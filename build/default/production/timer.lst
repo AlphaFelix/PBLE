@@ -1,0 +1,373 @@
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE  1
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00001 ;--------------------------------------------------------
+                      00002 ; File Created by SDCC : free open source ANSI-C Compiler
+                      00003 ; Version 3.6.0 #9615 (MINGW64)
+                      00004 ;--------------------------------------------------------
+                      00005 ; PIC16 port for the Microchip 16-bit core micros
+                      00006 ;--------------------------------------------------------
+                      00007         list    p=18f4550
+                      00008         radix   dec
+                      00009 
+                      00010 
+                      00011 ;--------------------------------------------------------
+                      00012 ; public variables in this module
+                      00013 ;--------------------------------------------------------
+  0000                00014         global  _timerEnded
+  0000                00015         global  _timerWait
+  0000                00016         global  _countTime
+  0000                00017         global  _getCount
+  0000                00018         global  _timerReset
+  0000                00019         global  _timerInit
+  0000                00020         global  _timer
+                      00021 
+                      00022 ;--------------------------------------------------------
+                      00023 ; extern variables in this module
+                      00024 ;--------------------------------------------------------
+  0000                00025         extern  __mulint
+                      00026 
+                      00027 ;--------------------------------------------------------
+                      00028 ;       Equates to used internal registers
+                      00029 ;--------------------------------------------------------
+  00000FD8            00030 STATUS  equ     0xfd8
+  00000FE8            00031 WREG    equ     0xfe8
+  00000FE1            00032 FSR1L   equ     0xfe1
+  00000FD9            00033 FSR2L   equ     0xfd9
+  00000FEF            00034 INDF0   equ     0xfef
+  00000FE5            00035 POSTDEC1        equ     0xfe5
+  00000FE4            00036 PREINC1 equ     0xfe4
+  00000FDB            00037 PLUSW2  equ     0xfdb
+  00000FF3            00038 PRODL   equ     0xff3
+                      00039 
+                      00040 
+                      00041 ; Internal registers
+                      00042 .registers      udata_ovr       0x0000
+000000                00043 r0x00   res     1
+000001                00044 r0x01   res     1
+000002                00045 r0x02   res     1
+000003                00046 r0x03   res     1
+000004                00047 r0x04   res     1
+000005                00048 r0x05   res     1
+                      00049 
+                      00050 udata_timer_0   udata
+000000                00051 _timer  res     2
+                      00052 
+                      00053 ;--------------------------------------------------------
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE  2
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00054 ; global & static initialisations
+                      00055 ;--------------------------------------------------------
+                      00056 ; I code from now on!
+                      00057 ; ; Starting pCode block
+                      00058 S_timer__timerInit      code
+000000                00059 _timerInit:
+                      00060 ;       .line   60; timer.c     void timerInit(void) {
+000000 CFD9 FFE5      00061         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00062         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00063         MOVFF   r0x00, POSTDEC1
+                      00064 ;       .line   61; timer.c     T0CON = 0b00001000; //configura timer 0 sem prescaler
+00000C EE0F F0D5      00065         LFSR    0x00, 0xfd5
+000010 0E08           00066         MOVLW   0x08
+000012 6EEF           00067         MOVWF   INDF0
+                      00068 ;       .line   62; timer.c     bitSet(T0CON, 7); //liga o timer 0
+000014 EE0F F0D5      00069         LFSR    0x00, 0xfd5
+000018 CFEF F000      00070         MOVFF   INDF0, r0x00
+00001C 8E??           00071         BSF     r0x00, 7
+00001E EE0F F0D5      00072         LFSR    0x00, 0xfd5
+000022 C??? F???      00073         MOVFF   r0x00, INDF0
+                      00074 ;       .line   63; timer.c     timer = 5;
+000026 0E05           00075         MOVLW   0x05
+000028 010?           00076         BANKSEL _timer
+00002A 6F??           00077         MOVWF   _timer, B
+00002C 010?           00078         BANKSEL (_timer + 1)
+00002E 6B??           00079         CLRF    (_timer + 1), B
+000030 CFE4 F000      00080         MOVFF   PREINC1, r0x00
+000034 CFE4 FFD9      00081         MOVFF   PREINC1, FSR2L
+000038 0012           00082         RETURN  
+                      00083 
+                      00084 ; ; Starting pCode block
+                      00085 S_timer__timerReset     code
+000000                00086 _timerReset:
+                      00087 ;       .line   47; timer.c     void timerReset(unsigned int tempo) {
+000000 CFD9 FFE5      00088         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00089         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00090         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      00091         MOVFF   r0x01, POSTDEC1
+000010 C??? F???      00092         MOVFF   r0x02, POSTDEC1
+000014 C??? F???      00093         MOVFF   r0x03, POSTDEC1
+000018 C??? F???      00094         MOVFF   r0x04, POSTDEC1
+00001C C??? F???      00095         MOVFF   r0x05, POSTDEC1
+000020 0E02           00096         MOVLW   0x02
+000022 CFDB F000      00097         MOVFF   PLUSW2, r0x00
+000026 0E03           00098         MOVLW   0x03
+000028 CFDB F000      00099         MOVFF   PLUSW2, r0x01
+                      00100 ;       .line   49; timer.c     unsigned ciclos = tempo * 2;
+00002C 50??           00101         MOVF    r0x01, W
+00002E 6EE5           00102         MOVWF   POSTDEC1
+000030 50??           00103         MOVF    r0x00, W
+000032 6EE5           00104         MOVWF   POSTDEC1
+000034 0E00           00105         MOVLW   0x00
+000036 6EE5           00106         MOVWF   POSTDEC1
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE  3
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000038 0E02           00107         MOVLW   0x02
+00003A 6EE5           00108         MOVWF   POSTDEC1
+00003C EC?? F0??      00109         CALL    __mulint
+000040 6E??           00110         MOVWF   r0x00
+000042 CFF3 F000      00111         MOVFF   PRODL, r0x01
+000046 0E04           00112         MOVLW   0x04
+000048 26E1           00113         ADDWF   FSR1L, F
+                      00114 ;       .line   51; timer.c     ciclos = 65535 - ciclos;
+00004A C??? F???      00115         MOVFF   r0x00, r0x02
+00004E C??? F???      00116         MOVFF   r0x01, r0x03
+000052 6A??           00117         CLRF    r0x04
+000054 6A??           00118         CLRF    r0x05
+000056 50??           00119         MOVF    r0x02, W
+000058 08FF           00120         SUBLW   0xff
+00005A 6E??           00121         MOVWF   r0x02
+00005C 0EFF           00122         MOVLW   0xff
+00005E 56??           00123         SUBFWB  r0x03, F
+000060 0E00           00124         MOVLW   0x00
+000062 56??           00125         SUBFWB  r0x04, F
+000064 0E00           00126         MOVLW   0x00
+000066 56??           00127         SUBFWB  r0x05, F
+000068 50??           00128         MOVF    r0x02, W
+00006A 6E??           00129         MOVWF   r0x00
+00006C 50??           00130         MOVF    r0x03, W
+00006E 6E??           00131         MOVWF   r0x01
+                      00132 ;       .line   53; timer.c     ciclos -= 14; //subtrai tempo de overhead(experimental)
+000070 0EF2           00133         MOVLW   0xf2
+000072 26??           00134         ADDWF   r0x00, F
+000074 A0D8           00135         BTFSS   STATUS, 0
+000076 06??           00136         DECF    r0x01, F
+                      00137 ;       .line   54; timer.c     TMR0H = (ciclos >> 8); //salva a parte alta
+000078 50??           00138         MOVF    r0x01, W
+00007A 6E??           00139         MOVWF   r0x02
+00007C 6A??           00140         CLRF    r0x03
+00007E EE0F F0D7      00141         LFSR    0x00, 0xfd7
+000082 C??? F???      00142         MOVFF   r0x02, INDF0
+                      00143 ;       .line   55; timer.c     TMR0L = (ciclos & 0x00FF); // salva a parte baixa
+000086 6A??           00144         CLRF    r0x01
+000088 EE0F F0D6      00145         LFSR    0x00, 0xfd6
+00008C C??? F???      00146         MOVFF   r0x00, INDF0
+                      00147 ;       .line   57; timer.c     bitClr(INTCON, 2); //limpa a flag de overflow
+000090 EE0F F0F2      00148         LFSR    0x00, 0xff2
+000094 CFEF F000      00149         MOVFF   INDF0, r0x00
+000098 94??           00150         BCF     r0x00, 2
+00009A EE0F F0F2      00151         LFSR    0x00, 0xff2
+00009E C??? F???      00152         MOVFF   r0x00, INDF0
+0000A2 CFE4 F000      00153         MOVFF   PREINC1, r0x05
+0000A6 CFE4 F000      00154         MOVFF   PREINC1, r0x04
+0000AA CFE4 F000      00155         MOVFF   PREINC1, r0x03
+0000AE CFE4 F000      00156         MOVFF   PREINC1, r0x02
+0000B2 CFE4 F000      00157         MOVFF   PREINC1, r0x01
+0000B6 CFE4 F000      00158         MOVFF   PREINC1, r0x00
+0000BA CFE4 FFD9      00159         MOVFF   PREINC1, FSR2L
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE  4
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0000BE 0012           00160         RETURN  
+                      00161 
+                      00162 ; ; Starting pCode block
+                      00163 S_timer__getCount       code
+000000                00164 _getCount:
+                      00165 ;       .line   41; timer.c     int getCount(void){
+000000 CFD9 FFE5      00166         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00167         MOVFF   FSR1L, FSR2L
+                      00168 ;       .line   42; timer.c     return timer;
+000008 C??? F???      00169         MOVFF   (_timer + 1), PRODL
+00000C 010?           00170         BANKSEL _timer
+00000E 51??           00171         MOVF    _timer, W, B
+000010 CFE4 FFD9      00172         MOVFF   PREINC1, FSR2L
+000014 0012           00173         RETURN  
+                      00174 
+                      00175 ; ; Starting pCode block
+                      00176 S_timer__countTime      code
+000000                00177 _countTime:
+                      00178 ;       .line   33; timer.c     void countTime(void)
+000000 CFD9 FFE5      00179         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00180         MOVFF   FSR1L, FSR2L
+000008 010?           00181         BANKSEL _timer
+                      00182 ;       .line   35; timer.c     if(timer > 0)
+00000A 51??           00183         MOVF    _timer, W, B
+00000C 010?           00184         BANKSEL (_timer + 1)
+00000E 11??           00185         IORWF   (_timer + 1), W, B
+000010 E0??           00186         BZ      _00124_DS_
+                      00187 ;       .line   36; timer.c     timer--;
+000012 0EFF           00188         MOVLW   0xff
+000014 010?           00189         BANKSEL _timer
+000016 27??           00190         ADDWF   _timer, F, B
+000018 010?           00191         BANKSEL (_timer + 1)
+00001A 23??           00192         ADDWFC  (_timer + 1), F, B
+00001C D???           00193         BRA     _00126_DS_
+00001E                00194 _00124_DS_:
+                      00195 ;       .line   38; timer.c     timer = 3;
+00001E 0E03           00196         MOVLW   0x03
+000020 010?           00197         BANKSEL _timer
+000022 6F??           00198         MOVWF   _timer, B
+000024 010?           00199         BANKSEL (_timer + 1)
+000026 6B??           00200         CLRF    (_timer + 1), B
+000028                00201 _00126_DS_:
+000028 CFE4 FFD9      00202         MOVFF   PREINC1, FSR2L
+00002C 0012           00203         RETURN  
+                      00204 
+                      00205 ; ; Starting pCode block
+                      00206 S_timer__timerWait      code
+000000                00207 _timerWait:
+                      00208 ;       .line   29; timer.c     void timerWait(void) {
+000000 CFD9 FFE5      00209         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00210         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00211         MOVFF   r0x00, POSTDEC1
+00000C                00212 _00110_DS_:
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE  5
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00213 ;       .line   30; timer.c     while (!bitTst(INTCON, 2));
+00000C EE0F F0F2      00214         LFSR    0x00, 0xff2
+000010 CFEF F000      00215         MOVFF   INDF0, r0x00
+000014 A4??           00216         BTFSS   r0x00, 2
+000016 D???           00217         BRA     _00110_DS_
+000018 CFE4 F000      00218         MOVFF   PREINC1, r0x00
+00001C CFE4 FFD9      00219         MOVFF   PREINC1, FSR2L
+000020 0012           00220         RETURN  
+                      00221 
+                      00222 ; ; Starting pCode block
+                      00223 S_timer__timerEnded     code
+000000                00224 _timerEnded:
+                      00225 ;       .line   25; timer.c     char timerEnded(void) {
+000000 CFD9 FFE5      00226         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00227         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00228         MOVFF   r0x00, POSTDEC1
+                      00229 ;       .line   26; timer.c     return bitTst(INTCON, 2);
+00000C EE0F F0F2      00230         LFSR    0x00, 0xff2
+000010 CFEF F000      00231         MOVFF   INDF0, r0x00
+000014 0E04           00232         MOVLW   0x04
+000016 16??           00233         ANDWF   r0x00, F
+000018 50??           00234         MOVF    r0x00, W
+00001A CFE4 F000      00235         MOVFF   PREINC1, r0x00
+00001E CFE4 FFD9      00236         MOVFF   PREINC1, FSR2L
+000022 0012           00237         RETURN  
+                      00238 
+                      00239 
+                      00240 
+                      00241 ; Statistics:
+                      00242 ; code size:      388 (0x0184) bytes ( 0.30%)
+                      00243 ;                 194 (0x00c2) words
+                      00244 ; udata size:       2 (0x0002) bytes ( 0.11%)
+                      00245 ; access size:      6 (0x0006) bytes
+                      00246 
+                      00247 
+                      00248         end
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE  6
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+FSR1L                             CONSTANT      00000FE1           4065
+FSR2L                             CONSTANT      00000FD9           4057
+INDF0                             CONSTANT      00000FEF           4079
+PLUSW2                            CONSTANT      00000FDB           4059
+POSTDEC1                          CONSTANT      00000FE5           4069
+PREINC1                           CONSTANT      00000FE4           4068
+PRODL                             CONSTANT      00000FF3           4083
+STATUS                            CONSTANT      00000FD8           4056
+WREG                              CONSTANT      00000FE8           4072
+_00110_DS_                        ADDRESS       0000000C             12
+_00124_DS_                        ADDRESS       0000001E             30
+_00126_DS_                        ADDRESS       00000028             40
+__16_BIT                          CONSTANT      00000001              1
+__18F4550                         CONSTANT      00000001              1
+__ACC_RAM_LOW_END                 CONSTANT      0000005F             95
+__ACC_RAM_LOW_START               CONSTANT      00000000              0
+__ACTIVE_BANK_ADDR                VARIABLE      FFFFFFFF             -1
+__ASSUMED_BANK_ADDR               VARIABLE      FFFFFFFF             -1
+__BANK_0                          CONSTANT      00000000              0
+__BANK_1                          CONSTANT      00000100            256
+__BANK_2                          CONSTANT      00000200            512
+__BANK_3                          CONSTANT      00000300            768
+__BANK_4                          CONSTANT      00000400           1024
+__BANK_5                          CONSTANT      00000500           1280
+__BANK_6                          CONSTANT      00000600           1536
+__BANK_7                          CONSTANT      00000700           1792
+__BANK_8                          CONSTANT      00000800           2048
+__BANK_9                          CONSTANT      00000900           2304
+__BANK_10                         CONSTANT      00000A00           2560
+__BANK_11                         CONSTANT      00000B00           2816
+__BANK_12                         CONSTANT      00000C00           3072
+__BANK_13                         CONSTANT      00000D00           3328
+__BANK_14                         CONSTANT      00000E00           3584
+__BANK_15                         CONSTANT      00000F00           3840
+__BANK_BITS                       CONSTANT      00000F00           3840
+__BANK_FIRST                      CONSTANT      00000000              0
+__BANK_INV                        CONSTANT      FFFFFFFF             -1
+__BANK_LAST                       CONSTANT      00000F00           3840
+__BANK_MASK                       CONSTANT      000000FF            255
+__BANK_SHIFT                      CONSTANT      00000008              8
+__BANK_SIZE                       CONSTANT      00000100            256
+__CODE_END                        CONSTANT      00007FFF          32767
+__CODE_START                      CONSTANT      00000000              0
+__COMMON_RAM_END                  CONSTANT      0000005F             95
+__COMMON_RAM_START                CONSTANT      00000000              0
+__CONFIG_END                      CONSTANT      0030000D        3145741
+__CONFIG_START                    CONSTANT      00300000        3145728
+__EEPROM_END                      CONSTANT      00F000FF       15728895
+__EEPROM_START                    CONSTANT      00F00000       15728640
+__EXTENDED                        CONSTANT      00000001              1
+__GPUTILS_SVN_VERSION             CONSTANT      00000505           1285
+__GPUTILS_VERSION_MAJOR           CONSTANT      00000001              1
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE  7
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+__GPUTILS_VERSION_MICRO           CONSTANT      00000000              0
+__GPUTILS_VERSION_MINOR           CONSTANT      00000005              5
+__IDLOCS_END                      CONSTANT      00200007        2097159
+__IDLOCS_START                    CONSTANT      00200000        2097152
+__NUM_BANKS                       CONSTANT      00000010             16
+__VECTOR_INT_HIGH                 CONSTANT      00000008              8
+__VECTOR_INT_LOW                  CONSTANT      00000018             24
+__VECTOR_RESET                    CONSTANT      00000000              0
+__WHILE_LOOP_COUNT_MAX            CONSTANT      000000FF            255
+__mulint                          EXTERNAL      00000000              0
+_countTime                        GLOBAL        00000000              0
+_getCount                         GLOBAL        00000000              0
+_timer                            GLOBAL        00000000              0
+_timerEnded                       GLOBAL        00000000              0
+_timerInit                        GLOBAL        00000000              0
+_timerReset                       GLOBAL        00000000              0
+_timerWait                        GLOBAL        00000000              0
+r0x00                             STATIC        00000000              0
+r0x01                             STATIC        00000001              1
+r0x02                             STATIC        00000002              2
+r0x03                             STATIC        00000003              3
+r0x04                             STATIC        00000004              4
+r0x05                             STATIC        00000005              5
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     0 reported,     0 suppressed
+
+

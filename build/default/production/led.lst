@@ -1,0 +1,350 @@
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE  1
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00001 ;--------------------------------------------------------
+                      00002 ; File Created by SDCC : free open source ANSI-C Compiler
+                      00003 ; Version 3.6.0 #9615 (MINGW64)
+                      00004 ;--------------------------------------------------------
+                      00005 ; PIC16 port for the Microchip 16-bit core micros
+                      00006 ;--------------------------------------------------------
+                      00007         list    p=18f4550
+                      00008         radix   dec
+                      00009 
+                      00010 
+                      00011 ;--------------------------------------------------------
+                      00012 ; public variables in this module
+                      00013 ;--------------------------------------------------------
+  0000                00014         global  _ledInit
+  0000                00015         global  _ledOn
+  0000                00016         global  _ledOff
+  0000                00017         global  _ledBlink
+                      00018 
+                      00019 ;--------------------------------------------------------
+                      00020 ; extern variables in this module
+                      00021 ;--------------------------------------------------------
+  0000                00022         extern  _getCount
+                      00023 
+                      00024 ;--------------------------------------------------------
+                      00025 ;       Equates to used internal registers
+                      00026 ;--------------------------------------------------------
+  00000FD8            00027 STATUS  equ     0xfd8
+  00000FE8            00028 WREG    equ     0xfe8
+  00000FE1            00029 FSR1L   equ     0xfe1
+  00000FD9            00030 FSR2L   equ     0xfd9
+  00000FEF            00031 INDF0   equ     0xfef
+  00000FE5            00032 POSTDEC1        equ     0xfe5
+  00000FE4            00033 PREINC1 equ     0xfe4
+  00000FDB            00034 PLUSW2  equ     0xfdb
+  00000FF3            00035 PRODL   equ     0xff3
+                      00036 
+                      00037 
+                      00038 ; Internal registers
+                      00039 .registers      udata_ovr       0x0000
+000000                00040 r0x00   res     1
+000001                00041 r0x01   res     1
+000002                00042 r0x02   res     1
+                      00043 
+                      00044 udata_led_0     udata
+000000                00045 _time0  res     2
+                      00046 
+                      00047 udata_led_1     udata
+000000                00048 _time1  res     2
+                      00049 
+                      00050 ;--------------------------------------------------------
+                      00051 ; global & static initialisations
+                      00052 ;--------------------------------------------------------
+                      00053 ; I code from now on!
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE  2
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00054 ; ; Starting pCode block
+                      00055 S_led__ledBlink code
+000000                00056 _ledBlink:
+                      00057 ;       .line   22; led.c       void ledBlink(char x){   
+000000 CFD9 FFE5      00058         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00059         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00060         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      00061         MOVFF   r0x01, POSTDEC1
+000010 C??? F???      00062         MOVFF   r0x02, POSTDEC1
+000014 0E02           00063         MOVLW   0x02
+000016 CFDB F000      00064         MOVFF   PLUSW2, r0x00
+                      00065 ;       .line   24; led.c       if(getCount() == 0)
+00001A EC?? F0??      00066         CALL    _getCount
+00001E 6E??           00067         MOVWF   r0x01
+000020 CFF3 F000      00068         MOVFF   PRODL, r0x02
+000024 50??           00069         MOVF    r0x01, W
+000026 10??           00070         IORWF   r0x02, W
+000028 E1??           00071         BNZ     _00130_DS_
+                      00072 ;       .line   25; led.c       bitFlp(PORTB,((x%2)+5));    
+00002A EE0F F081      00073         LFSR    0x00, 0xf81
+00002E CFEF F000      00074         MOVFF   INDF0, r0x01
+000032 0E01           00075         MOVLW   0x01
+000034 16??           00076         ANDWF   r0x00, F
+000036 0E05           00077         MOVLW   0x05
+000038 26??           00078         ADDWF   r0x00, F
+00003A 0E01           00079         MOVLW   0x01
+00003C 6E??           00080         MOVWF   r0x02
+00003E 50??           00081         MOVF    r0x00, W
+000040 E0??           00082         BZ      _00136_DS_
+000042 6CE8           00083         NEGF    WREG
+000044 90D8           00084         BCF     STATUS, 0
+000046                00085 _00137_DS_:
+000046 36??           00086         RLCF    r0x02, F
+000048 0F01           00087         ADDLW   0x01
+00004A E3??           00088         BNC     _00137_DS_
+00004C                00089 _00136_DS_:
+00004C 50??           00090         MOVF    r0x02, W
+00004E 1A??           00091         XORWF   r0x01, F
+000050 EE0F F081      00092         LFSR    0x00, 0xf81
+000054 C??? F???      00093         MOVFF   r0x01, INDF0
+000058                00094 _00130_DS_:
+000058 CFE4 F000      00095         MOVFF   PREINC1, r0x02
+00005C CFE4 F000      00096         MOVFF   PREINC1, r0x01
+000060 CFE4 F000      00097         MOVFF   PREINC1, r0x00
+000064 CFE4 FFD9      00098         MOVFF   PREINC1, FSR2L
+000068 0012           00099         RETURN  
+                      00100 
+                      00101 ; ; Starting pCode block
+                      00102 S_led__ledOff   code
+000000                00103 _ledOff:
+                      00104 ;       .line   18; led.c       void ledOff(char x){
+000000 CFD9 FFE5      00105         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00106         MOVFF   FSR1L, FSR2L
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE  3
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000008 C??? F???      00107         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      00108         MOVFF   r0x01, POSTDEC1
+000010 C??? F???      00109         MOVFF   r0x02, POSTDEC1
+000014 0E02           00110         MOVLW   0x02
+000016 CFDB F000      00111         MOVFF   PLUSW2, r0x00
+                      00112 ;       .line   19; led.c       bitClr(PORTB,((x%2)+5));      
+00001A EE0F F081      00113         LFSR    0x00, 0xf81
+00001E CFEF F000      00114         MOVFF   INDF0, r0x01
+000022 0E01           00115         MOVLW   0x01
+000024 16??           00116         ANDWF   r0x00, F
+000026 0E05           00117         MOVLW   0x05
+000028 26??           00118         ADDWF   r0x00, F
+00002A 0E01           00119         MOVLW   0x01
+00002C 6E??           00120         MOVWF   r0x02
+00002E 50??           00121         MOVF    r0x00, W
+000030 E0??           00122         BZ      _00122_DS_
+000032 6CE8           00123         NEGF    WREG
+000034 90D8           00124         BCF     STATUS, 0
+000036                00125 _00123_DS_:
+000036 36??           00126         RLCF    r0x02, F
+000038 0F01           00127         ADDLW   0x01
+00003A E3??           00128         BNC     _00123_DS_
+00003C                00129 _00122_DS_:
+00003C 1C??           00130         COMF    r0x02, W
+00003E 6E??           00131         MOVWF   r0x00
+000040 50??           00132         MOVF    r0x00, W
+000042 16??           00133         ANDWF   r0x01, F
+000044 EE0F F081      00134         LFSR    0x00, 0xf81
+000048 C??? F???      00135         MOVFF   r0x01, INDF0
+00004C CFE4 F000      00136         MOVFF   PREINC1, r0x02
+000050 CFE4 F000      00137         MOVFF   PREINC1, r0x01
+000054 CFE4 F000      00138         MOVFF   PREINC1, r0x00
+000058 CFE4 FFD9      00139         MOVFF   PREINC1, FSR2L
+00005C 0012           00140         RETURN  
+                      00141 
+                      00142 ; ; Starting pCode block
+                      00143 S_led__ledOn    code
+000000                00144 _ledOn:
+                      00145 ;       .line   14; led.c       void ledOn(char x){
+000000 CFD9 FFE5      00146         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00147         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00148         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      00149         MOVFF   r0x01, POSTDEC1
+000010 C??? F???      00150         MOVFF   r0x02, POSTDEC1
+000014 0E02           00151         MOVLW   0x02
+000016 CFDB F000      00152         MOVFF   PLUSW2, r0x00
+                      00153 ;       .line   15; led.c       bitSet(PORTB,((x%2)+5));   
+00001A EE0F F081      00154         LFSR    0x00, 0xf81
+00001E CFEF F000      00155         MOVFF   INDF0, r0x01
+000022 0E01           00156         MOVLW   0x01
+000024 16??           00157         ANDWF   r0x00, F
+000026 0E05           00158         MOVLW   0x05
+000028 26??           00159         ADDWF   r0x00, F
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE  4
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00002A 0E01           00160         MOVLW   0x01
+00002C 6E??           00161         MOVWF   r0x02
+00002E 50??           00162         MOVF    r0x00, W
+000030 E0??           00163         BZ      _00113_DS_
+000032 6CE8           00164         NEGF    WREG
+000034 90D8           00165         BCF     STATUS, 0
+000036                00166 _00114_DS_:
+000036 36??           00167         RLCF    r0x02, F
+000038 0F01           00168         ADDLW   0x01
+00003A E3??           00169         BNC     _00114_DS_
+00003C                00170 _00113_DS_:
+00003C 50??           00171         MOVF    r0x02, W
+00003E 12??           00172         IORWF   r0x01, F
+000040 EE0F F081      00173         LFSR    0x00, 0xf81
+000044 C??? F???      00174         MOVFF   r0x01, INDF0
+000048 CFE4 F000      00175         MOVFF   PREINC1, r0x02
+00004C CFE4 F000      00176         MOVFF   PREINC1, r0x01
+000050 CFE4 F000      00177         MOVFF   PREINC1, r0x00
+000054 CFE4 FFD9      00178         MOVFF   PREINC1, FSR2L
+000058 0012           00179         RETURN  
+                      00180 
+                      00181 ; ; Starting pCode block
+                      00182 S_led__ledInit  code
+000000                00183 _ledInit:
+                      00184 ;       .line   7; led.c        void ledInit(void){    
+000000 CFD9 FFE5      00185         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00186         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00187         MOVFF   r0x00, POSTDEC1
+                      00188 ;       .line   8; led.c        bitClr(TRISB,5);
+00000C EE0F F093      00189         LFSR    0x00, 0xf93
+000010 CFEF F000      00190         MOVFF   INDF0, r0x00
+000014 9A??           00191         BCF     r0x00, 5
+000016 EE0F F093      00192         LFSR    0x00, 0xf93
+00001A C??? F???      00193         MOVFF   r0x00, INDF0
+                      00194 ;       .line   9; led.c        bitClr(TRISB,6);
+00001E EE0F F093      00195         LFSR    0x00, 0xf93
+000022 CFEF F000      00196         MOVFF   INDF0, r0x00
+000026 9C??           00197         BCF     r0x00, 6
+000028 EE0F F093      00198         LFSR    0x00, 0xf93
+00002C C??? F???      00199         MOVFF   r0x00, INDF0
+                      00200 ;       .line   10; led.c       bitClr(PORTB,5);
+000030 EE0F F081      00201         LFSR    0x00, 0xf81
+000034 CFEF F000      00202         MOVFF   INDF0, r0x00
+000038 9A??           00203         BCF     r0x00, 5
+00003A EE0F F081      00204         LFSR    0x00, 0xf81
+00003E C??? F???      00205         MOVFF   r0x00, INDF0
+                      00206 ;       .line   11; led.c       bitClr(PORTB,6);    
+000042 EE0F F081      00207         LFSR    0x00, 0xf81
+000046 CFEF F000      00208         MOVFF   INDF0, r0x00
+00004A 9C??           00209         BCF     r0x00, 6
+00004C EE0F F081      00210         LFSR    0x00, 0xf81
+000050 C??? F???      00211         MOVFF   r0x00, INDF0
+000054 CFE4 F000      00212         MOVFF   PREINC1, r0x00
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE  5
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000058 CFE4 FFD9      00213         MOVFF   PREINC1, FSR2L
+00005C 0012           00214         RETURN  
+                      00215 
+                      00216 
+                      00217 
+                      00218 ; Statistics:
+                      00219 ; code size:      384 (0x0180) bytes ( 0.29%)
+                      00220 ;                 192 (0x00c0) words
+                      00221 ; udata size:       4 (0x0004) bytes ( 0.22%)
+                      00222 ; access size:      3 (0x0003) bytes
+                      00223 
+                      00224 
+                      00225         end
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE  6
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+FSR1L                             CONSTANT      00000FE1           4065
+FSR2L                             CONSTANT      00000FD9           4057
+INDF0                             CONSTANT      00000FEF           4079
+PLUSW2                            CONSTANT      00000FDB           4059
+POSTDEC1                          CONSTANT      00000FE5           4069
+PREINC1                           CONSTANT      00000FE4           4068
+PRODL                             CONSTANT      00000FF3           4083
+STATUS                            CONSTANT      00000FD8           4056
+WREG                              CONSTANT      00000FE8           4072
+_00113_DS_                        ADDRESS       0000003C             60
+_00114_DS_                        ADDRESS       00000036             54
+_00122_DS_                        ADDRESS       0000003C             60
+_00123_DS_                        ADDRESS       00000036             54
+_00130_DS_                        ADDRESS       00000058             88
+_00136_DS_                        ADDRESS       0000004C             76
+_00137_DS_                        ADDRESS       00000046             70
+__16_BIT                          CONSTANT      00000001              1
+__18F4550                         CONSTANT      00000001              1
+__ACC_RAM_LOW_END                 CONSTANT      0000005F             95
+__ACC_RAM_LOW_START               CONSTANT      00000000              0
+__ACTIVE_BANK_ADDR                VARIABLE      FFFFFFFF             -1
+__ASSUMED_BANK_ADDR               VARIABLE      FFFFFFFF             -1
+__BANK_0                          CONSTANT      00000000              0
+__BANK_1                          CONSTANT      00000100            256
+__BANK_2                          CONSTANT      00000200            512
+__BANK_3                          CONSTANT      00000300            768
+__BANK_4                          CONSTANT      00000400           1024
+__BANK_5                          CONSTANT      00000500           1280
+__BANK_6                          CONSTANT      00000600           1536
+__BANK_7                          CONSTANT      00000700           1792
+__BANK_8                          CONSTANT      00000800           2048
+__BANK_9                          CONSTANT      00000900           2304
+__BANK_10                         CONSTANT      00000A00           2560
+__BANK_11                         CONSTANT      00000B00           2816
+__BANK_12                         CONSTANT      00000C00           3072
+__BANK_13                         CONSTANT      00000D00           3328
+__BANK_14                         CONSTANT      00000E00           3584
+__BANK_15                         CONSTANT      00000F00           3840
+__BANK_BITS                       CONSTANT      00000F00           3840
+__BANK_FIRST                      CONSTANT      00000000              0
+__BANK_INV                        CONSTANT      FFFFFFFF             -1
+__BANK_LAST                       CONSTANT      00000F00           3840
+__BANK_MASK                       CONSTANT      000000FF            255
+__BANK_SHIFT                      CONSTANT      00000008              8
+__BANK_SIZE                       CONSTANT      00000100            256
+__CODE_END                        CONSTANT      00007FFF          32767
+__CODE_START                      CONSTANT      00000000              0
+__COMMON_RAM_END                  CONSTANT      0000005F             95
+__COMMON_RAM_START                CONSTANT      00000000              0
+__CONFIG_END                      CONSTANT      0030000D        3145741
+__CONFIG_START                    CONSTANT      00300000        3145728
+__EEPROM_END                      CONSTANT      00F000FF       15728895
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE  7
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+__EEPROM_START                    CONSTANT      00F00000       15728640
+__EXTENDED                        CONSTANT      00000001              1
+__GPUTILS_SVN_VERSION             CONSTANT      00000505           1285
+__GPUTILS_VERSION_MAJOR           CONSTANT      00000001              1
+__GPUTILS_VERSION_MICRO           CONSTANT      00000000              0
+__GPUTILS_VERSION_MINOR           CONSTANT      00000005              5
+__IDLOCS_END                      CONSTANT      00200007        2097159
+__IDLOCS_START                    CONSTANT      00200000        2097152
+__NUM_BANKS                       CONSTANT      00000010             16
+__VECTOR_INT_HIGH                 CONSTANT      00000008              8
+__VECTOR_INT_LOW                  CONSTANT      00000018             24
+__VECTOR_RESET                    CONSTANT      00000000              0
+__WHILE_LOOP_COUNT_MAX            CONSTANT      000000FF            255
+_getCount                         EXTERNAL      00000000              0
+_ledBlink                         GLOBAL        00000000              0
+_ledInit                          GLOBAL        00000000              0
+_ledOff                           GLOBAL        00000000              0
+_ledOn                            GLOBAL        00000000              0
+_time0                            STATIC        00000000              0
+_time1                            STATIC        00000000              0
+r0x00                             STATIC        00000000              0
+r0x01                             STATIC        00000001              1
+r0x02                             STATIC        00000002              2
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     0 reported,     0 suppressed
+
+

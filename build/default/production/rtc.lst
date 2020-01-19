@@ -1,0 +1,1297 @@
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:00        PAGE  1
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00001 ;--------------------------------------------------------
+                      00002 ; File Created by SDCC : free open source ANSI-C Compiler
+                      00003 ; Version 3.6.0 #9615 (MINGW64)
+                      00004 ;--------------------------------------------------------
+                      00005 ; PIC16 port for the Microchip 16-bit core micros
+                      00006 ;--------------------------------------------------------
+                      00007         list    p=18f4550
+                      00008         radix   dec
+                      00009 
+                      00010 
+                      00011 ;--------------------------------------------------------
+                      00012 ; public variables in this module
+                      00013 ;--------------------------------------------------------
+  0000                00014         global  _rtcInit
+  0000                00015         global  _BCD2UpperCh
+  0000                00016         global  _BCD2LowerCh
+  0000                00017         global  _rtcStore
+  0000                00018         global  _rtcStoreInt
+  0000                00019         global  _rtcRead
+  0000                00020         global  _rtcReadInt
+  0000                00021         global  _rtcStart
+  0000                00022         global  _rtcMin
+  0000                00023         global  _rtcHour
+  0000                00024         global  _rtcDay
+  0000                00025         global  _rtcDate
+  0000                00026         global  _rtcMonth
+  0000                00027         global  _rtcYear
+                      00028 
+                      00029 ;--------------------------------------------------------
+                      00030 ; extern variables in this module
+                      00031 ;--------------------------------------------------------
+  0000                00032         extern  _SPPCFGbits
+  0000                00033         extern  _SPPEPSbits
+  0000                00034         extern  _SPPCONbits
+  0000                00035         extern  _UFRMLbits
+  0000                00036         extern  _UFRMHbits
+  0000                00037         extern  _UIRbits
+  0000                00038         extern  _UIEbits
+  0000                00039         extern  _UEIRbits
+  0000                00040         extern  _UEIEbits
+  0000                00041         extern  _USTATbits
+  0000                00042         extern  _UCONbits
+  0000                00043         extern  _UADDRbits
+  0000                00044         extern  _UCFGbits
+  0000                00045         extern  _UEP0bits
+  0000                00046         extern  _UEP1bits
+  0000                00047         extern  _UEP2bits
+  0000                00048         extern  _UEP3bits
+  0000                00049         extern  _UEP4bits
+  0000                00050         extern  _UEP5bits
+  0000                00051         extern  _UEP6bits
+  0000                00052         extern  _UEP7bits
+  0000                00053         extern  _UEP8bits
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:00        PAGE  2
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+  0000                00054         extern  _UEP9bits
+  0000                00055         extern  _UEP10bits
+  0000                00056         extern  _UEP11bits
+  0000                00057         extern  _UEP12bits
+  0000                00058         extern  _UEP13bits
+  0000                00059         extern  _UEP14bits
+  0000                00060         extern  _UEP15bits
+  0000                00061         extern  _PORTAbits
+  0000                00062         extern  _PORTBbits
+  0000                00063         extern  _PORTCbits
+  0000                00064         extern  _PORTDbits
+  0000                00065         extern  _PORTEbits
+  0000                00066         extern  _LATAbits
+  0000                00067         extern  _LATBbits
+  0000                00068         extern  _LATCbits
+  0000                00069         extern  _LATDbits
+  0000                00070         extern  _LATEbits
+  0000                00071         extern  _DDRAbits
+  0000                00072         extern  _TRISAbits
+  0000                00073         extern  _DDRBbits
+  0000                00074         extern  _TRISBbits
+  0000                00075         extern  _DDRCbits
+  0000                00076         extern  _TRISCbits
+  0000                00077         extern  _DDRDbits
+  0000                00078         extern  _TRISDbits
+  0000                00079         extern  _DDREbits
+  0000                00080         extern  _TRISEbits
+  0000                00081         extern  _OSCTUNEbits
+  0000                00082         extern  _PIE1bits
+  0000                00083         extern  _PIR1bits
+  0000                00084         extern  _IPR1bits
+  0000                00085         extern  _PIE2bits
+  0000                00086         extern  _PIR2bits
+  0000                00087         extern  _IPR2bits
+  0000                00088         extern  _EECON1bits
+  0000                00089         extern  _RCSTAbits
+  0000                00090         extern  _TXSTAbits
+  0000                00091         extern  _T3CONbits
+  0000                00092         extern  _CMCONbits
+  0000                00093         extern  _CVRCONbits
+  0000                00094         extern  _CCP1ASbits
+  0000                00095         extern  _ECCP1ASbits
+  0000                00096         extern  _CCP1DELbits
+  0000                00097         extern  _ECCP1DELbits
+  0000                00098         extern  _BAUDCONbits
+  0000                00099         extern  _BAUDCTLbits
+  0000                00100         extern  _CCP2CONbits
+  0000                00101         extern  _CCP1CONbits
+  0000                00102         extern  _ECCP1CONbits
+  0000                00103         extern  _ADCON2bits
+  0000                00104         extern  _ADCON1bits
+  0000                00105         extern  _ADCON0bits
+  0000                00106         extern  _SSPCON2bits
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:00        PAGE  3
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+  0000                00107         extern  _SSPCON1bits
+  0000                00108         extern  _SSPSTATbits
+  0000                00109         extern  _T2CONbits
+  0000                00110         extern  _T1CONbits
+  0000                00111         extern  _RCONbits
+  0000                00112         extern  _WDTCONbits
+  0000                00113         extern  _HLVDCONbits
+  0000                00114         extern  _LVDCONbits
+  0000                00115         extern  _OSCCONbits
+  0000                00116         extern  _T0CONbits
+  0000                00117         extern  _STATUSbits
+  0000                00118         extern  _INTCON3bits
+  0000                00119         extern  _INTCON2bits
+  0000                00120         extern  _INTCONbits
+  0000                00121         extern  _STKPTRbits
+  0000                00122         extern  _SPPDATA
+  0000                00123         extern  _SPPCFG
+  0000                00124         extern  _SPPEPS
+  0000                00125         extern  _SPPCON
+  0000                00126         extern  _UFRM
+  0000                00127         extern  _UFRML
+  0000                00128         extern  _UFRMH
+  0000                00129         extern  _UIR
+  0000                00130         extern  _UIE
+  0000                00131         extern  _UEIR
+  0000                00132         extern  _UEIE
+  0000                00133         extern  _USTAT
+  0000                00134         extern  _UCON
+  0000                00135         extern  _UADDR
+  0000                00136         extern  _UCFG
+  0000                00137         extern  _UEP0
+  0000                00138         extern  _UEP1
+  0000                00139         extern  _UEP2
+  0000                00140         extern  _UEP3
+  0000                00141         extern  _UEP4
+  0000                00142         extern  _UEP5
+  0000                00143         extern  _UEP6
+  0000                00144         extern  _UEP7
+  0000                00145         extern  _UEP8
+  0000                00146         extern  _UEP9
+  0000                00147         extern  _UEP10
+  0000                00148         extern  _UEP11
+  0000                00149         extern  _UEP12
+  0000                00150         extern  _UEP13
+  0000                00151         extern  _UEP14
+  0000                00152         extern  _UEP15
+  0000                00153         extern  _PORTA
+  0000                00154         extern  _PORTB
+  0000                00155         extern  _PORTC
+  0000                00156         extern  _PORTD
+  0000                00157         extern  _PORTE
+  0000                00158         extern  _LATA
+  0000                00159         extern  _LATB
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:00        PAGE  4
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+  0000                00160         extern  _LATC
+  0000                00161         extern  _LATD
+  0000                00162         extern  _LATE
+  0000                00163         extern  _DDRA
+  0000                00164         extern  _TRISA
+  0000                00165         extern  _DDRB
+  0000                00166         extern  _TRISB
+  0000                00167         extern  _DDRC
+  0000                00168         extern  _TRISC
+  0000                00169         extern  _DDRD
+  0000                00170         extern  _TRISD
+  0000                00171         extern  _DDRE
+  0000                00172         extern  _TRISE
+  0000                00173         extern  _OSCTUNE
+  0000                00174         extern  _PIE1
+  0000                00175         extern  _PIR1
+  0000                00176         extern  _IPR1
+  0000                00177         extern  _PIE2
+  0000                00178         extern  _PIR2
+  0000                00179         extern  _IPR2
+  0000                00180         extern  _EECON1
+  0000                00181         extern  _EECON2
+  0000                00182         extern  _EEDATA
+  0000                00183         extern  _EEADR
+  0000                00184         extern  _RCSTA
+  0000                00185         extern  _TXSTA
+  0000                00186         extern  _TXREG
+  0000                00187         extern  _RCREG
+  0000                00188         extern  _SPBRG
+  0000                00189         extern  _SPBRGH
+  0000                00190         extern  _T3CON
+  0000                00191         extern  _TMR3
+  0000                00192         extern  _TMR3L
+  0000                00193         extern  _TMR3H
+  0000                00194         extern  _CMCON
+  0000                00195         extern  _CVRCON
+  0000                00196         extern  _CCP1AS
+  0000                00197         extern  _ECCP1AS
+  0000                00198         extern  _CCP1DEL
+  0000                00199         extern  _ECCP1DEL
+  0000                00200         extern  _BAUDCON
+  0000                00201         extern  _BAUDCTL
+  0000                00202         extern  _CCP2CON
+  0000                00203         extern  _CCPR2
+  0000                00204         extern  _CCPR2L
+  0000                00205         extern  _CCPR2H
+  0000                00206         extern  _CCP1CON
+  0000                00207         extern  _ECCP1CON
+  0000                00208         extern  _CCPR1
+  0000                00209         extern  _CCPR1L
+  0000                00210         extern  _CCPR1H
+  0000                00211         extern  _ADCON2
+  0000                00212         extern  _ADCON1
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:00        PAGE  5
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+  0000                00213         extern  _ADCON0
+  0000                00214         extern  _ADRES
+  0000                00215         extern  _ADRESL
+  0000                00216         extern  _ADRESH
+  0000                00217         extern  _SSPCON2
+  0000                00218         extern  _SSPCON1
+  0000                00219         extern  _SSPSTAT
+  0000                00220         extern  _SSPADD
+  0000                00221         extern  _SSPBUF
+  0000                00222         extern  _T2CON
+  0000                00223         extern  _PR2
+  0000                00224         extern  _TMR2
+  0000                00225         extern  _T1CON
+  0000                00226         extern  _TMR1
+  0000                00227         extern  _TMR1L
+  0000                00228         extern  _TMR1H
+  0000                00229         extern  _RCON
+  0000                00230         extern  _WDTCON
+  0000                00231         extern  _HLVDCON
+  0000                00232         extern  _LVDCON
+  0000                00233         extern  _OSCCON
+  0000                00234         extern  _T0CON
+  0000                00235         extern  _TMR0
+  0000                00236         extern  _TMR0L
+  0000                00237         extern  _TMR0H
+  0000                00238         extern  _STATUS
+  0000                00239         extern  _FSR2L
+  0000                00240         extern  _FSR2H
+  0000                00241         extern  _PLUSW2
+  0000                00242         extern  _PREINC2
+  0000                00243         extern  _POSTDEC2
+  0000                00244         extern  _POSTINC2
+  0000                00245         extern  _INDF2
+  0000                00246         extern  _BSR
+  0000                00247         extern  _FSR1L
+  0000                00248         extern  _FSR1H
+  0000                00249         extern  _PLUSW1
+  0000                00250         extern  _PREINC1
+  0000                00251         extern  _POSTDEC1
+  0000                00252         extern  _POSTINC1
+  0000                00253         extern  _INDF1
+  0000                00254         extern  _WREG
+  0000                00255         extern  _FSR0L
+  0000                00256         extern  _FSR0H
+  0000                00257         extern  _PLUSW0
+  0000                00258         extern  _PREINC0
+  0000                00259         extern  _POSTDEC0
+  0000                00260         extern  _POSTINC0
+  0000                00261         extern  _INDF0
+  0000                00262         extern  _INTCON3
+  0000                00263         extern  _INTCON2
+  0000                00264         extern  _INTCON
+  0000                00265         extern  _PROD
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:00        PAGE  6
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+  0000                00266         extern  _PRODL
+  0000                00267         extern  _PRODH
+  0000                00268         extern  _TABLAT
+  0000                00269         extern  _TBLPTR
+  0000                00270         extern  _TBLPTRL
+  0000                00271         extern  _TBLPTRH
+  0000                00272         extern  _TBLPTRU
+  0000                00273         extern  _PC
+  0000                00274         extern  _PCL
+  0000                00275         extern  _PCLATH
+  0000                00276         extern  _PCLATU
+  0000                00277         extern  _STKPTR
+  0000                00278         extern  _TOS
+  0000                00279         extern  _TOSL
+  0000                00280         extern  _TOSH
+  0000                00281         extern  _TOSU
+  0000                00282         extern  _i2cInit
+  0000                00283         extern  _i2cStart
+  0000                00284         extern  _i2cRestart
+  0000                00285         extern  _i2cStop
+  0000                00286         extern  _i2cSend
+  0000                00287         extern  _i2cRead
+  0000                00288         extern  _lcdCommand
+                      00289 
+                      00290 ;--------------------------------------------------------
+                      00291 ;       Equates to used internal registers
+                      00292 ;--------------------------------------------------------
+  00000FE8            00293 WREG    equ     0xfe8
+  00000FE1            00294 FSR1L   equ     0xfe1
+  00000FD9            00295 FSR2L   equ     0xfd9
+  00000FE6            00296 POSTINC1        equ     0xfe6
+  00000FE5            00297 POSTDEC1        equ     0xfe5
+  00000FE4            00298 PREINC1 equ     0xfe4
+  00000FDB            00299 PLUSW2  equ     0xfdb
+  00000FF3            00300 PRODL   equ     0xff3
+                      00301 
+                      00302 
+                      00303 ; Internal registers
+                      00304 .registers      udata_ovr       0x0000
+000000                00305 r0x00   res     1
+000001                00306 r0x01   res     1
+000002                00307 r0x02   res     1
+000003                00308 r0x03   res     1
+000004                00309 r0x04   res     1
+000005                00310 r0x05   res     1
+                      00311 
+                      00312 ;--------------------------------------------------------
+                      00313 ; global & static initialisations
+                      00314 ;--------------------------------------------------------
+                      00315 ; I code from now on!
+                      00316 ; ; Starting pCode block
+                      00317 S_rtc__rtcYear  code
+000000                00318 _rtcYear:
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:00        PAGE  7
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00319 ;       .line   123; rtc.c      void rtcYear(unsigned char year){
+000000 CFD9 FFE5      00320         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00321         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00322         MOVFF   r0x00, POSTDEC1
+00000C 0E02           00323         MOVLW   0x02
+00000E CFDB F000      00324         MOVFF   PLUSW2, r0x00
+                      00325 ;       .line   124; rtc.c      i2cStart();
+000012 EC?? F0??      00326         CALL    _i2cStart
+                      00327 ;       .line   125; rtc.c      i2cSend(0xD0);
+000016 0ED0           00328         MOVLW   0xd0
+000018 6EE5           00329         MOVWF   POSTDEC1
+00001A EC?? F0??      00330         CALL    _i2cSend
+00001E 52E6           00331         MOVF    POSTINC1, F
+                      00332 ;       .line   126; rtc.c      i2cSend(0x06);
+000020 0E06           00333         MOVLW   0x06
+000022 6EE5           00334         MOVWF   POSTDEC1
+000024 EC?? F0??      00335         CALL    _i2cSend
+000028 52E6           00336         MOVF    POSTINC1, F
+                      00337 ;       .line   127; rtc.c      i2cSend(year);  
+00002A 50??           00338         MOVF    r0x00, W
+00002C 6EE5           00339         MOVWF   POSTDEC1
+00002E EC?? F0??      00340         CALL    _i2cSend
+000032 52E6           00341         MOVF    POSTINC1, F
+                      00342 ;       .line   128; rtc.c      i2cStop();
+000034 EC?? F0??      00343         CALL    _i2cStop
+                      00344 ;       .line   129; rtc.c      lcdCommand(0x01);
+000038 0E01           00345         MOVLW   0x01
+00003A 6EE5           00346         MOVWF   POSTDEC1
+00003C EC?? F0??      00347         CALL    _lcdCommand
+000040 52E6           00348         MOVF    POSTINC1, F
+000042 CFE4 F000      00349         MOVFF   PREINC1, r0x00
+000046 CFE4 FFD9      00350         MOVFF   PREINC1, FSR2L
+00004A 0012           00351         RETURN  
+                      00352 
+                      00353 ; ; Starting pCode block
+                      00354 S_rtc__rtcMonth code
+000000                00355 _rtcMonth:
+                      00356 ;       .line   114; rtc.c      void rtcMonth(unsigned char month){
+000000 CFD9 FFE5      00357         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00358         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00359         MOVFF   r0x00, POSTDEC1
+00000C 0E02           00360         MOVLW   0x02
+00000E CFDB F000      00361         MOVFF   PLUSW2, r0x00
+                      00362 ;       .line   115; rtc.c      i2cStart();
+000012 EC?? F0??      00363         CALL    _i2cStart
+                      00364 ;       .line   116; rtc.c      i2cSend(0xD0);
+000016 0ED0           00365         MOVLW   0xd0
+000018 6EE5           00366         MOVWF   POSTDEC1
+00001A EC?? F0??      00367         CALL    _i2cSend
+00001E 52E6           00368         MOVF    POSTINC1, F
+                      00369 ;       .line   117; rtc.c      i2cSend(0x05);
+000020 0E05           00370         MOVLW   0x05
+000022 6EE5           00371         MOVWF   POSTDEC1
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:00        PAGE  8
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000024 EC?? F0??      00372         CALL    _i2cSend
+000028 52E6           00373         MOVF    POSTINC1, F
+                      00374 ;       .line   118; rtc.c      i2cSend(month); 
+00002A 50??           00375         MOVF    r0x00, W
+00002C 6EE5           00376         MOVWF   POSTDEC1
+00002E EC?? F0??      00377         CALL    _i2cSend
+000032 52E6           00378         MOVF    POSTINC1, F
+                      00379 ;       .line   119; rtc.c      i2cStop();
+000034 EC?? F0??      00380         CALL    _i2cStop
+                      00381 ;       .line   120; rtc.c      lcdCommand(0x01);
+000038 0E01           00382         MOVLW   0x01
+00003A 6EE5           00383         MOVWF   POSTDEC1
+00003C EC?? F0??      00384         CALL    _lcdCommand
+000040 52E6           00385         MOVF    POSTINC1, F
+000042 CFE4 F000      00386         MOVFF   PREINC1, r0x00
+000046 CFE4 FFD9      00387         MOVFF   PREINC1, FSR2L
+00004A 0012           00388         RETURN  
+                      00389 
+                      00390 ; ; Starting pCode block
+                      00391 S_rtc__rtcDate  code
+000000                00392 _rtcDate:
+                      00393 ;       .line   105; rtc.c      void rtcDate(unsigned char date){
+000000 CFD9 FFE5      00394         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00395         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00396         MOVFF   r0x00, POSTDEC1
+00000C 0E02           00397         MOVLW   0x02
+00000E CFDB F000      00398         MOVFF   PLUSW2, r0x00
+                      00399 ;       .line   106; rtc.c      i2cStart();
+000012 EC?? F0??      00400         CALL    _i2cStart
+                      00401 ;       .line   107; rtc.c      i2cSend(0xD0);
+000016 0ED0           00402         MOVLW   0xd0
+000018 6EE5           00403         MOVWF   POSTDEC1
+00001A EC?? F0??      00404         CALL    _i2cSend
+00001E 52E6           00405         MOVF    POSTINC1, F
+                      00406 ;       .line   108; rtc.c      i2cSend(0x04);
+000020 0E04           00407         MOVLW   0x04
+000022 6EE5           00408         MOVWF   POSTDEC1
+000024 EC?? F0??      00409         CALL    _i2cSend
+000028 52E6           00410         MOVF    POSTINC1, F
+                      00411 ;       .line   109; rtc.c      i2cSend(date);  
+00002A 50??           00412         MOVF    r0x00, W
+00002C 6EE5           00413         MOVWF   POSTDEC1
+00002E EC?? F0??      00414         CALL    _i2cSend
+000032 52E6           00415         MOVF    POSTINC1, F
+                      00416 ;       .line   110; rtc.c      i2cStop();
+000034 EC?? F0??      00417         CALL    _i2cStop
+                      00418 ;       .line   111; rtc.c      lcdCommand(0x01);
+000038 0E01           00419         MOVLW   0x01
+00003A 6EE5           00420         MOVWF   POSTDEC1
+00003C EC?? F0??      00421         CALL    _lcdCommand
+000040 52E6           00422         MOVF    POSTINC1, F
+000042 CFE4 F000      00423         MOVFF   PREINC1, r0x00
+000046 CFE4 FFD9      00424         MOVFF   PREINC1, FSR2L
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:00        PAGE  9
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00004A 0012           00425         RETURN  
+                      00426 
+                      00427 ; ; Starting pCode block
+                      00428 S_rtc__rtcDay   code
+000000                00429 _rtcDay:
+                      00430 ;       .line   96; rtc.c       void rtcDay(unsigned char day){
+000000 CFD9 FFE5      00431         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00432         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00433         MOVFF   r0x00, POSTDEC1
+00000C 0E02           00434         MOVLW   0x02
+00000E CFDB F000      00435         MOVFF   PLUSW2, r0x00
+                      00436 ;       .line   97; rtc.c       i2cStart();
+000012 EC?? F0??      00437         CALL    _i2cStart
+                      00438 ;       .line   98; rtc.c       i2cSend(0xD0);
+000016 0ED0           00439         MOVLW   0xd0
+000018 6EE5           00440         MOVWF   POSTDEC1
+00001A EC?? F0??      00441         CALL    _i2cSend
+00001E 52E6           00442         MOVF    POSTINC1, F
+                      00443 ;       .line   99; rtc.c       i2cSend(0x03);
+000020 0E03           00444         MOVLW   0x03
+000022 6EE5           00445         MOVWF   POSTDEC1
+000024 EC?? F0??      00446         CALL    _i2cSend
+000028 52E6           00447         MOVF    POSTINC1, F
+                      00448 ;       .line   100; rtc.c      i2cSend(day);   
+00002A 50??           00449         MOVF    r0x00, W
+00002C 6EE5           00450         MOVWF   POSTDEC1
+00002E EC?? F0??      00451         CALL    _i2cSend
+000032 52E6           00452         MOVF    POSTINC1, F
+                      00453 ;       .line   101; rtc.c      i2cStop();
+000034 EC?? F0??      00454         CALL    _i2cStop
+                      00455 ;       .line   102; rtc.c      lcdCommand(0x01);
+000038 0E01           00456         MOVLW   0x01
+00003A 6EE5           00457         MOVWF   POSTDEC1
+00003C EC?? F0??      00458         CALL    _lcdCommand
+000040 52E6           00459         MOVF    POSTINC1, F
+000042 CFE4 F000      00460         MOVFF   PREINC1, r0x00
+000046 CFE4 FFD9      00461         MOVFF   PREINC1, FSR2L
+00004A 0012           00462         RETURN  
+                      00463 
+                      00464 ; ; Starting pCode block
+                      00465 S_rtc__rtcHour  code
+000000                00466 _rtcHour:
+                      00467 ;       .line   87; rtc.c       void rtcHour(unsigned char hour){
+000000 CFD9 FFE5      00468         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00469         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00470         MOVFF   r0x00, POSTDEC1
+00000C 0E02           00471         MOVLW   0x02
+00000E CFDB F000      00472         MOVFF   PLUSW2, r0x00
+                      00473 ;       .line   88; rtc.c       i2cStart();
+000012 EC?? F0??      00474         CALL    _i2cStart
+                      00475 ;       .line   89; rtc.c       i2cSend(0xD0);
+000016 0ED0           00476         MOVLW   0xd0
+000018 6EE5           00477         MOVWF   POSTDEC1
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:00        PAGE 10
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00001A EC?? F0??      00478         CALL    _i2cSend
+00001E 52E6           00479         MOVF    POSTINC1, F
+                      00480 ;       .line   90; rtc.c       i2cSend(0x02);
+000020 0E02           00481         MOVLW   0x02
+000022 6EE5           00482         MOVWF   POSTDEC1
+000024 EC?? F0??      00483         CALL    _i2cSend
+000028 52E6           00484         MOVF    POSTINC1, F
+                      00485 ;       .line   91; rtc.c       i2cSend(hour);  
+00002A 50??           00486         MOVF    r0x00, W
+00002C 6EE5           00487         MOVWF   POSTDEC1
+00002E EC?? F0??      00488         CALL    _i2cSend
+000032 52E6           00489         MOVF    POSTINC1, F
+                      00490 ;       .line   92; rtc.c       i2cStop();
+000034 EC?? F0??      00491         CALL    _i2cStop
+                      00492 ;       .line   93; rtc.c       lcdCommand(0x01);
+000038 0E01           00493         MOVLW   0x01
+00003A 6EE5           00494         MOVWF   POSTDEC1
+00003C EC?? F0??      00495         CALL    _lcdCommand
+000040 52E6           00496         MOVF    POSTINC1, F
+000042 CFE4 F000      00497         MOVFF   PREINC1, r0x00
+000046 CFE4 FFD9      00498         MOVFF   PREINC1, FSR2L
+00004A 0012           00499         RETURN  
+                      00500 
+                      00501 ; ; Starting pCode block
+                      00502 S_rtc__rtcMin   code
+000000                00503 _rtcMin:
+                      00504 ;       .line   78; rtc.c       void rtcMin(unsigned char min){
+000000 CFD9 FFE5      00505         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00506         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00507         MOVFF   r0x00, POSTDEC1
+00000C 0E02           00508         MOVLW   0x02
+00000E CFDB F000      00509         MOVFF   PLUSW2, r0x00
+                      00510 ;       .line   79; rtc.c       i2cStart();
+000012 EC?? F0??      00511         CALL    _i2cStart
+                      00512 ;       .line   80; rtc.c       i2cSend(0xD0);
+000016 0ED0           00513         MOVLW   0xd0
+000018 6EE5           00514         MOVWF   POSTDEC1
+00001A EC?? F0??      00515         CALL    _i2cSend
+00001E 52E6           00516         MOVF    POSTINC1, F
+                      00517 ;       .line   81; rtc.c       i2cSend(0x01);
+000020 0E01           00518         MOVLW   0x01
+000022 6EE5           00519         MOVWF   POSTDEC1
+000024 EC?? F0??      00520         CALL    _i2cSend
+000028 52E6           00521         MOVF    POSTINC1, F
+                      00522 ;       .line   82; rtc.c       i2cSend(min);   
+00002A 50??           00523         MOVF    r0x00, W
+00002C 6EE5           00524         MOVWF   POSTDEC1
+00002E EC?? F0??      00525         CALL    _i2cSend
+000032 52E6           00526         MOVF    POSTINC1, F
+                      00527 ;       .line   83; rtc.c       i2cStop();
+000034 EC?? F0??      00528         CALL    _i2cStop
+                      00529 ;       .line   84; rtc.c       lcdCommand(0x01);
+000038 0E01           00530         MOVLW   0x01
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:00        PAGE 11
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00003A 6EE5           00531         MOVWF   POSTDEC1
+00003C EC?? F0??      00532         CALL    _lcdCommand
+000040 52E6           00533         MOVF    POSTINC1, F
+000042 CFE4 F000      00534         MOVFF   PREINC1, r0x00
+000046 CFE4 FFD9      00535         MOVFF   PREINC1, FSR2L
+00004A 0012           00536         RETURN  
+                      00537 
+                      00538 ; ; Starting pCode block
+                      00539 S_rtc__rtcStart code
+000000                00540 _rtcStart:
+                      00541 ;       .line   68; rtc.c       void rtcStart(void){
+000000 CFD9 FFE5      00542         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00543         MOVFF   FSR1L, FSR2L
+                      00544 ;       .line   69; rtc.c       i2cStart();
+000008 EC?? F0??      00545         CALL    _i2cStart
+                      00546 ;       .line   70; rtc.c       i2cSend(0xD0);
+00000C 0ED0           00547         MOVLW   0xd0
+00000E 6EE5           00548         MOVWF   POSTDEC1
+000010 EC?? F0??      00549         CALL    _i2cSend
+000014 52E6           00550         MOVF    POSTINC1, F
+                      00551 ;       .line   71; rtc.c       i2cSend(0x00);
+000016 0E00           00552         MOVLW   0x00
+000018 6EE5           00553         MOVWF   POSTDEC1
+00001A EC?? F0??      00554         CALL    _i2cSend
+00001E 52E6           00555         MOVF    POSTINC1, F
+                      00556 ;       .line   72; rtc.c       i2cSend(0x00);  
+000020 0E00           00557         MOVLW   0x00
+000022 6EE5           00558         MOVWF   POSTDEC1
+000024 EC?? F0??      00559         CALL    _i2cSend
+000028 52E6           00560         MOVF    POSTINC1, F
+                      00561 ;       .line   73; rtc.c       i2cStop();
+00002A EC?? F0??      00562         CALL    _i2cStop
+                      00563 ;       .line   74; rtc.c       lcdCommand(0x01);
+00002E 0E01           00564         MOVLW   0x01
+000030 6EE5           00565         MOVWF   POSTDEC1
+000032 EC?? F0??      00566         CALL    _lcdCommand
+000036 52E6           00567         MOVF    POSTINC1, F
+000038 CFE4 FFD9      00568         MOVFF   PREINC1, FSR2L
+00003C 0012           00569         RETURN  
+                      00570 
+                      00571 ; ; Starting pCode block
+                      00572 S_rtc__rtcReadInt       code
+000000                00573 _rtcReadInt:
+                      00574 ;       .line   56; rtc.c       int rtcReadInt(unsigned char address){
+000000 CFD9 FFE5      00575         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00576         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00577         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      00578         MOVFF   r0x01, POSTDEC1
+000010 C??? F???      00579         MOVFF   r0x02, POSTDEC1
+000014 C??? F???      00580         MOVFF   r0x03, POSTDEC1
+000018 C??? F???      00581         MOVFF   r0x04, POSTDEC1
+00001C C??? F???      00582         MOVFF   r0x05, POSTDEC1
+000020 0E02           00583         MOVLW   0x02
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:00        PAGE 12
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000022 CFDB F000      00584         MOVFF   PLUSW2, r0x00
+                      00585 ;       .line   60; rtc.c       valH = rtcRead(address);  
+000026 50??           00586         MOVF    r0x00, W
+000028 6EE5           00587         MOVWF   POSTDEC1
+00002A EC?? F0??      00588         CALL    _rtcRead
+00002E 6E??           00589         MOVWF   r0x01
+000030 52E6           00590         MOVF    POSTINC1, F
+                      00591 ;       .line   61; rtc.c       valL = rtcRead(address+1);      
+000032 2A??           00592         INCF    r0x00, F
+000034 50??           00593         MOVF    r0x00, W
+000036 6EE5           00594         MOVWF   POSTDEC1
+000038 EC?? F0??      00595         CALL    _rtcRead
+00003C 6E??           00596         MOVWF   r0x00
+00003E 52E6           00597         MOVF    POSTINC1, F
+                      00598 ;       .line   62; rtc.c       val = (valH << 8);
+000040 6A??           00599         CLRF    r0x02
+000042 50??           00600         MOVF    r0x01, W
+000044 6E??           00601         MOVWF   r0x04
+000046 6A??           00602         CLRF    r0x03
+                      00603 ;       .line   63; rtc.c       val = val + valL;      
+000048 6A??           00604         CLRF    r0x05
+00004A 50??           00605         MOVF    r0x00, W
+00004C 26??           00606         ADDWF   r0x03, F
+00004E 50??           00607         MOVF    r0x05, W
+000050 22??           00608         ADDWFC  r0x04, F
+                      00609 ;       .line   65; rtc.c       return val;
+000052 C??? F???      00610         MOVFF   r0x04, PRODL
+000056 50??           00611         MOVF    r0x03, W
+000058 CFE4 F000      00612         MOVFF   PREINC1, r0x05
+00005C CFE4 F000      00613         MOVFF   PREINC1, r0x04
+000060 CFE4 F000      00614         MOVFF   PREINC1, r0x03
+000064 CFE4 F000      00615         MOVFF   PREINC1, r0x02
+000068 CFE4 F000      00616         MOVFF   PREINC1, r0x01
+00006C CFE4 F000      00617         MOVFF   PREINC1, r0x00
+000070 CFE4 FFD9      00618         MOVFF   PREINC1, FSR2L
+000074 0012           00619         RETURN  
+                      00620 
+                      00621 ; ; Starting pCode block
+                      00622 S_rtc__rtcRead  code
+000000                00623 _rtcRead:
+                      00624 ;       .line   44; rtc.c       char rtcRead(unsigned char address){
+000000 CFD9 FFE5      00625         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00626         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00627         MOVFF   r0x00, POSTDEC1
+00000C 0E02           00628         MOVLW   0x02
+00000E CFDB F000      00629         MOVFF   PLUSW2, r0x00
+                      00630 ;       .line   46; rtc.c       i2cStart();
+000012 EC?? F0??      00631         CALL    _i2cStart
+                      00632 ;       .line   47; rtc.c       i2cSend(0xD0);
+000016 0ED0           00633         MOVLW   0xd0
+000018 6EE5           00634         MOVWF   POSTDEC1
+00001A EC?? F0??      00635         CALL    _i2cSend
+00001E 52E6           00636         MOVF    POSTINC1, F
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:00        PAGE 13
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00637 ;       .line   48; rtc.c       i2cSend(address);
+000020 50??           00638         MOVF    r0x00, W
+000022 6EE5           00639         MOVWF   POSTDEC1
+000024 EC?? F0??      00640         CALL    _i2cSend
+000028 52E6           00641         MOVF    POSTINC1, F
+                      00642 ;       .line   49; rtc.c       i2cRestart();
+00002A EC?? F0??      00643         CALL    _i2cRestart
+                      00644 ;       .line   50; rtc.c       i2cSend(0xD1);
+00002E 0ED1           00645         MOVLW   0xd1
+000030 6EE5           00646         MOVWF   POSTDEC1
+000032 EC?? F0??      00647         CALL    _i2cSend
+000036 52E6           00648         MOVF    POSTINC1, F
+                      00649 ;       .line   51; rtc.c       val = i2cRead();
+000038 EC?? F0??      00650         CALL    _i2cRead
+00003C 6E??           00651         MOVWF   r0x00
+                      00652 ;       .line   52; rtc.c       i2cStop();      
+00003E EC?? F0??      00653         CALL    _i2cStop
+                      00654 ;       .line   53; rtc.c       return val;
+000042 50??           00655         MOVF    r0x00, W
+000044 CFE4 F000      00656         MOVFF   PREINC1, r0x00
+000048 CFE4 FFD9      00657         MOVFF   PREINC1, FSR2L
+00004C 0012           00658         RETURN  
+                      00659 
+                      00660 ; ; Starting pCode block
+                      00661 S_rtc__rtcStoreInt      code
+000000                00662 _rtcStoreInt:
+                      00663 ;       .line   34; rtc.c       void rtcStoreInt(unsigned char address, int val)
+000000 CFD9 FFE5      00664         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00665         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00666         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      00667         MOVFF   r0x01, POSTDEC1
+000010 C??? F???      00668         MOVFF   r0x02, POSTDEC1
+000014 C??? F???      00669         MOVFF   r0x03, POSTDEC1
+000018 0E02           00670         MOVLW   0x02
+00001A CFDB F000      00671         MOVFF   PLUSW2, r0x00
+00001E 0E03           00672         MOVLW   0x03
+000020 CFDB F000      00673         MOVFF   PLUSW2, r0x01
+000024 0E04           00674         MOVLW   0x04
+000026 CFDB F000      00675         MOVFF   PLUSW2, r0x02
+                      00676 ;       .line   36; rtc.c       i2cStart();
+00002A EC?? F0??      00677         CALL    _i2cStart
+                      00678 ;       .line   37; rtc.c       i2cSend(0xD0);
+00002E 0ED0           00679         MOVLW   0xd0
+000030 6EE5           00680         MOVWF   POSTDEC1
+000032 EC?? F0??      00681         CALL    _i2cSend
+000036 52E6           00682         MOVF    POSTINC1, F
+                      00683 ;       .line   38; rtc.c       i2cSend(address);       
+000038 50??           00684         MOVF    r0x00, W
+00003A 6EE5           00685         MOVWF   POSTDEC1
+00003C EC?? F0??      00686         CALL    _i2cSend
+000040 52E6           00687         MOVF    POSTINC1, F
+                      00688 ;       .line   39; rtc.c       i2cSend(val >> 8);    
+000042 50??           00689         MOVF    r0x02, W
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:00        PAGE 14
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000044 6E??           00690         MOVWF   r0x00
+000046 6A??           00691         CLRF    r0x03
+000048 BE??           00692         BTFSC   r0x00, 7
+00004A 68??           00693         SETF    r0x03
+00004C 50??           00694         MOVF    r0x00, W
+00004E 6EE5           00695         MOVWF   POSTDEC1
+000050 EC?? F0??      00696         CALL    _i2cSend
+000054 52E6           00697         MOVF    POSTINC1, F
+                      00698 ;       .line   40; rtc.c       i2cSend(val & 0x00FF);
+000056 6A??           00699         CLRF    r0x02
+000058 50??           00700         MOVF    r0x01, W
+00005A 6EE5           00701         MOVWF   POSTDEC1
+00005C EC?? F0??      00702         CALL    _i2cSend
+000060 52E6           00703         MOVF    POSTINC1, F
+                      00704 ;       .line   41; rtc.c       i2cStop();
+000062 EC?? F0??      00705         CALL    _i2cStop
+000066 CFE4 F000      00706         MOVFF   PREINC1, r0x03
+00006A CFE4 F000      00707         MOVFF   PREINC1, r0x02
+00006E CFE4 F000      00708         MOVFF   PREINC1, r0x01
+000072 CFE4 F000      00709         MOVFF   PREINC1, r0x00
+000076 CFE4 FFD9      00710         MOVFF   PREINC1, FSR2L
+00007A 0012           00711         RETURN  
+                      00712 
+                      00713 ; ; Starting pCode block
+                      00714 S_rtc__rtcStore code
+000000                00715 _rtcStore:
+                      00716 ;       .line   25; rtc.c       void rtcStore(unsigned char address, char val)
+000000 CFD9 FFE5      00717         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00718         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00719         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      00720         MOVFF   r0x01, POSTDEC1
+000010 0E02           00721         MOVLW   0x02
+000012 CFDB F000      00722         MOVFF   PLUSW2, r0x00
+000016 0E03           00723         MOVLW   0x03
+000018 CFDB F000      00724         MOVFF   PLUSW2, r0x01
+                      00725 ;       .line   27; rtc.c       i2cStart();
+00001C EC?? F0??      00726         CALL    _i2cStart
+                      00727 ;       .line   28; rtc.c       i2cSend(0xD0);
+000020 0ED0           00728         MOVLW   0xd0
+000022 6EE5           00729         MOVWF   POSTDEC1
+000024 EC?? F0??      00730         CALL    _i2cSend
+000028 52E6           00731         MOVF    POSTINC1, F
+                      00732 ;       .line   29; rtc.c       i2cSend(address);       
+00002A 50??           00733         MOVF    r0x00, W
+00002C 6EE5           00734         MOVWF   POSTDEC1
+00002E EC?? F0??      00735         CALL    _i2cSend
+000032 52E6           00736         MOVF    POSTINC1, F
+                      00737 ;       .line   30; rtc.c       i2cSend(val);
+000034 50??           00738         MOVF    r0x01, W
+000036 6EE5           00739         MOVWF   POSTDEC1
+000038 EC?? F0??      00740         CALL    _i2cSend
+00003C 52E6           00741         MOVF    POSTINC1, F
+                      00742 ;       .line   31; rtc.c       i2cStop();   
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:00        PAGE 15
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00003E EC?? F0??      00743         CALL    _i2cStop
+000042 CFE4 F000      00744         MOVFF   PREINC1, r0x01
+000046 CFE4 F000      00745         MOVFF   PREINC1, r0x00
+00004A CFE4 FFD9      00746         MOVFF   PREINC1, FSR2L
+00004E 0012           00747         RETURN  
+                      00748 
+                      00749 ; ; Starting pCode block
+                      00750 S_rtc__BCD2LowerCh      code
+000000                00751 _BCD2LowerCh:
+                      00752 ;       .line   17; rtc.c       unsigned char BCD2LowerCh(unsigned char bcd)
+000000 CFD9 FFE5      00753         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00754         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00755         MOVFF   r0x00, POSTDEC1
+00000C 0E02           00756         MOVLW   0x02
+00000E CFDB F000      00757         MOVFF   PLUSW2, r0x00
+                      00758 ;       .line   20; rtc.c       temp = bcd & 0x0F; //Making the Upper 4-bits
+000012 0E0F           00759         MOVLW   0x0f
+000014 16??           00760         ANDWF   r0x00, F
+                      00761 ;       .line   21; rtc.c       temp = temp | 0x30;
+000016 0E30           00762         MOVLW   0x30
+000018 12??           00763         IORWF   r0x00, F
+                      00764 ;       .line   22; rtc.c       return(temp);
+00001A 50??           00765         MOVF    r0x00, W
+00001C CFE4 F000      00766         MOVFF   PREINC1, r0x00
+000020 CFE4 FFD9      00767         MOVFF   PREINC1, FSR2L
+000024 0012           00768         RETURN  
+                      00769 
+                      00770 ; ; Starting pCode block
+                      00771 S_rtc__BCD2UpperCh      code
+000000                00772 _BCD2UpperCh:
+                      00773 ;       .line   10; rtc.c       unsigned char BCD2UpperCh(unsigned char bcd)
+000000 CFD9 FFE5      00774         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00775         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00776         MOVFF   r0x00, POSTDEC1
+00000C 0E02           00777         MOVLW   0x02
+00000E CFDB F000      00778         MOVFF   PLUSW2, r0x00
+                      00779 ;       .line   13; rtc.c       temp = bcd >> 4;
+000012 38??           00780         SWAPF   r0x00, W
+000014 0B0F           00781         ANDLW   0x0f
+000016 6E??           00782         MOVWF   r0x00
+                      00783 ;       .line   14; rtc.c       temp = temp | 0x30;
+000018 0E30           00784         MOVLW   0x30
+00001A 12??           00785         IORWF   r0x00, F
+                      00786 ;       .line   15; rtc.c       return(temp);   
+00001C 50??           00787         MOVF    r0x00, W
+00001E CFE4 F000      00788         MOVFF   PREINC1, r0x00
+000022 CFE4 FFD9      00789         MOVFF   PREINC1, FSR2L
+000026 0012           00790         RETURN  
+                      00791 
+                      00792 ; ; Starting pCode block
+                      00793 S_rtc__rtcInit  code
+000000                00794 _rtcInit:
+                      00795 ;       .line   6; rtc.c        void rtcInit(void) {
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:00        PAGE 16
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000000 CFD9 FFE5      00796         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00797         MOVFF   FSR1L, FSR2L
+                      00798 ;       .line   7; rtc.c        i2cInit();
+000008 EC?? F0??      00799         CALL    _i2cInit
+00000C CFE4 FFD9      00800         MOVFF   PREINC1, FSR2L
+000010 0012           00801         RETURN  
+                      00802 
+                      00803 
+                      00804 
+                      00805 ; Statistics:
+                      00806 ; code size:     1014 (0x03f6) bytes ( 0.77%)
+                      00807 ;                 507 (0x01fb) words
+                      00808 ; udata size:       0 (0x0000) bytes ( 0.00%)
+                      00809 ; access size:      6 (0x0006) bytes
+                      00810 
+                      00811 
+                      00812         end
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:00        PAGE 17
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+FSR1L                             CONSTANT      00000FE1           4065
+FSR2L                             CONSTANT      00000FD9           4057
+PLUSW2                            CONSTANT      00000FDB           4059
+POSTDEC1                          CONSTANT      00000FE5           4069
+POSTINC1                          CONSTANT      00000FE6           4070
+PREINC1                           CONSTANT      00000FE4           4068
+PRODL                             CONSTANT      00000FF3           4083
+WREG                              CONSTANT      00000FE8           4072
+_ADCON0                           EXTERNAL      00000000              0
+_ADCON0bits                       EXTERNAL      00000000              0
+_ADCON1                           EXTERNAL      00000000              0
+_ADCON1bits                       EXTERNAL      00000000              0
+_ADCON2                           EXTERNAL      00000000              0
+_ADCON2bits                       EXTERNAL      00000000              0
+_ADRES                            EXTERNAL      00000000              0
+_ADRESH                           EXTERNAL      00000000              0
+_ADRESL                           EXTERNAL      00000000              0
+_BAUDCON                          EXTERNAL      00000000              0
+_BAUDCONbits                      EXTERNAL      00000000              0
+_BAUDCTL                          EXTERNAL      00000000              0
+_BAUDCTLbits                      EXTERNAL      00000000              0
+_BCD2LowerCh                      GLOBAL        00000000              0
+_BCD2UpperCh                      GLOBAL        00000000              0
+_BSR                              EXTERNAL      00000000              0
+_CCP1AS                           EXTERNAL      00000000              0
+_CCP1ASbits                       EXTERNAL      00000000              0
+_CCP1CON                          EXTERNAL      00000000              0
+_CCP1CONbits                      EXTERNAL      00000000              0
+_CCP1DEL                          EXTERNAL      00000000              0
+_CCP1DELbits                      EXTERNAL      00000000              0
+_CCP2CON                          EXTERNAL      00000000              0
+_CCP2CONbits                      EXTERNAL      00000000              0
+_CCPR1                            EXTERNAL      00000000              0
+_CCPR1H                           EXTERNAL      00000000              0
+_CCPR1L                           EXTERNAL      00000000              0
+_CCPR2                            EXTERNAL      00000000              0
+_CCPR2H                           EXTERNAL      00000000              0
+_CCPR2L                           EXTERNAL      00000000              0
+_CMCON                            EXTERNAL      00000000              0
+_CMCONbits                        EXTERNAL      00000000              0
+_CVRCON                           EXTERNAL      00000000              0
+_CVRCONbits                       EXTERNAL      00000000              0
+_DDRA                             EXTERNAL      00000000              0
+_DDRAbits                         EXTERNAL      00000000              0
+_DDRB                             EXTERNAL      00000000              0
+_DDRBbits                         EXTERNAL      00000000              0
+_DDRC                             EXTERNAL      00000000              0
+_DDRCbits                         EXTERNAL      00000000              0
+_DDRD                             EXTERNAL      00000000              0
+_DDRDbits                         EXTERNAL      00000000              0
+_DDRE                             EXTERNAL      00000000              0
+_DDREbits                         EXTERNAL      00000000              0
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:00        PAGE 18
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+_ECCP1AS                          EXTERNAL      00000000              0
+_ECCP1ASbits                      EXTERNAL      00000000              0
+_ECCP1CON                         EXTERNAL      00000000              0
+_ECCP1CONbits                     EXTERNAL      00000000              0
+_ECCP1DEL                         EXTERNAL      00000000              0
+_ECCP1DELbits                     EXTERNAL      00000000              0
+_EEADR                            EXTERNAL      00000000              0
+_EECON1                           EXTERNAL      00000000              0
+_EECON1bits                       EXTERNAL      00000000              0
+_EECON2                           EXTERNAL      00000000              0
+_EEDATA                           EXTERNAL      00000000              0
+_FSR0H                            EXTERNAL      00000000              0
+_FSR0L                            EXTERNAL      00000000              0
+_FSR1H                            EXTERNAL      00000000              0
+_FSR1L                            EXTERNAL      00000000              0
+_FSR2H                            EXTERNAL      00000000              0
+_FSR2L                            EXTERNAL      00000000              0
+_HLVDCON                          EXTERNAL      00000000              0
+_HLVDCONbits                      EXTERNAL      00000000              0
+_INDF0                            EXTERNAL      00000000              0
+_INDF1                            EXTERNAL      00000000              0
+_INDF2                            EXTERNAL      00000000              0
+_INTCON                           EXTERNAL      00000000              0
+_INTCON2                          EXTERNAL      00000000              0
+_INTCON2bits                      EXTERNAL      00000000              0
+_INTCON3                          EXTERNAL      00000000              0
+_INTCON3bits                      EXTERNAL      00000000              0
+_INTCONbits                       EXTERNAL      00000000              0
+_IPR1                             EXTERNAL      00000000              0
+_IPR1bits                         EXTERNAL      00000000              0
+_IPR2                             EXTERNAL      00000000              0
+_IPR2bits                         EXTERNAL      00000000              0
+_LATA                             EXTERNAL      00000000              0
+_LATAbits                         EXTERNAL      00000000              0
+_LATB                             EXTERNAL      00000000              0
+_LATBbits                         EXTERNAL      00000000              0
+_LATC                             EXTERNAL      00000000              0
+_LATCbits                         EXTERNAL      00000000              0
+_LATD                             EXTERNAL      00000000              0
+_LATDbits                         EXTERNAL      00000000              0
+_LATE                             EXTERNAL      00000000              0
+_LATEbits                         EXTERNAL      00000000              0
+_LVDCON                           EXTERNAL      00000000              0
+_LVDCONbits                       EXTERNAL      00000000              0
+_OSCCON                           EXTERNAL      00000000              0
+_OSCCONbits                       EXTERNAL      00000000              0
+_OSCTUNE                          EXTERNAL      00000000              0
+_OSCTUNEbits                      EXTERNAL      00000000              0
+_PC                               EXTERNAL      00000000              0
+_PCL                              EXTERNAL      00000000              0
+_PCLATH                           EXTERNAL      00000000              0
+_PCLATU                           EXTERNAL      00000000              0
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:00        PAGE 19
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+_PIE1                             EXTERNAL      00000000              0
+_PIE1bits                         EXTERNAL      00000000              0
+_PIE2                             EXTERNAL      00000000              0
+_PIE2bits                         EXTERNAL      00000000              0
+_PIR1                             EXTERNAL      00000000              0
+_PIR1bits                         EXTERNAL      00000000              0
+_PIR2                             EXTERNAL      00000000              0
+_PIR2bits                         EXTERNAL      00000000              0
+_PLUSW0                           EXTERNAL      00000000              0
+_PLUSW1                           EXTERNAL      00000000              0
+_PLUSW2                           EXTERNAL      00000000              0
+_PORTA                            EXTERNAL      00000000              0
+_PORTAbits                        EXTERNAL      00000000              0
+_PORTB                            EXTERNAL      00000000              0
+_PORTBbits                        EXTERNAL      00000000              0
+_PORTC                            EXTERNAL      00000000              0
+_PORTCbits                        EXTERNAL      00000000              0
+_PORTD                            EXTERNAL      00000000              0
+_PORTDbits                        EXTERNAL      00000000              0
+_PORTE                            EXTERNAL      00000000              0
+_PORTEbits                        EXTERNAL      00000000              0
+_POSTDEC0                         EXTERNAL      00000000              0
+_POSTDEC1                         EXTERNAL      00000000              0
+_POSTDEC2                         EXTERNAL      00000000              0
+_POSTINC0                         EXTERNAL      00000000              0
+_POSTINC1                         EXTERNAL      00000000              0
+_POSTINC2                         EXTERNAL      00000000              0
+_PR2                              EXTERNAL      00000000              0
+_PREINC0                          EXTERNAL      00000000              0
+_PREINC1                          EXTERNAL      00000000              0
+_PREINC2                          EXTERNAL      00000000              0
+_PROD                             EXTERNAL      00000000              0
+_PRODH                            EXTERNAL      00000000              0
+_PRODL                            EXTERNAL      00000000              0
+_RCON                             EXTERNAL      00000000              0
+_RCONbits                         EXTERNAL      00000000              0
+_RCREG                            EXTERNAL      00000000              0
+_RCSTA                            EXTERNAL      00000000              0
+_RCSTAbits                        EXTERNAL      00000000              0
+_SPBRG                            EXTERNAL      00000000              0
+_SPBRGH                           EXTERNAL      00000000              0
+_SPPCFG                           EXTERNAL      00000000              0
+_SPPCFGbits                       EXTERNAL      00000000              0
+_SPPCON                           EXTERNAL      00000000              0
+_SPPCONbits                       EXTERNAL      00000000              0
+_SPPDATA                          EXTERNAL      00000000              0
+_SPPEPS                           EXTERNAL      00000000              0
+_SPPEPSbits                       EXTERNAL      00000000              0
+_SSPADD                           EXTERNAL      00000000              0
+_SSPBUF                           EXTERNAL      00000000              0
+_SSPCON1                          EXTERNAL      00000000              0
+_SSPCON1bits                      EXTERNAL      00000000              0
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:00        PAGE 20
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+_SSPCON2                          EXTERNAL      00000000              0
+_SSPCON2bits                      EXTERNAL      00000000              0
+_SSPSTAT                          EXTERNAL      00000000              0
+_SSPSTATbits                      EXTERNAL      00000000              0
+_STATUS                           EXTERNAL      00000000              0
+_STATUSbits                       EXTERNAL      00000000              0
+_STKPTR                           EXTERNAL      00000000              0
+_STKPTRbits                       EXTERNAL      00000000              0
+_T0CON                            EXTERNAL      00000000              0
+_T0CONbits                        EXTERNAL      00000000              0
+_T1CON                            EXTERNAL      00000000              0
+_T1CONbits                        EXTERNAL      00000000              0
+_T2CON                            EXTERNAL      00000000              0
+_T2CONbits                        EXTERNAL      00000000              0
+_T3CON                            EXTERNAL      00000000              0
+_T3CONbits                        EXTERNAL      00000000              0
+_TABLAT                           EXTERNAL      00000000              0
+_TBLPTR                           EXTERNAL      00000000              0
+_TBLPTRH                          EXTERNAL      00000000              0
+_TBLPTRL                          EXTERNAL      00000000              0
+_TBLPTRU                          EXTERNAL      00000000              0
+_TMR0                             EXTERNAL      00000000              0
+_TMR0H                            EXTERNAL      00000000              0
+_TMR0L                            EXTERNAL      00000000              0
+_TMR1                             EXTERNAL      00000000              0
+_TMR1H                            EXTERNAL      00000000              0
+_TMR1L                            EXTERNAL      00000000              0
+_TMR2                             EXTERNAL      00000000              0
+_TMR3                             EXTERNAL      00000000              0
+_TMR3H                            EXTERNAL      00000000              0
+_TMR3L                            EXTERNAL      00000000              0
+_TOS                              EXTERNAL      00000000              0
+_TOSH                             EXTERNAL      00000000              0
+_TOSL                             EXTERNAL      00000000              0
+_TOSU                             EXTERNAL      00000000              0
+_TRISA                            EXTERNAL      00000000              0
+_TRISAbits                        EXTERNAL      00000000              0
+_TRISB                            EXTERNAL      00000000              0
+_TRISBbits                        EXTERNAL      00000000              0
+_TRISC                            EXTERNAL      00000000              0
+_TRISCbits                        EXTERNAL      00000000              0
+_TRISD                            EXTERNAL      00000000              0
+_TRISDbits                        EXTERNAL      00000000              0
+_TRISE                            EXTERNAL      00000000              0
+_TRISEbits                        EXTERNAL      00000000              0
+_TXREG                            EXTERNAL      00000000              0
+_TXSTA                            EXTERNAL      00000000              0
+_TXSTAbits                        EXTERNAL      00000000              0
+_UADDR                            EXTERNAL      00000000              0
+_UADDRbits                        EXTERNAL      00000000              0
+_UCFG                             EXTERNAL      00000000              0
+_UCFGbits                         EXTERNAL      00000000              0
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:00        PAGE 21
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+_UCON                             EXTERNAL      00000000              0
+_UCONbits                         EXTERNAL      00000000              0
+_UEIE                             EXTERNAL      00000000              0
+_UEIEbits                         EXTERNAL      00000000              0
+_UEIR                             EXTERNAL      00000000              0
+_UEIRbits                         EXTERNAL      00000000              0
+_UEP0                             EXTERNAL      00000000              0
+_UEP0bits                         EXTERNAL      00000000              0
+_UEP1                             EXTERNAL      00000000              0
+_UEP1bits                         EXTERNAL      00000000              0
+_UEP2                             EXTERNAL      00000000              0
+_UEP2bits                         EXTERNAL      00000000              0
+_UEP3                             EXTERNAL      00000000              0
+_UEP3bits                         EXTERNAL      00000000              0
+_UEP4                             EXTERNAL      00000000              0
+_UEP4bits                         EXTERNAL      00000000              0
+_UEP5                             EXTERNAL      00000000              0
+_UEP5bits                         EXTERNAL      00000000              0
+_UEP6                             EXTERNAL      00000000              0
+_UEP6bits                         EXTERNAL      00000000              0
+_UEP7                             EXTERNAL      00000000              0
+_UEP7bits                         EXTERNAL      00000000              0
+_UEP8                             EXTERNAL      00000000              0
+_UEP8bits                         EXTERNAL      00000000              0
+_UEP9                             EXTERNAL      00000000              0
+_UEP9bits                         EXTERNAL      00000000              0
+_UEP10                            EXTERNAL      00000000              0
+_UEP10bits                        EXTERNAL      00000000              0
+_UEP11                            EXTERNAL      00000000              0
+_UEP11bits                        EXTERNAL      00000000              0
+_UEP12                            EXTERNAL      00000000              0
+_UEP12bits                        EXTERNAL      00000000              0
+_UEP13                            EXTERNAL      00000000              0
+_UEP13bits                        EXTERNAL      00000000              0
+_UEP14                            EXTERNAL      00000000              0
+_UEP14bits                        EXTERNAL      00000000              0
+_UEP15                            EXTERNAL      00000000              0
+_UEP15bits                        EXTERNAL      00000000              0
+_UFRM                             EXTERNAL      00000000              0
+_UFRMH                            EXTERNAL      00000000              0
+_UFRMHbits                        EXTERNAL      00000000              0
+_UFRML                            EXTERNAL      00000000              0
+_UFRMLbits                        EXTERNAL      00000000              0
+_UIE                              EXTERNAL      00000000              0
+_UIEbits                          EXTERNAL      00000000              0
+_UIR                              EXTERNAL      00000000              0
+_UIRbits                          EXTERNAL      00000000              0
+_USTAT                            EXTERNAL      00000000              0
+_USTATbits                        EXTERNAL      00000000              0
+_WDTCON                           EXTERNAL      00000000              0
+_WDTCONbits                       EXTERNAL      00000000              0
+_WREG                             EXTERNAL      00000000              0
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:00        PAGE 22
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+__16_BIT                          CONSTANT      00000001              1
+__18F4550                         CONSTANT      00000001              1
+__ACC_RAM_LOW_END                 CONSTANT      0000005F             95
+__ACC_RAM_LOW_START               CONSTANT      00000000              0
+__ACTIVE_BANK_ADDR                VARIABLE      FFFFFFFF             -1
+__ASSUMED_BANK_ADDR               VARIABLE      FFFFFFFF             -1
+__BANK_0                          CONSTANT      00000000              0
+__BANK_1                          CONSTANT      00000100            256
+__BANK_2                          CONSTANT      00000200            512
+__BANK_3                          CONSTANT      00000300            768
+__BANK_4                          CONSTANT      00000400           1024
+__BANK_5                          CONSTANT      00000500           1280
+__BANK_6                          CONSTANT      00000600           1536
+__BANK_7                          CONSTANT      00000700           1792
+__BANK_8                          CONSTANT      00000800           2048
+__BANK_9                          CONSTANT      00000900           2304
+__BANK_10                         CONSTANT      00000A00           2560
+__BANK_11                         CONSTANT      00000B00           2816
+__BANK_12                         CONSTANT      00000C00           3072
+__BANK_13                         CONSTANT      00000D00           3328
+__BANK_14                         CONSTANT      00000E00           3584
+__BANK_15                         CONSTANT      00000F00           3840
+__BANK_BITS                       CONSTANT      00000F00           3840
+__BANK_FIRST                      CONSTANT      00000000              0
+__BANK_INV                        CONSTANT      FFFFFFFF             -1
+__BANK_LAST                       CONSTANT      00000F00           3840
+__BANK_MASK                       CONSTANT      000000FF            255
+__BANK_SHIFT                      CONSTANT      00000008              8
+__BANK_SIZE                       CONSTANT      00000100            256
+__CODE_END                        CONSTANT      00007FFF          32767
+__CODE_START                      CONSTANT      00000000              0
+__COMMON_RAM_END                  CONSTANT      0000005F             95
+__COMMON_RAM_START                CONSTANT      00000000              0
+__CONFIG_END                      CONSTANT      0030000D        3145741
+__CONFIG_START                    CONSTANT      00300000        3145728
+__EEPROM_END                      CONSTANT      00F000FF       15728895
+__EEPROM_START                    CONSTANT      00F00000       15728640
+__EXTENDED                        CONSTANT      00000001              1
+__GPUTILS_SVN_VERSION             CONSTANT      00000505           1285
+__GPUTILS_VERSION_MAJOR           CONSTANT      00000001              1
+__GPUTILS_VERSION_MICRO           CONSTANT      00000000              0
+__GPUTILS_VERSION_MINOR           CONSTANT      00000005              5
+__IDLOCS_END                      CONSTANT      00200007        2097159
+__IDLOCS_START                    CONSTANT      00200000        2097152
+__NUM_BANKS                       CONSTANT      00000010             16
+__VECTOR_INT_HIGH                 CONSTANT      00000008              8
+__VECTOR_INT_LOW                  CONSTANT      00000018             24
+__VECTOR_RESET                    CONSTANT      00000000              0
+__WHILE_LOOP_COUNT_MAX            CONSTANT      000000FF            255
+_i2cInit                          EXTERNAL      00000000              0
+_i2cRead                          EXTERNAL      00000000              0
+_i2cRestart                       EXTERNAL      00000000              0
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:00        PAGE 23
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+_i2cSend                          EXTERNAL      00000000              0
+_i2cStart                         EXTERNAL      00000000              0
+_i2cStop                          EXTERNAL      00000000              0
+_lcdCommand                       EXTERNAL      00000000              0
+_rtcDate                          GLOBAL        00000000              0
+_rtcDay                           GLOBAL        00000000              0
+_rtcHour                          GLOBAL        00000000              0
+_rtcInit                          GLOBAL        00000000              0
+_rtcMin                           GLOBAL        00000000              0
+_rtcMonth                         GLOBAL        00000000              0
+_rtcRead                          GLOBAL        00000000              0
+_rtcReadInt                       GLOBAL        00000000              0
+_rtcStart                         GLOBAL        00000000              0
+_rtcStore                         GLOBAL        00000000              0
+_rtcStoreInt                      GLOBAL        00000000              0
+_rtcYear                          GLOBAL        00000000              0
+r0x00                             STATIC        00000000              0
+r0x01                             STATIC        00000001              1
+r0x02                             STATIC        00000002              2
+r0x03                             STATIC        00000003              3
+r0x04                             STATIC        00000004              4
+r0x05                             STATIC        00000005              5
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     0 reported,     0 suppressed
+
+

@@ -1,0 +1,1866 @@
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE  1
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00001 ;--------------------------------------------------------
+                      00002 ; File Created by SDCC : free open source ANSI-C Compiler
+                      00003 ; Version 3.6.0 #9615 (MINGW64)
+                      00004 ;--------------------------------------------------------
+                      00005 ; PIC16 port for the Microchip 16-bit core micros
+                      00006 ;--------------------------------------------------------
+                      00007         list    p=18f4550
+                      00008         radix   dec
+                      00009 
+                      00010 
+                      00011 ;--------------------------------------------------------
+                      00012 ; public variables in this module
+                      00013 ;--------------------------------------------------------
+  0000                00014         global  _serialSend
+  0000                00015         global  _serialInt
+  0000                00016         global  _serialString
+  0000                00017         global  _serialRead
+  0000                00018         global  _serialInit
+  0000                00019         global  _serialProtocol
+  0000                00020         global  _code
+  0000                00021         global  _mi
+  0000                00022         global  _cen
+  0000                00023         global  _dez
+  0000                00024         global  _uni
+                      00025 
+                      00026 ;--------------------------------------------------------
+                      00027 ; extern variables in this module
+                      00028 ;--------------------------------------------------------
+  0000                00029         extern  __gptrget1
+  0000                00030         extern  _setTime
+  0000                00031         extern  _setAlarmLow
+  0000                00032         extern  _setAlarmHigh
+  0000                00033         extern  _getIdiom
+  0000                00034         extern  _setIdiom
+  0000                00035         extern  __divsint
+  0000                00036         extern  __modsint
+  0000                00037         extern  __mulint
+                      00038 
+                      00039 ;--------------------------------------------------------
+                      00040 ;       Equates to used internal registers
+                      00041 ;--------------------------------------------------------
+  00000FD8            00042 STATUS  equ     0xfd8
+  00000FE8            00043 WREG    equ     0xfe8
+  00000FE9            00044 FSR0L   equ     0xfe9
+  00000FE1            00045 FSR1L   equ     0xfe1
+  00000FD9            00046 FSR2L   equ     0xfd9
+  00000FEF            00047 INDF0   equ     0xfef
+  00000FE6            00048 POSTINC1        equ     0xfe6
+  00000FE5            00049 POSTDEC1        equ     0xfe5
+  00000FE4            00050 PREINC1 equ     0xfe4
+  00000FDB            00051 PLUSW2  equ     0xfdb
+  00000FF3            00052 PRODL   equ     0xff3
+                      00053 
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE  2
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00054 
+                      00055 ; Internal registers
+                      00056 .registers      udata_ovr       0x0000
+000000                00057 r0x00   res     1
+000001                00058 r0x01   res     1
+000002                00059 r0x02   res     1
+000003                00060 r0x03   res     1
+000004                00061 r0x04   res     1
+000005                00062 r0x05   res     1
+000006                00063 r0x06   res     1
+                      00064 
+                      00065 udata_serial_0  udata
+000000                00066 _mi     res     1
+                      00067 
+                      00068 udata_serial_1  udata
+000000                00069 _cen    res     1
+                      00070 
+                      00071 udata_serial_2  udata
+000000                00072 _uni    res     1
+                      00073 
+                      00074 udata_serial_3  udata
+000000                00075 _dez    res     1
+                      00076 
+                      00077 udata_serial_4  udata
+000000                00078 _code   res     1
+                      00079 
+                      00080 ;--------------------------------------------------------
+                      00081 ; global & static initialisations
+                      00082 ;--------------------------------------------------------
+                      00083 ; I code from now on!
+                      00084 ; ; Starting pCode block
+                      00085 S_serial__serialProtocol        code
+000000                00086 _serialProtocol:
+                      00087 ;       .line   61; serial.c    unsigned char serialProtocol(void) {
+000000 CFD9 FFE5      00088         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00089         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00090         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      00091         MOVFF   r0x01, POSTDEC1
+000010 C??? F???      00092         MOVFF   r0x02, POSTDEC1
+000014 C??? F???      00093         MOVFF   r0x03, POSTDEC1
+000018 C??? F???      00094         MOVFF   r0x04, POSTDEC1
+00001C C??? F???      00095         MOVFF   r0x05, POSTDEC1
+000020 010?           00096         BANKSEL _code
+                      00097 ;       .line   63; serial.c    if(code == 0){
+000022 51??           00098         MOVF    _code, W, B
+000024 E1??           00099         BNZ     _00162_DS_
+                      00100 ;       .line   64; serial.c    code = serialRead();
+000026 EC?? F0??      00101         CALL    _serialRead
+00002A 010?           00102         BANKSEL _code
+00002C 6F??           00103         MOVWF   _code, B
+00002E 010?           00104         BANKSEL _code
+                      00105 ;       .line   65; serial.c    return code;
+000030 51??           00106         MOVF    _code, W, B
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE  3
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000032 EF?? F0??      00107         GOTO    _00247_DS_
+000036                00108 _00162_DS_:
+000036 010?           00109         BANKSEL _code
+                      00110 ;       .line   68; serial.c    switch (code){
+000038 51??           00111         MOVF    _code, W, B
+00003A 0A43           00112         XORLW   0x43
+00003C E1??           00113         BNZ     _00412_DS_
+00003E EF?? F0??      00114         GOTO    _00244_DS_
+000042                00115 _00412_DS_:
+000042 010?           00116         BANKSEL _code
+000044 51??           00117         MOVF    _code, W, B
+000046 0A48           00118         XORLW   0x48
+000048 E1??           00119         BNZ     _00414_DS_
+00004A D???           00120         BRA     _00177_DS_
+00004C                00121 _00414_DS_:
+00004C 010?           00122         BANKSEL _code
+00004E 51??           00123         MOVF    _code, W, B
+000050 0A49           00124         XORLW   0x49
+000052 E1??           00125         BNZ     _00416_DS_
+000054 EF?? F0??      00126         GOTO    _00243_DS_
+000058                00127 _00416_DS_:
+000058 010?           00128         BANKSEL _code
+00005A 51??           00129         MOVF    _code, W, B
+00005C 0A4A           00130         XORLW   0x4a
+00005E E1??           00131         BNZ     _00418_DS_
+000060 D???           00132         BRA     _00191_DS_
+000062                00133 _00418_DS_:
+000062 010?           00134         BANKSEL _code
+000064 51??           00135         MOVF    _code, W, B
+000066 0A4B           00136         XORLW   0x4b
+000068 E1??           00137         BNZ     _00420_DS_
+00006A EF?? F0??      00138         GOTO    _00221_DS_
+00006E                00139 _00420_DS_:
+00006E 010?           00140         BANKSEL _code
+000070 51??           00141         MOVF    _code, W, B
+000072 0A4C           00142         XORLW   0x4c
+000074 E1??           00143         BNZ     _00422_DS_
+000076 EF?? F0??      00144         GOTO    _00205_DS_
+00007A                00145 _00422_DS_:
+00007A 010?           00146         BANKSEL _code
+00007C 51??           00147         MOVF    _code, W, B
+00007E 0A4D           00148         XORLW   0x4d
+000080 E1??           00149         BNZ     _00424_DS_
+000082 EF?? F0??      00150         GOTO    _00235_DS_
+000086                00151 _00424_DS_:
+000086 010?           00152         BANKSEL _code
+000088 51??           00153         MOVF    _code, W, B
+00008A 0A54           00154         XORLW   0x54
+00008C E0??           00155         BZ      _00426_DS_
+00008E EF?? F0??      00156         GOTO    _00245_DS_
+000092                00157 _00426_DS_:
+000092 010?           00158         BANKSEL _mi
+                      00159 ;       .line   70; serial.c    if(mi == 0){
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE  4
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000094 51??           00160         MOVF    _mi, W, B
+000096 E1??           00161         BNZ     _00165_DS_
+                      00162 ;       .line   71; serial.c    mi = serialRead();
+000098 EC?? F0??      00163         CALL    _serialRead
+00009C 010?           00164         BANKSEL _mi
+00009E 6F??           00165         MOVWF   _mi, B
+0000A0                00166 _00165_DS_:
+0000A0 010?           00167         BANKSEL _cen
+                      00168 ;       .line   73; serial.c    if(cen == 0 && mi!=0){
+0000A2 51??           00169         MOVF    _cen, W, B
+0000A4 E1??           00170         BNZ     _00167_DS_
+0000A6 010?           00171         BANKSEL _mi
+0000A8 51??           00172         MOVF    _mi, W, B
+0000AA E0??           00173         BZ      _00167_DS_
+                      00174 ;       .line   74; serial.c    cen = serialRead();
+0000AC EC?? F0??      00175         CALL    _serialRead
+0000B0 010?           00176         BANKSEL _cen
+0000B2 6F??           00177         MOVWF   _cen, B
+0000B4                00178 _00167_DS_:
+0000B4 010?           00179         BANKSEL _dez
+                      00180 ;       .line   76; serial.c    if(dez == 0 && cen!=0 ){
+0000B6 51??           00181         MOVF    _dez, W, B
+0000B8 E1??           00182         BNZ     _00170_DS_
+0000BA 010?           00183         BANKSEL _cen
+0000BC 51??           00184         MOVF    _cen, W, B
+0000BE E0??           00185         BZ      _00170_DS_
+                      00186 ;       .line   77; serial.c    dez = serialRead();
+0000C0 EC?? F0??      00187         CALL    _serialRead
+0000C4 010?           00188         BANKSEL _dez
+0000C6 6F??           00189         MOVWF   _dez, B
+0000C8                00190 _00170_DS_:
+0000C8 010?           00191         BANKSEL _uni
+                      00192 ;       .line   79; serial.c    if(uni == 0 && dez!=0 ){
+0000CA 51??           00193         MOVF    _uni, W, B
+0000CC E1??           00194         BNZ     _00173_DS_
+0000CE 010?           00195         BANKSEL _dez
+0000D0 51??           00196         MOVF    _dez, W, B
+0000D2 E0??           00197         BZ      _00173_DS_
+                      00198 ;       .line   80; serial.c    uni = serialRead();                
+0000D4 EC?? F0??      00199         CALL    _serialRead
+0000D8 010?           00200         BANKSEL _uni
+0000DA 6F??           00201         MOVWF   _uni, B
+0000DC                00202 _00173_DS_:
+0000DC 010?           00203         BANKSEL _uni
+                      00204 ;       .line   82; serial.c    if(uni !=0)
+0000DE 51??           00205         MOVF    _uni, W, B
+0000E0 B4D8           00206         BTFSC   STATUS, 2
+0000E2 EF?? F0??      00207         GOTO    _00246_DS_
+                      00208 ;       .line   84; serial.c    soma = (mi-48)*1000 + (cen-48)*100 + (dez-48)*10 + uni-48;
+0000E6 C??? F???      00209         MOVFF   _mi, r0x00
+0000EA 6A??           00210         CLRF    r0x01
+0000EC 0ED0           00211         MOVLW   0xd0
+0000EE 26??           00212         ADDWF   r0x00, F
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE  5
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0000F0 A0D8           00213         BTFSS   STATUS, 0
+0000F2 06??           00214         DECF    r0x01, F
+0000F4 50??           00215         MOVF    r0x01, W
+0000F6 6EE5           00216         MOVWF   POSTDEC1
+0000F8 50??           00217         MOVF    r0x00, W
+0000FA 6EE5           00218         MOVWF   POSTDEC1
+0000FC 0E03           00219         MOVLW   0x03
+0000FE 6EE5           00220         MOVWF   POSTDEC1
+000100 0EE8           00221         MOVLW   0xe8
+000102 6EE5           00222         MOVWF   POSTDEC1
+000104 EC?? F0??      00223         CALL    __mulint
+000108 6E??           00224         MOVWF   r0x00
+00010A CFF3 F000      00225         MOVFF   PRODL, r0x01
+00010E 0E04           00226         MOVLW   0x04
+000110 26E1           00227         ADDWF   FSR1L, F
+000112 C??? F???      00228         MOVFF   _cen, r0x02
+000116 6A??           00229         CLRF    r0x03
+000118 0ED0           00230         MOVLW   0xd0
+00011A 26??           00231         ADDWF   r0x02, F
+00011C A0D8           00232         BTFSS   STATUS, 0
+00011E 06??           00233         DECF    r0x03, F
+000120 50??           00234         MOVF    r0x03, W
+000122 6EE5           00235         MOVWF   POSTDEC1
+000124 50??           00236         MOVF    r0x02, W
+000126 6EE5           00237         MOVWF   POSTDEC1
+000128 0E00           00238         MOVLW   0x00
+00012A 6EE5           00239         MOVWF   POSTDEC1
+00012C 0E64           00240         MOVLW   0x64
+00012E 6EE5           00241         MOVWF   POSTDEC1
+000130 EC?? F0??      00242         CALL    __mulint
+000134 6E??           00243         MOVWF   r0x02
+000136 CFF3 F000      00244         MOVFF   PRODL, r0x03
+00013A 0E04           00245         MOVLW   0x04
+00013C 26E1           00246         ADDWF   FSR1L, F
+00013E 50??           00247         MOVF    r0x02, W
+000140 26??           00248         ADDWF   r0x00, F
+000142 50??           00249         MOVF    r0x03, W
+000144 22??           00250         ADDWFC  r0x01, F
+000146 C??? F???      00251         MOVFF   _dez, r0x02
+00014A 6A??           00252         CLRF    r0x03
+00014C 0ED0           00253         MOVLW   0xd0
+00014E 26??           00254         ADDWF   r0x02, F
+000150 A0D8           00255         BTFSS   STATUS, 0
+000152 06??           00256         DECF    r0x03, F
+000154 50??           00257         MOVF    r0x03, W
+000156 6EE5           00258         MOVWF   POSTDEC1
+000158 50??           00259         MOVF    r0x02, W
+00015A 6EE5           00260         MOVWF   POSTDEC1
+00015C 0E00           00261         MOVLW   0x00
+00015E 6EE5           00262         MOVWF   POSTDEC1
+000160 0E0A           00263         MOVLW   0x0a
+000162 6EE5           00264         MOVWF   POSTDEC1
+000164 EC?? F0??      00265         CALL    __mulint
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE  6
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000168 6E??           00266         MOVWF   r0x02
+00016A CFF3 F000      00267         MOVFF   PRODL, r0x03
+00016E 0E04           00268         MOVLW   0x04
+000170 26E1           00269         ADDWF   FSR1L, F
+000172 50??           00270         MOVF    r0x02, W
+000174 26??           00271         ADDWF   r0x00, F
+000176 50??           00272         MOVF    r0x03, W
+000178 22??           00273         ADDWFC  r0x01, F
+00017A C??? F???      00274         MOVFF   _uni, r0x02
+00017E 6A??           00275         CLRF    r0x03
+000180 50??           00276         MOVF    r0x02, W
+000182 26??           00277         ADDWF   r0x00, F
+000184 50??           00278         MOVF    r0x03, W
+000186 22??           00279         ADDWFC  r0x01, F
+000188 0ED0           00280         MOVLW   0xd0
+00018A 26??           00281         ADDWF   r0x00, F
+00018C A0D8           00282         BTFSS   STATUS, 0
+00018E 06??           00283         DECF    r0x01, F
+                      00284 ;       .line   85; serial.c    setTime (soma);
+000190 50??           00285         MOVF    r0x01, W
+000192 6EE5           00286         MOVWF   POSTDEC1
+000194 50??           00287         MOVF    r0x00, W
+000196 6EE5           00288         MOVWF   POSTDEC1
+000198 EC?? F0??      00289         CALL    _setTime
+00019C 52E6           00290         MOVF    POSTINC1, F
+00019E 52E6           00291         MOVF    POSTINC1, F
+0001A0 010?           00292         BANKSEL _code
+                      00293 ;       .line   86; serial.c    code = 0;
+0001A2 6B??           00294         CLRF    _code, B
+0001A4 010?           00295         BANKSEL _uni
+                      00296 ;       .line   87; serial.c    uni = 0;
+0001A6 6B??           00297         CLRF    _uni, B
+0001A8 010?           00298         BANKSEL _dez
+                      00299 ;       .line   88; serial.c    dez = 0;
+0001AA 6B??           00300         CLRF    _dez, B
+0001AC 010?           00301         BANKSEL _mi
+                      00302 ;       .line   89; serial.c    mi = 0;
+0001AE 6B??           00303         CLRF    _mi, B
+0001B0 010?           00304         BANKSEL _cen
+                      00305 ;       .line   90; serial.c    cen = 0;
+0001B2 6B??           00306         CLRF    _cen, B
+                      00307 ;       .line   93; serial.c    break; 
+0001B4 EF?? F0??      00308         GOTO    _00246_DS_
+0001B8                00309 _00177_DS_:
+0001B8 010?           00310         BANKSEL _mi
+                      00311 ;       .line   96; serial.c    if(mi == 0){
+0001BA 51??           00312         MOVF    _mi, W, B
+0001BC E1??           00313         BNZ     _00179_DS_
+                      00314 ;       .line   97; serial.c    mi = serialRead();
+0001BE EC?? F0??      00315         CALL    _serialRead
+0001C2 010?           00316         BANKSEL _mi
+0001C4 6F??           00317         MOVWF   _mi, B
+0001C6                00318 _00179_DS_:
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE  7
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0001C6 010?           00319         BANKSEL _cen
+                      00320 ;       .line   99; serial.c    if(cen == 0 && mi!=0){
+0001C8 51??           00321         MOVF    _cen, W, B
+0001CA E1??           00322         BNZ     _00181_DS_
+0001CC 010?           00323         BANKSEL _mi
+0001CE 51??           00324         MOVF    _mi, W, B
+0001D0 E0??           00325         BZ      _00181_DS_
+                      00326 ;       .line   100; serial.c   cen = serialRead();
+0001D2 EC?? F0??      00327         CALL    _serialRead
+0001D6 010?           00328         BANKSEL _cen
+0001D8 6F??           00329         MOVWF   _cen, B
+0001DA                00330 _00181_DS_:
+0001DA 010?           00331         BANKSEL _dez
+                      00332 ;       .line   102; serial.c   if(dez == 0 && cen!=0 ){
+0001DC 51??           00333         MOVF    _dez, W, B
+0001DE E1??           00334         BNZ     _00184_DS_
+0001E0 010?           00335         BANKSEL _cen
+0001E2 51??           00336         MOVF    _cen, W, B
+0001E4 E0??           00337         BZ      _00184_DS_
+                      00338 ;       .line   103; serial.c   dez = serialRead();
+0001E6 EC?? F0??      00339         CALL    _serialRead
+0001EA 010?           00340         BANKSEL _dez
+0001EC 6F??           00341         MOVWF   _dez, B
+0001EE                00342 _00184_DS_:
+0001EE 010?           00343         BANKSEL _uni
+                      00344 ;       .line   105; serial.c   if(uni == 0 && dez!=0 ){
+0001F0 51??           00345         MOVF    _uni, W, B
+0001F2 E1??           00346         BNZ     _00187_DS_
+0001F4 010?           00347         BANKSEL _dez
+0001F6 51??           00348         MOVF    _dez, W, B
+0001F8 E0??           00349         BZ      _00187_DS_
+                      00350 ;       .line   106; serial.c   uni = serialRead();                 
+0001FA EC?? F0??      00351         CALL    _serialRead
+0001FE 010?           00352         BANKSEL _uni
+000200 6F??           00353         MOVWF   _uni, B
+000202                00354 _00187_DS_:
+000202 010?           00355         BANKSEL _uni
+                      00356 ;       .line   108; serial.c   if(uni !=0)
+000204 51??           00357         MOVF    _uni, W, B
+000206 B4D8           00358         BTFSC   STATUS, 2
+000208 EF?? F0??      00359         GOTO    _00246_DS_
+                      00360 ;       .line   110; serial.c   soma = (mi-48)*1000 + (cen-48)*100 + (dez-48)*10 + uni-48;
+00020C C??? F???      00361         MOVFF   _mi, r0x02
+000210 6A??           00362         CLRF    r0x03
+000212 0ED0           00363         MOVLW   0xd0
+000214 26??           00364         ADDWF   r0x02, F
+000216 A0D8           00365         BTFSS   STATUS, 0
+000218 06??           00366         DECF    r0x03, F
+00021A 50??           00367         MOVF    r0x03, W
+00021C 6EE5           00368         MOVWF   POSTDEC1
+00021E 50??           00369         MOVF    r0x02, W
+000220 6EE5           00370         MOVWF   POSTDEC1
+000222 0E03           00371         MOVLW   0x03
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE  8
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000224 6EE5           00372         MOVWF   POSTDEC1
+000226 0EE8           00373         MOVLW   0xe8
+000228 6EE5           00374         MOVWF   POSTDEC1
+00022A EC?? F0??      00375         CALL    __mulint
+00022E 6E??           00376         MOVWF   r0x02
+000230 CFF3 F000      00377         MOVFF   PRODL, r0x03
+000234 0E04           00378         MOVLW   0x04
+000236 26E1           00379         ADDWF   FSR1L, F
+000238 C??? F???      00380         MOVFF   _cen, r0x04
+00023C 6A??           00381         CLRF    r0x05
+00023E 0ED0           00382         MOVLW   0xd0
+000240 26??           00383         ADDWF   r0x04, F
+000242 A0D8           00384         BTFSS   STATUS, 0
+000244 06??           00385         DECF    r0x05, F
+000246 50??           00386         MOVF    r0x05, W
+000248 6EE5           00387         MOVWF   POSTDEC1
+00024A 50??           00388         MOVF    r0x04, W
+00024C 6EE5           00389         MOVWF   POSTDEC1
+00024E 0E00           00390         MOVLW   0x00
+000250 6EE5           00391         MOVWF   POSTDEC1
+000252 0E64           00392         MOVLW   0x64
+000254 6EE5           00393         MOVWF   POSTDEC1
+000256 EC?? F0??      00394         CALL    __mulint
+00025A 6E??           00395         MOVWF   r0x04
+00025C CFF3 F000      00396         MOVFF   PRODL, r0x05
+000260 0E04           00397         MOVLW   0x04
+000262 26E1           00398         ADDWF   FSR1L, F
+000264 50??           00399         MOVF    r0x04, W
+000266 26??           00400         ADDWF   r0x02, F
+000268 50??           00401         MOVF    r0x05, W
+00026A 22??           00402         ADDWFC  r0x03, F
+00026C C??? F???      00403         MOVFF   _dez, r0x04
+000270 6A??           00404         CLRF    r0x05
+000272 0ED0           00405         MOVLW   0xd0
+000274 26??           00406         ADDWF   r0x04, F
+000276 A0D8           00407         BTFSS   STATUS, 0
+000278 06??           00408         DECF    r0x05, F
+00027A 50??           00409         MOVF    r0x05, W
+00027C 6EE5           00410         MOVWF   POSTDEC1
+00027E 50??           00411         MOVF    r0x04, W
+000280 6EE5           00412         MOVWF   POSTDEC1
+000282 0E00           00413         MOVLW   0x00
+000284 6EE5           00414         MOVWF   POSTDEC1
+000286 0E0A           00415         MOVLW   0x0a
+000288 6EE5           00416         MOVWF   POSTDEC1
+00028A EC?? F0??      00417         CALL    __mulint
+00028E 6E??           00418         MOVWF   r0x04
+000290 CFF3 F000      00419         MOVFF   PRODL, r0x05
+000294 0E04           00420         MOVLW   0x04
+000296 26E1           00421         ADDWF   FSR1L, F
+000298 50??           00422         MOVF    r0x04, W
+00029A 26??           00423         ADDWF   r0x02, F
+00029C 50??           00424         MOVF    r0x05, W
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE  9
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00029E 22??           00425         ADDWFC  r0x03, F
+0002A0 C??? F???      00426         MOVFF   _uni, r0x04
+0002A4 6A??           00427         CLRF    r0x05
+0002A6 50??           00428         MOVF    r0x04, W
+0002A8 26??           00429         ADDWF   r0x02, F
+0002AA 50??           00430         MOVF    r0x05, W
+0002AC 22??           00431         ADDWFC  r0x03, F
+0002AE 50??           00432         MOVF    r0x02, W
+0002B0 0FD0           00433         ADDLW   0xd0
+0002B2 6E??           00434         MOVWF   r0x00
+0002B4 0EFF           00435         MOVLW   0xff
+0002B6 20??           00436         ADDWFC  r0x03, W
+0002B8 6E??           00437         MOVWF   r0x01
+                      00438 ;       .line   111; serial.c   setAlarmHigh (0, soma);
+0002BA 50??           00439         MOVF    r0x01, W
+0002BC 6EE5           00440         MOVWF   POSTDEC1
+0002BE 50??           00441         MOVF    r0x00, W
+0002C0 6EE5           00442         MOVWF   POSTDEC1
+0002C2 0E00           00443         MOVLW   0x00
+0002C4 6EE5           00444         MOVWF   POSTDEC1
+0002C6 EC?? F0??      00445         CALL    _setAlarmHigh
+0002CA 0E03           00446         MOVLW   0x03
+0002CC 26E1           00447         ADDWF   FSR1L, F
+0002CE 010?           00448         BANKSEL _code
+                      00449 ;       .line   112; serial.c   code = 0;
+0002D0 6B??           00450         CLRF    _code, B
+0002D2 010?           00451         BANKSEL _uni
+                      00452 ;       .line   113; serial.c   uni = 0;
+0002D4 6B??           00453         CLRF    _uni, B
+0002D6 010?           00454         BANKSEL _dez
+                      00455 ;       .line   114; serial.c   dez = 0;
+0002D8 6B??           00456         CLRF    _dez, B
+0002DA 010?           00457         BANKSEL _mi
+                      00458 ;       .line   115; serial.c   mi = 0;
+0002DC 6B??           00459         CLRF    _mi, B
+0002DE 010?           00460         BANKSEL _cen
+                      00461 ;       .line   116; serial.c   cen = 0;
+0002E0 6B??           00462         CLRF    _cen, B
+                      00463 ;       .line   118; serial.c   break;
+0002E2 EF?? F0??      00464         GOTO    _00246_DS_
+0002E6                00465 _00191_DS_:
+0002E6 010?           00466         BANKSEL _mi
+                      00467 ;       .line   121; serial.c   if(mi == 0){
+0002E8 51??           00468         MOVF    _mi, W, B
+0002EA E1??           00469         BNZ     _00193_DS_
+                      00470 ;       .line   122; serial.c   mi = serialRead();
+0002EC EC?? F0??      00471         CALL    _serialRead
+0002F0 010?           00472         BANKSEL _mi
+0002F2 6F??           00473         MOVWF   _mi, B
+0002F4                00474 _00193_DS_:
+0002F4 010?           00475         BANKSEL _cen
+                      00476 ;       .line   124; serial.c   if(cen == 0 && mi!=0){
+0002F6 51??           00477         MOVF    _cen, W, B
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 10
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0002F8 E1??           00478         BNZ     _00195_DS_
+0002FA 010?           00479         BANKSEL _mi
+0002FC 51??           00480         MOVF    _mi, W, B
+0002FE E0??           00481         BZ      _00195_DS_
+                      00482 ;       .line   125; serial.c   cen = serialRead();
+000300 EC?? F0??      00483         CALL    _serialRead
+000304 010?           00484         BANKSEL _cen
+000306 6F??           00485         MOVWF   _cen, B
+000308                00486 _00195_DS_:
+000308 010?           00487         BANKSEL _dez
+                      00488 ;       .line   127; serial.c   if(dez == 0 && cen!=0 ){
+00030A 51??           00489         MOVF    _dez, W, B
+00030C E1??           00490         BNZ     _00198_DS_
+00030E 010?           00491         BANKSEL _cen
+000310 51??           00492         MOVF    _cen, W, B
+000312 E0??           00493         BZ      _00198_DS_
+                      00494 ;       .line   128; serial.c   dez = serialRead();
+000314 EC?? F0??      00495         CALL    _serialRead
+000318 010?           00496         BANKSEL _dez
+00031A 6F??           00497         MOVWF   _dez, B
+00031C                00498 _00198_DS_:
+00031C 010?           00499         BANKSEL _uni
+                      00500 ;       .line   130; serial.c   if(uni == 0 && dez!=0 ){
+00031E 51??           00501         MOVF    _uni, W, B
+000320 E1??           00502         BNZ     _00201_DS_
+000322 010?           00503         BANKSEL _dez
+000324 51??           00504         MOVF    _dez, W, B
+000326 E0??           00505         BZ      _00201_DS_
+                      00506 ;       .line   131; serial.c   uni = serialRead();                 
+000328 EC?? F0??      00507         CALL    _serialRead
+00032C 010?           00508         BANKSEL _uni
+00032E 6F??           00509         MOVWF   _uni, B
+000330                00510 _00201_DS_:
+000330 010?           00511         BANKSEL _uni
+                      00512 ;       .line   133; serial.c   if(uni !=0)
+000332 51??           00513         MOVF    _uni, W, B
+000334 B4D8           00514         BTFSC   STATUS, 2
+000336 EF?? F0??      00515         GOTO    _00246_DS_
+                      00516 ;       .line   135; serial.c   soma = (mi-48)*1000 + (cen-48)*100 + (dez-48)*10 + uni-48;
+00033A C??? F???      00517         MOVFF   _mi, r0x02
+00033E 6A??           00518         CLRF    r0x03
+000340 0ED0           00519         MOVLW   0xd0
+000342 26??           00520         ADDWF   r0x02, F
+000344 A0D8           00521         BTFSS   STATUS, 0
+000346 06??           00522         DECF    r0x03, F
+000348 50??           00523         MOVF    r0x03, W
+00034A 6EE5           00524         MOVWF   POSTDEC1
+00034C 50??           00525         MOVF    r0x02, W
+00034E 6EE5           00526         MOVWF   POSTDEC1
+000350 0E03           00527         MOVLW   0x03
+000352 6EE5           00528         MOVWF   POSTDEC1
+000354 0EE8           00529         MOVLW   0xe8
+000356 6EE5           00530         MOVWF   POSTDEC1
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 11
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000358 EC?? F0??      00531         CALL    __mulint
+00035C 6E??           00532         MOVWF   r0x02
+00035E CFF3 F000      00533         MOVFF   PRODL, r0x03
+000362 0E04           00534         MOVLW   0x04
+000364 26E1           00535         ADDWF   FSR1L, F
+000366 C??? F???      00536         MOVFF   _cen, r0x04
+00036A 6A??           00537         CLRF    r0x05
+00036C 0ED0           00538         MOVLW   0xd0
+00036E 26??           00539         ADDWF   r0x04, F
+000370 A0D8           00540         BTFSS   STATUS, 0
+000372 06??           00541         DECF    r0x05, F
+000374 50??           00542         MOVF    r0x05, W
+000376 6EE5           00543         MOVWF   POSTDEC1
+000378 50??           00544         MOVF    r0x04, W
+00037A 6EE5           00545         MOVWF   POSTDEC1
+00037C 0E00           00546         MOVLW   0x00
+00037E 6EE5           00547         MOVWF   POSTDEC1
+000380 0E64           00548         MOVLW   0x64
+000382 6EE5           00549         MOVWF   POSTDEC1
+000384 EC?? F0??      00550         CALL    __mulint
+000388 6E??           00551         MOVWF   r0x04
+00038A CFF3 F000      00552         MOVFF   PRODL, r0x05
+00038E 0E04           00553         MOVLW   0x04
+000390 26E1           00554         ADDWF   FSR1L, F
+000392 50??           00555         MOVF    r0x04, W
+000394 26??           00556         ADDWF   r0x02, F
+000396 50??           00557         MOVF    r0x05, W
+000398 22??           00558         ADDWFC  r0x03, F
+00039A C??? F???      00559         MOVFF   _dez, r0x04
+00039E 6A??           00560         CLRF    r0x05
+0003A0 0ED0           00561         MOVLW   0xd0
+0003A2 26??           00562         ADDWF   r0x04, F
+0003A4 A0D8           00563         BTFSS   STATUS, 0
+0003A6 06??           00564         DECF    r0x05, F
+0003A8 50??           00565         MOVF    r0x05, W
+0003AA 6EE5           00566         MOVWF   POSTDEC1
+0003AC 50??           00567         MOVF    r0x04, W
+0003AE 6EE5           00568         MOVWF   POSTDEC1
+0003B0 0E00           00569         MOVLW   0x00
+0003B2 6EE5           00570         MOVWF   POSTDEC1
+0003B4 0E0A           00571         MOVLW   0x0a
+0003B6 6EE5           00572         MOVWF   POSTDEC1
+0003B8 EC?? F0??      00573         CALL    __mulint
+0003BC 6E??           00574         MOVWF   r0x04
+0003BE CFF3 F000      00575         MOVFF   PRODL, r0x05
+0003C2 0E04           00576         MOVLW   0x04
+0003C4 26E1           00577         ADDWF   FSR1L, F
+0003C6 50??           00578         MOVF    r0x04, W
+0003C8 26??           00579         ADDWF   r0x02, F
+0003CA 50??           00580         MOVF    r0x05, W
+0003CC 22??           00581         ADDWFC  r0x03, F
+0003CE C??? F???      00582         MOVFF   _uni, r0x04
+0003D2 6A??           00583         CLRF    r0x05
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 12
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0003D4 50??           00584         MOVF    r0x04, W
+0003D6 26??           00585         ADDWF   r0x02, F
+0003D8 50??           00586         MOVF    r0x05, W
+0003DA 22??           00587         ADDWFC  r0x03, F
+0003DC 50??           00588         MOVF    r0x02, W
+0003DE 0FD0           00589         ADDLW   0xd0
+0003E0 6E??           00590         MOVWF   r0x00
+0003E2 0EFF           00591         MOVLW   0xff
+0003E4 20??           00592         ADDWFC  r0x03, W
+0003E6 6E??           00593         MOVWF   r0x01
+                      00594 ;       .line   136; serial.c   setAlarmHigh (1, soma);
+0003E8 50??           00595         MOVF    r0x01, W
+0003EA 6EE5           00596         MOVWF   POSTDEC1
+0003EC 50??           00597         MOVF    r0x00, W
+0003EE 6EE5           00598         MOVWF   POSTDEC1
+0003F0 0E01           00599         MOVLW   0x01
+0003F2 6EE5           00600         MOVWF   POSTDEC1
+0003F4 EC?? F0??      00601         CALL    _setAlarmHigh
+0003F8 0E03           00602         MOVLW   0x03
+0003FA 26E1           00603         ADDWF   FSR1L, F
+0003FC 010?           00604         BANKSEL _code
+                      00605 ;       .line   137; serial.c   code = 0;
+0003FE 6B??           00606         CLRF    _code, B
+000400 010?           00607         BANKSEL _uni
+                      00608 ;       .line   138; serial.c   uni = 0;
+000402 6B??           00609         CLRF    _uni, B
+000404 010?           00610         BANKSEL _dez
+                      00611 ;       .line   139; serial.c   dez = 0;
+000406 6B??           00612         CLRF    _dez, B
+000408 010?           00613         BANKSEL _mi
+                      00614 ;       .line   140; serial.c   mi = 0;
+00040A 6B??           00615         CLRF    _mi, B
+00040C 010?           00616         BANKSEL _cen
+                      00617 ;       .line   141; serial.c   cen = 0;
+00040E 6B??           00618         CLRF    _cen, B
+                      00619 ;       .line   143; serial.c   break;
+000410 EF?? F0??      00620         GOTO    _00246_DS_
+000414                00621 _00205_DS_:
+000414 010?           00622         BANKSEL _mi
+                      00623 ;       .line   146; serial.c   if(mi == 0){
+000416 51??           00624         MOVF    _mi, W, B
+000418 E1??           00625         BNZ     _00207_DS_
+                      00626 ;       .line   147; serial.c   mi = serialRead();
+00041A EC?? F0??      00627         CALL    _serialRead
+00041E 010?           00628         BANKSEL _mi
+000420 6F??           00629         MOVWF   _mi, B
+000422                00630 _00207_DS_:
+000422 010?           00631         BANKSEL _cen
+                      00632 ;       .line   149; serial.c   if(cen == 0 && mi!=0){
+000424 51??           00633         MOVF    _cen, W, B
+000426 E1??           00634         BNZ     _00209_DS_
+000428 010?           00635         BANKSEL _mi
+00042A 51??           00636         MOVF    _mi, W, B
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 13
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00042C E0??           00637         BZ      _00209_DS_
+                      00638 ;       .line   150; serial.c   cen = serialRead();
+00042E EC?? F0??      00639         CALL    _serialRead
+000432 010?           00640         BANKSEL _cen
+000434 6F??           00641         MOVWF   _cen, B
+000436                00642 _00209_DS_:
+000436 010?           00643         BANKSEL _dez
+                      00644 ;       .line   152; serial.c   if(dez == 0 && cen!=0 ){
+000438 51??           00645         MOVF    _dez, W, B
+00043A E1??           00646         BNZ     _00212_DS_
+00043C 010?           00647         BANKSEL _cen
+00043E 51??           00648         MOVF    _cen, W, B
+000440 E0??           00649         BZ      _00212_DS_
+                      00650 ;       .line   153; serial.c   dez = serialRead();
+000442 EC?? F0??      00651         CALL    _serialRead
+000446 010?           00652         BANKSEL _dez
+000448 6F??           00653         MOVWF   _dez, B
+00044A                00654 _00212_DS_:
+00044A 010?           00655         BANKSEL _uni
+                      00656 ;       .line   155; serial.c   if(uni == 0 && dez!=0 ){
+00044C 51??           00657         MOVF    _uni, W, B
+00044E E1??           00658         BNZ     _00215_DS_
+000450 010?           00659         BANKSEL _dez
+000452 51??           00660         MOVF    _dez, W, B
+000454 E0??           00661         BZ      _00215_DS_
+                      00662 ;       .line   156; serial.c   uni = serialRead();                 
+000456 EC?? F0??      00663         CALL    _serialRead
+00045A 010?           00664         BANKSEL _uni
+00045C 6F??           00665         MOVWF   _uni, B
+00045E                00666 _00215_DS_:
+00045E 010?           00667         BANKSEL _uni
+                      00668 ;       .line   158; serial.c   if(uni !=0)
+000460 51??           00669         MOVF    _uni, W, B
+000462 B4D8           00670         BTFSC   STATUS, 2
+000464 EF?? F0??      00671         GOTO    _00246_DS_
+                      00672 ;       .line   160; serial.c   soma = (mi-48)*1000 + (cen-48)*100 + (dez-48)*10 + uni-48;
+000468 C??? F???      00673         MOVFF   _mi, r0x02
+00046C 6A??           00674         CLRF    r0x03
+00046E 0ED0           00675         MOVLW   0xd0
+000470 26??           00676         ADDWF   r0x02, F
+000472 A0D8           00677         BTFSS   STATUS, 0
+000474 06??           00678         DECF    r0x03, F
+000476 50??           00679         MOVF    r0x03, W
+000478 6EE5           00680         MOVWF   POSTDEC1
+00047A 50??           00681         MOVF    r0x02, W
+00047C 6EE5           00682         MOVWF   POSTDEC1
+00047E 0E03           00683         MOVLW   0x03
+000480 6EE5           00684         MOVWF   POSTDEC1
+000482 0EE8           00685         MOVLW   0xe8
+000484 6EE5           00686         MOVWF   POSTDEC1
+000486 EC?? F0??      00687         CALL    __mulint
+00048A 6E??           00688         MOVWF   r0x02
+00048C CFF3 F000      00689         MOVFF   PRODL, r0x03
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 14
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000490 0E04           00690         MOVLW   0x04
+000492 26E1           00691         ADDWF   FSR1L, F
+000494 C??? F???      00692         MOVFF   _cen, r0x04
+000498 6A??           00693         CLRF    r0x05
+00049A 0ED0           00694         MOVLW   0xd0
+00049C 26??           00695         ADDWF   r0x04, F
+00049E A0D8           00696         BTFSS   STATUS, 0
+0004A0 06??           00697         DECF    r0x05, F
+0004A2 50??           00698         MOVF    r0x05, W
+0004A4 6EE5           00699         MOVWF   POSTDEC1
+0004A6 50??           00700         MOVF    r0x04, W
+0004A8 6EE5           00701         MOVWF   POSTDEC1
+0004AA 0E00           00702         MOVLW   0x00
+0004AC 6EE5           00703         MOVWF   POSTDEC1
+0004AE 0E64           00704         MOVLW   0x64
+0004B0 6EE5           00705         MOVWF   POSTDEC1
+0004B2 EC?? F0??      00706         CALL    __mulint
+0004B6 6E??           00707         MOVWF   r0x04
+0004B8 CFF3 F000      00708         MOVFF   PRODL, r0x05
+0004BC 0E04           00709         MOVLW   0x04
+0004BE 26E1           00710         ADDWF   FSR1L, F
+0004C0 50??           00711         MOVF    r0x04, W
+0004C2 26??           00712         ADDWF   r0x02, F
+0004C4 50??           00713         MOVF    r0x05, W
+0004C6 22??           00714         ADDWFC  r0x03, F
+0004C8 C??? F???      00715         MOVFF   _dez, r0x04
+0004CC 6A??           00716         CLRF    r0x05
+0004CE 0ED0           00717         MOVLW   0xd0
+0004D0 26??           00718         ADDWF   r0x04, F
+0004D2 A0D8           00719         BTFSS   STATUS, 0
+0004D4 06??           00720         DECF    r0x05, F
+0004D6 50??           00721         MOVF    r0x05, W
+0004D8 6EE5           00722         MOVWF   POSTDEC1
+0004DA 50??           00723         MOVF    r0x04, W
+0004DC 6EE5           00724         MOVWF   POSTDEC1
+0004DE 0E00           00725         MOVLW   0x00
+0004E0 6EE5           00726         MOVWF   POSTDEC1
+0004E2 0E0A           00727         MOVLW   0x0a
+0004E4 6EE5           00728         MOVWF   POSTDEC1
+0004E6 EC?? F0??      00729         CALL    __mulint
+0004EA 6E??           00730         MOVWF   r0x04
+0004EC CFF3 F000      00731         MOVFF   PRODL, r0x05
+0004F0 0E04           00732         MOVLW   0x04
+0004F2 26E1           00733         ADDWF   FSR1L, F
+0004F4 50??           00734         MOVF    r0x04, W
+0004F6 26??           00735         ADDWF   r0x02, F
+0004F8 50??           00736         MOVF    r0x05, W
+0004FA 22??           00737         ADDWFC  r0x03, F
+0004FC C??? F???      00738         MOVFF   _uni, r0x04
+000500 6A??           00739         CLRF    r0x05
+000502 50??           00740         MOVF    r0x04, W
+000504 26??           00741         ADDWF   r0x02, F
+000506 50??           00742         MOVF    r0x05, W
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 15
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000508 22??           00743         ADDWFC  r0x03, F
+00050A 50??           00744         MOVF    r0x02, W
+00050C 0FD0           00745         ADDLW   0xd0
+00050E 6E??           00746         MOVWF   r0x00
+000510 0EFF           00747         MOVLW   0xff
+000512 20??           00748         ADDWFC  r0x03, W
+000514 6E??           00749         MOVWF   r0x01
+                      00750 ;       .line   161; serial.c   if(soma>=1024){
+000516 50??           00751         MOVF    r0x01, W
+000518 0F80           00752         ADDLW   0x80
+00051A 0F7C           00753         ADDLW   0x7c
+00051C E1??           00754         BNZ     _00427_DS_
+00051E 0E00           00755         MOVLW   0x00
+000520 5C??           00756         SUBWF   r0x00, W
+000522                00757 _00427_DS_:
+000522 E3??           00758         BNC     _00218_DS_
+                      00759 ;       .line   162; serial.c   soma = 1023;
+000524 0EFF           00760         MOVLW   0xff
+000526 6E??           00761         MOVWF   r0x00
+000528 0E03           00762         MOVLW   0x03
+00052A 6E??           00763         MOVWF   r0x01
+                      00764 ;       .line   163; serial.c   setAlarmLow (0, soma);
+00052C 0E03           00765         MOVLW   0x03
+00052E 6EE5           00766         MOVWF   POSTDEC1
+000530 0EFF           00767         MOVLW   0xff
+000532 6EE5           00768         MOVWF   POSTDEC1
+000534 0E00           00769         MOVLW   0x00
+000536 6EE5           00770         MOVWF   POSTDEC1
+000538 EC?? F0??      00771         CALL    _setAlarmLow
+00053C 0E03           00772         MOVLW   0x03
+00053E 26E1           00773         ADDWF   FSR1L, F
+                      00774 ;       .line   164; serial.c   serialString("Representação Estourada");
+000540 0E??           00775         MOVLW   UPPER(___str_0)
+000542 6E??           00776         MOVWF   r0x04
+000544 0E??           00777         MOVLW   HIGH(___str_0)
+000546 6E??           00778         MOVWF   r0x03
+000548 0E??           00779         MOVLW   LOW(___str_0)
+00054A 6E??           00780         MOVWF   r0x02
+00054C 50??           00781         MOVF    r0x04, W
+00054E 6EE5           00782         MOVWF   POSTDEC1
+000550 50??           00783         MOVF    r0x03, W
+000552 6EE5           00784         MOVWF   POSTDEC1
+000554 50??           00785         MOVF    r0x02, W
+000556 6EE5           00786         MOVWF   POSTDEC1
+000558 EC?? F0??      00787         CALL    _serialString
+00055C 0E03           00788         MOVLW   0x03
+00055E 26E1           00789         ADDWF   FSR1L, F
+000560                00790 _00218_DS_:
+                      00791 ;       .line   166; serial.c   setAlarmLow (0, soma);
+000560 50??           00792         MOVF    r0x01, W
+000562 6EE5           00793         MOVWF   POSTDEC1
+000564 50??           00794         MOVF    r0x00, W
+000566 6EE5           00795         MOVWF   POSTDEC1
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 16
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000568 0E00           00796         MOVLW   0x00
+00056A 6EE5           00797         MOVWF   POSTDEC1
+00056C EC?? F0??      00798         CALL    _setAlarmLow
+000570 0E03           00799         MOVLW   0x03
+000572 26E1           00800         ADDWF   FSR1L, F
+000574 010?           00801         BANKSEL _code
+                      00802 ;       .line   167; serial.c   code = 0;
+000576 6B??           00803         CLRF    _code, B
+000578 010?           00804         BANKSEL _uni
+                      00805 ;       .line   168; serial.c   uni = 0;
+00057A 6B??           00806         CLRF    _uni, B
+00057C 010?           00807         BANKSEL _dez
+                      00808 ;       .line   169; serial.c   dez = 0;
+00057E 6B??           00809         CLRF    _dez, B
+000580 010?           00810         BANKSEL _mi
+                      00811 ;       .line   170; serial.c   mi = 0;
+000582 6B??           00812         CLRF    _mi, B
+000584 010?           00813         BANKSEL _cen
+                      00814 ;       .line   171; serial.c   cen = 0;
+000586 6B??           00815         CLRF    _cen, B
+                      00816 ;       .line   173; serial.c   break;
+000588 D???           00817         BRA     _00246_DS_
+00058A                00818 _00221_DS_:
+00058A 010?           00819         BANKSEL _mi
+                      00820 ;       .line   176; serial.c   if(mi == 0){
+00058C 51??           00821         MOVF    _mi, W, B
+00058E E1??           00822         BNZ     _00223_DS_
+                      00823 ;       .line   177; serial.c   mi = serialRead();
+000590 EC?? F0??      00824         CALL    _serialRead
+000594 010?           00825         BANKSEL _mi
+000596 6F??           00826         MOVWF   _mi, B
+000598                00827 _00223_DS_:
+000598 010?           00828         BANKSEL _cen
+                      00829 ;       .line   179; serial.c   if(cen == 0 && mi!=0){
+00059A 51??           00830         MOVF    _cen, W, B
+00059C E1??           00831         BNZ     _00225_DS_
+00059E 010?           00832         BANKSEL _mi
+0005A0 51??           00833         MOVF    _mi, W, B
+0005A2 E0??           00834         BZ      _00225_DS_
+                      00835 ;       .line   180; serial.c   cen = serialRead();
+0005A4 EC?? F0??      00836         CALL    _serialRead
+0005A8 010?           00837         BANKSEL _cen
+0005AA 6F??           00838         MOVWF   _cen, B
+0005AC                00839 _00225_DS_:
+0005AC 010?           00840         BANKSEL _dez
+                      00841 ;       .line   182; serial.c   if(dez == 0 && cen!=0 ){
+0005AE 51??           00842         MOVF    _dez, W, B
+0005B0 E1??           00843         BNZ     _00228_DS_
+0005B2 010?           00844         BANKSEL _cen
+0005B4 51??           00845         MOVF    _cen, W, B
+0005B6 E0??           00846         BZ      _00228_DS_
+                      00847 ;       .line   183; serial.c   dez = serialRead();
+0005B8 EC?? F0??      00848         CALL    _serialRead
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 17
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0005BC 010?           00849         BANKSEL _dez
+0005BE 6F??           00850         MOVWF   _dez, B
+0005C0                00851 _00228_DS_:
+0005C0 010?           00852         BANKSEL _uni
+                      00853 ;       .line   185; serial.c   if(uni == 0 && dez!=0 ){
+0005C2 51??           00854         MOVF    _uni, W, B
+0005C4 E1??           00855         BNZ     _00231_DS_
+0005C6 010?           00856         BANKSEL _dez
+0005C8 51??           00857         MOVF    _dez, W, B
+0005CA E0??           00858         BZ      _00231_DS_
+                      00859 ;       .line   186; serial.c   uni = serialRead();                 
+0005CC EC?? F0??      00860         CALL    _serialRead
+0005D0 010?           00861         BANKSEL _uni
+0005D2 6F??           00862         MOVWF   _uni, B
+0005D4                00863 _00231_DS_:
+0005D4 010?           00864         BANKSEL _uni
+                      00865 ;       .line   188; serial.c   if(uni !=0)
+0005D6 51??           00866         MOVF    _uni, W, B
+0005D8 B4D8           00867         BTFSC   STATUS, 2
+0005DA D???           00868         BRA     _00246_DS_
+                      00869 ;       .line   190; serial.c   soma = (mi-48)*1000 + (cen-48)*100 + (dez-48)*10 + uni-48;           
+0005DC C??? F???      00870         MOVFF   _mi, r0x02
+0005E0 6A??           00871         CLRF    r0x03
+0005E2 0ED0           00872         MOVLW   0xd0
+0005E4 26??           00873         ADDWF   r0x02, F
+0005E6 A0D8           00874         BTFSS   STATUS, 0
+0005E8 06??           00875         DECF    r0x03, F
+0005EA 50??           00876         MOVF    r0x03, W
+0005EC 6EE5           00877         MOVWF   POSTDEC1
+0005EE 50??           00878         MOVF    r0x02, W
+0005F0 6EE5           00879         MOVWF   POSTDEC1
+0005F2 0E03           00880         MOVLW   0x03
+0005F4 6EE5           00881         MOVWF   POSTDEC1
+0005F6 0EE8           00882         MOVLW   0xe8
+0005F8 6EE5           00883         MOVWF   POSTDEC1
+0005FA EC?? F0??      00884         CALL    __mulint
+0005FE 6E??           00885         MOVWF   r0x02
+000600 CFF3 F000      00886         MOVFF   PRODL, r0x03
+000604 0E04           00887         MOVLW   0x04
+000606 26E1           00888         ADDWF   FSR1L, F
+000608 C??? F???      00889         MOVFF   _cen, r0x04
+00060C 6A??           00890         CLRF    r0x05
+00060E 0ED0           00891         MOVLW   0xd0
+000610 26??           00892         ADDWF   r0x04, F
+000612 A0D8           00893         BTFSS   STATUS, 0
+000614 06??           00894         DECF    r0x05, F
+000616 50??           00895         MOVF    r0x05, W
+000618 6EE5           00896         MOVWF   POSTDEC1
+00061A 50??           00897         MOVF    r0x04, W
+00061C 6EE5           00898         MOVWF   POSTDEC1
+00061E 0E00           00899         MOVLW   0x00
+000620 6EE5           00900         MOVWF   POSTDEC1
+000622 0E64           00901         MOVLW   0x64
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 18
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000624 6EE5           00902         MOVWF   POSTDEC1
+000626 EC?? F0??      00903         CALL    __mulint
+00062A 6E??           00904         MOVWF   r0x04
+00062C CFF3 F000      00905         MOVFF   PRODL, r0x05
+000630 0E04           00906         MOVLW   0x04
+000632 26E1           00907         ADDWF   FSR1L, F
+000634 50??           00908         MOVF    r0x04, W
+000636 26??           00909         ADDWF   r0x02, F
+000638 50??           00910         MOVF    r0x05, W
+00063A 22??           00911         ADDWFC  r0x03, F
+00063C C??? F???      00912         MOVFF   _dez, r0x04
+000640 6A??           00913         CLRF    r0x05
+000642 0ED0           00914         MOVLW   0xd0
+000644 26??           00915         ADDWF   r0x04, F
+000646 A0D8           00916         BTFSS   STATUS, 0
+000648 06??           00917         DECF    r0x05, F
+00064A 50??           00918         MOVF    r0x05, W
+00064C 6EE5           00919         MOVWF   POSTDEC1
+00064E 50??           00920         MOVF    r0x04, W
+000650 6EE5           00921         MOVWF   POSTDEC1
+000652 0E00           00922         MOVLW   0x00
+000654 6EE5           00923         MOVWF   POSTDEC1
+000656 0E0A           00924         MOVLW   0x0a
+000658 6EE5           00925         MOVWF   POSTDEC1
+00065A EC?? F0??      00926         CALL    __mulint
+00065E 6E??           00927         MOVWF   r0x04
+000660 CFF3 F000      00928         MOVFF   PRODL, r0x05
+000664 0E04           00929         MOVLW   0x04
+000666 26E1           00930         ADDWF   FSR1L, F
+000668 50??           00931         MOVF    r0x04, W
+00066A 26??           00932         ADDWF   r0x02, F
+00066C 50??           00933         MOVF    r0x05, W
+00066E 22??           00934         ADDWFC  r0x03, F
+000670 C??? F???      00935         MOVFF   _uni, r0x04
+000674 6A??           00936         CLRF    r0x05
+000676 50??           00937         MOVF    r0x04, W
+000678 26??           00938         ADDWF   r0x02, F
+00067A 50??           00939         MOVF    r0x05, W
+00067C 22??           00940         ADDWFC  r0x03, F
+00067E 50??           00941         MOVF    r0x02, W
+000680 0FD0           00942         ADDLW   0xd0
+000682 6E??           00943         MOVWF   r0x00
+000684 0EFF           00944         MOVLW   0xff
+000686 20??           00945         ADDWFC  r0x03, W
+000688 6E??           00946         MOVWF   r0x01
+                      00947 ;       .line   192; serial.c   setAlarmLow (1, soma);
+00068A 50??           00948         MOVF    r0x01, W
+00068C 6EE5           00949         MOVWF   POSTDEC1
+00068E 50??           00950         MOVF    r0x00, W
+000690 6EE5           00951         MOVWF   POSTDEC1
+000692 0E01           00952         MOVLW   0x01
+000694 6EE5           00953         MOVWF   POSTDEC1
+000696 EC?? F0??      00954         CALL    _setAlarmLow
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 19
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00069A 0E03           00955         MOVLW   0x03
+00069C 26E1           00956         ADDWF   FSR1L, F
+00069E 010?           00957         BANKSEL _code
+                      00958 ;       .line   193; serial.c   code = 0;
+0006A0 6B??           00959         CLRF    _code, B
+0006A2 010?           00960         BANKSEL _uni
+                      00961 ;       .line   194; serial.c   uni = 0;
+0006A4 6B??           00962         CLRF    _uni, B
+0006A6 010?           00963         BANKSEL _dez
+                      00964 ;       .line   195; serial.c   dez = 0;
+0006A8 6B??           00965         CLRF    _dez, B
+0006AA 010?           00966         BANKSEL _mi
+                      00967 ;       .line   196; serial.c   mi = 0;
+0006AC 6B??           00968         CLRF    _mi, B
+0006AE 010?           00969         BANKSEL _cen
+                      00970 ;       .line   197; serial.c   cen = 0;
+0006B0 6B??           00971         CLRF    _cen, B
+                      00972 ;       .line   199; serial.c   break;
+0006B2 D???           00973         BRA     _00246_DS_
+0006B4                00974 _00235_DS_:
+0006B4 010?           00975         BANKSEL _mi
+                      00976 ;       .line   201; serial.c   if(mi == 0){
+0006B6 51??           00977         MOVF    _mi, W, B
+0006B8 E1??           00978         BNZ     _00237_DS_
+                      00979 ;       .line   202; serial.c   mi = serialRead();
+0006BA EC?? F0??      00980         CALL    _serialRead
+0006BE 010?           00981         BANKSEL _mi
+0006C0 6F??           00982         MOVWF   _mi, B
+0006C2                00983 _00237_DS_:
+0006C2 010?           00984         BANKSEL _cen
+                      00985 ;       .line   204; serial.c   if(cen == 0 && mi!=0){
+0006C4 51??           00986         MOVF    _cen, W, B
+0006C6 E1??           00987         BNZ     _00239_DS_
+0006C8 010?           00988         BANKSEL _mi
+0006CA 51??           00989         MOVF    _mi, W, B
+0006CC E0??           00990         BZ      _00239_DS_
+                      00991 ;       .line   205; serial.c   cen = serialRead();
+0006CE EC?? F0??      00992         CALL    _serialRead
+0006D2 010?           00993         BANKSEL _cen
+0006D4 6F??           00994         MOVWF   _cen, B
+0006D6                00995 _00239_DS_:
+0006D6 010?           00996         BANKSEL _cen
+                      00997 ;       .line   207; serial.c   if(cen !=0)
+0006D8 51??           00998         MOVF    _cen, W, B
+0006DA B4D8           00999         BTFSC   STATUS, 2
+0006DC D???           01000         BRA     _00243_DS_
+                      01001 ;       .line   209; serial.c   soma = (mi-48)*1000 + (cen-48)*100 + (dez-48)*10 + uni-48;           
+0006DE C??? F???      01002         MOVFF   _mi, r0x02
+0006E2 6A??           01003         CLRF    r0x03
+0006E4 0ED0           01004         MOVLW   0xd0
+0006E6 26??           01005         ADDWF   r0x02, F
+0006E8 A0D8           01006         BTFSS   STATUS, 0
+0006EA 06??           01007         DECF    r0x03, F
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 20
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0006EC 50??           01008         MOVF    r0x03, W
+0006EE 6EE5           01009         MOVWF   POSTDEC1
+0006F0 50??           01010         MOVF    r0x02, W
+0006F2 6EE5           01011         MOVWF   POSTDEC1
+0006F4 0E03           01012         MOVLW   0x03
+0006F6 6EE5           01013         MOVWF   POSTDEC1
+0006F8 0EE8           01014         MOVLW   0xe8
+0006FA 6EE5           01015         MOVWF   POSTDEC1
+0006FC EC?? F0??      01016         CALL    __mulint
+000700 6E??           01017         MOVWF   r0x02
+000702 CFF3 F000      01018         MOVFF   PRODL, r0x03
+000706 0E04           01019         MOVLW   0x04
+000708 26E1           01020         ADDWF   FSR1L, F
+00070A C??? F???      01021         MOVFF   _cen, r0x04
+00070E 6A??           01022         CLRF    r0x05
+000710 0ED0           01023         MOVLW   0xd0
+000712 26??           01024         ADDWF   r0x04, F
+000714 A0D8           01025         BTFSS   STATUS, 0
+000716 06??           01026         DECF    r0x05, F
+000718 50??           01027         MOVF    r0x05, W
+00071A 6EE5           01028         MOVWF   POSTDEC1
+00071C 50??           01029         MOVF    r0x04, W
+00071E 6EE5           01030         MOVWF   POSTDEC1
+000720 0E00           01031         MOVLW   0x00
+000722 6EE5           01032         MOVWF   POSTDEC1
+000724 0E64           01033         MOVLW   0x64
+000726 6EE5           01034         MOVWF   POSTDEC1
+000728 EC?? F0??      01035         CALL    __mulint
+00072C 6E??           01036         MOVWF   r0x04
+00072E CFF3 F000      01037         MOVFF   PRODL, r0x05
+000732 0E04           01038         MOVLW   0x04
+000734 26E1           01039         ADDWF   FSR1L, F
+000736 50??           01040         MOVF    r0x04, W
+000738 26??           01041         ADDWF   r0x02, F
+00073A 50??           01042         MOVF    r0x05, W
+00073C 22??           01043         ADDWFC  r0x03, F
+00073E C??? F???      01044         MOVFF   _dez, r0x04
+000742 6A??           01045         CLRF    r0x05
+000744 0ED0           01046         MOVLW   0xd0
+000746 26??           01047         ADDWF   r0x04, F
+000748 A0D8           01048         BTFSS   STATUS, 0
+00074A 06??           01049         DECF    r0x05, F
+00074C 50??           01050         MOVF    r0x05, W
+00074E 6EE5           01051         MOVWF   POSTDEC1
+000750 50??           01052         MOVF    r0x04, W
+000752 6EE5           01053         MOVWF   POSTDEC1
+000754 0E00           01054         MOVLW   0x00
+000756 6EE5           01055         MOVWF   POSTDEC1
+000758 0E0A           01056         MOVLW   0x0a
+00075A 6EE5           01057         MOVWF   POSTDEC1
+00075C EC?? F0??      01058         CALL    __mulint
+000760 6E??           01059         MOVWF   r0x04
+000762 CFF3 F000      01060         MOVFF   PRODL, r0x05
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 21
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000766 0E04           01061         MOVLW   0x04
+000768 26E1           01062         ADDWF   FSR1L, F
+00076A 50??           01063         MOVF    r0x04, W
+00076C 26??           01064         ADDWF   r0x02, F
+00076E 50??           01065         MOVF    r0x05, W
+000770 22??           01066         ADDWFC  r0x03, F
+000772 C??? F???      01067         MOVFF   _uni, r0x04
+000776 6A??           01068         CLRF    r0x05
+000778 50??           01069         MOVF    r0x04, W
+00077A 26??           01070         ADDWF   r0x02, F
+00077C 50??           01071         MOVF    r0x05, W
+00077E 22??           01072         ADDWFC  r0x03, F
+000780 50??           01073         MOVF    r0x02, W
+000782 0FD0           01074         ADDLW   0xd0
+000784 6E??           01075         MOVWF   r0x00
+000786 0EFF           01076         MOVLW   0xff
+000788 20??           01077         ADDWFC  r0x03, W
+00078A 6E??           01078         MOVWF   r0x01
+                      01079 ;       .line   211; serial.c   setAlarmLow (1, soma);
+00078C 50??           01080         MOVF    r0x01, W
+00078E 6EE5           01081         MOVWF   POSTDEC1
+000790 50??           01082         MOVF    r0x00, W
+000792 6EE5           01083         MOVWF   POSTDEC1
+000794 0E01           01084         MOVLW   0x01
+000796 6EE5           01085         MOVWF   POSTDEC1
+000798 EC?? F0??      01086         CALL    _setAlarmLow
+00079C 0E03           01087         MOVLW   0x03
+00079E 26E1           01088         ADDWF   FSR1L, F
+0007A0 010?           01089         BANKSEL _code
+                      01090 ;       .line   212; serial.c   code = 0;
+0007A2 6B??           01091         CLRF    _code, B
+0007A4 010?           01092         BANKSEL _uni
+                      01093 ;       .line   213; serial.c   uni = 0;
+0007A6 6B??           01094         CLRF    _uni, B
+0007A8 010?           01095         BANKSEL _dez
+                      01096 ;       .line   214; serial.c   dez = 0;
+0007AA 6B??           01097         CLRF    _dez, B
+0007AC 010?           01098         BANKSEL _mi
+                      01099 ;       .line   215; serial.c   mi = 0;
+0007AE 6B??           01100         CLRF    _mi, B
+0007B0 010?           01101         BANKSEL _cen
+                      01102 ;       .line   216; serial.c   cen = 0;
+0007B2 6B??           01103         CLRF    _cen, B
+0007B4                01104 _00243_DS_:
+                      01105 ;       .line   219; serial.c   setIdiom(getIdiom() + 1);
+0007B4 EC?? F0??      01106         CALL    _getIdiom
+0007B8 6E??           01107         MOVWF   r0x00
+0007BA 2A??           01108         INCF    r0x00, F
+0007BC 50??           01109         MOVF    r0x00, W
+0007BE 6EE5           01110         MOVWF   POSTDEC1
+0007C0 EC?? F0??      01111         CALL    _setIdiom
+0007C4 52E6           01112         MOVF    POSTINC1, F
+0007C6 010?           01113         BANKSEL _code
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 22
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      01114 ;       .line   220; serial.c   code = 0;
+0007C8 6B??           01115         CLRF    _code, B
+0007CA 010?           01116         BANKSEL _uni
+                      01117 ;       .line   221; serial.c   uni = 0;
+0007CC 6B??           01118         CLRF    _uni, B
+0007CE 010?           01119         BANKSEL _dez
+                      01120 ;       .line   222; serial.c   dez = 0;
+0007D0 6B??           01121         CLRF    _dez, B
+0007D2 010?           01122         BANKSEL _cen
+                      01123 ;       .line   223; serial.c   cen = 0;
+0007D4 6B??           01124         CLRF    _cen, B
+0007D6 010?           01125         BANKSEL _mi
+                      01126 ;       .line   224; serial.c   mi = 0;            
+0007D8 6B??           01127         CLRF    _mi, B
+                      01128 ;       .line   225; serial.c   break;
+0007DA D???           01129         BRA     _00246_DS_
+0007DC                01130 _00244_DS_:
+0007DC 010?           01131         BANKSEL _code
+                      01132 ;       .line   228; serial.c   code = 0;
+0007DE 6B??           01133         CLRF    _code, B
+0007E0 010?           01134         BANKSEL _uni
+                      01135 ;       .line   229; serial.c   uni = 0;
+0007E2 6B??           01136         CLRF    _uni, B
+0007E4 010?           01137         BANKSEL _dez
+                      01138 ;       .line   230; serial.c   dez = 0;
+0007E6 6B??           01139         CLRF    _dez, B
+0007E8 010?           01140         BANKSEL _cen
+                      01141 ;       .line   231; serial.c   cen = 0;
+0007EA 6B??           01142         CLRF    _cen, B
+0007EC 010?           01143         BANKSEL _mi
+                      01144 ;       .line   232; serial.c   mi = 0;
+0007EE 6B??           01145         CLRF    _mi, B
+                      01146 ;       .line   234; serial.c   break;
+0007F0 D???           01147         BRA     _00246_DS_
+0007F2                01148 _00245_DS_:
+0007F2 010?           01149         BANKSEL _code
+                      01150 ;       .line   236; serial.c   default: code = 0; 
+0007F4 6B??           01151         CLRF    _code, B
+0007F6 010?           01152         BANKSEL _uni
+                      01153 ;       .line   237; serial.c   uni = 0;
+0007F8 6B??           01154         CLRF    _uni, B
+0007FA 010?           01155         BANKSEL _dez
+                      01156 ;       .line   238; serial.c   dez = 0;
+0007FC 6B??           01157         CLRF    _dez, B
+0007FE 010?           01158         BANKSEL _mi
+                      01159 ;       .line   239; serial.c   mi = 0;
+000800 6B??           01160         CLRF    _mi, B
+000802 010?           01161         BANKSEL _cen
+                      01162 ;       .line   240; serial.c   cen = 0;
+000804 6B??           01163         CLRF    _cen, B
+000806                01164 _00246_DS_:
+000806 010?           01165         BANKSEL _code
+                      01166 ;       .line   243; serial.c   return code;
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 23
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000808 51??           01167         MOVF    _code, W, B
+00080A                01168 _00247_DS_:
+00080A CFE4 F000      01169         MOVFF   PREINC1, r0x05
+00080E CFE4 F000      01170         MOVFF   PREINC1, r0x04
+000812 CFE4 F000      01171         MOVFF   PREINC1, r0x03
+000816 CFE4 F000      01172         MOVFF   PREINC1, r0x02
+00081A CFE4 F000      01173         MOVFF   PREINC1, r0x01
+00081E CFE4 F000      01174         MOVFF   PREINC1, r0x00
+000822 CFE4 FFD9      01175         MOVFF   PREINC1, FSR2L
+000826 0012           01176         RETURN  
+                      01177 
+                      01178 ; ; Starting pCode block
+                      01179 S_serial__serialInit    code
+000000                01180 _serialInit:
+                      01181 ;       .line   50; serial.c    void serialInit(void) {
+000000 CFD9 FFE5      01182         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      01183         MOVFF   FSR1L, FSR2L
+000008 C??? F???      01184         MOVFF   r0x00, POSTDEC1
+                      01185 ;       .line   51; serial.c    TXSTA = 0b00101100; //configura a transmissão de dados da serial
+00000C EE0F F0AC      01186         LFSR    0x00, 0xfac
+000010 0E2C           01187         MOVLW   0x2c
+000012 6EEF           01188         MOVWF   INDF0
+                      01189 ;       .line   52; serial.c    RCSTA = 0b10010000; //configura a recepção de dados da serial
+000014 EE0F F0AB      01190         LFSR    0x00, 0xfab
+000018 0E90           01191         MOVLW   0x90
+00001A 6EEF           01192         MOVWF   INDF0
+                      01193 ;       .line   53; serial.c    BAUDCON = 0b00001000; //configura sistema de velocidade da serial
+00001C EE0F F0B8      01194         LFSR    0x00, 0xfb8
+000020 0E08           01195         MOVLW   0x08
+000022 6EEF           01196         MOVWF   INDF0
+                      01197 ;       .line   54; serial.c    SPBRGH = 0b00000000; //configura para 56k
+000024 EE0F F0B0      01198         LFSR    0x00, 0xfb0
+000028 0E00           01199         MOVLW   0x00
+00002A 6EEF           01200         MOVWF   INDF0
+                      01201 ;       .line   55; serial.c    SPBRG = 51; //configura para 56k
+00002C EE0F F0AF      01202         LFSR    0x00, 0xfaf
+000030 0E33           01203         MOVLW   0x33
+000032 6EEF           01204         MOVWF   INDF0
+                      01205 ;       .line   56; serial.c    bitSet(TRISC, 6); //pino de recepção de dados
+000034 EE0F F094      01206         LFSR    0x00, 0xf94
+000038 CFEF F000      01207         MOVFF   INDF0, r0x00
+00003C 8C??           01208         BSF     r0x00, 6
+00003E EE0F F094      01209         LFSR    0x00, 0xf94
+000042 C??? F???      01210         MOVFF   r0x00, INDF0
+                      01211 ;       .line   57; serial.c    bitSet(TRISC, 7); //pino de envio de dados
+000046 EE0F F094      01212         LFSR    0x00, 0xf94
+00004A CFEF F000      01213         MOVFF   INDF0, r0x00
+00004E 8E??           01214         BSF     r0x00, 7
+000050 EE0F F094      01215         LFSR    0x00, 0xf94
+000054 C??? F???      01216         MOVFF   r0x00, INDF0
+000058 010?           01217         BANKSEL _mi
+                      01218 ;       .line   58; serial.c    mi = 0, cen = 0, uni = 0, dez = 0, code = 0;
+00005A 6B??           01219         CLRF    _mi, B
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 24
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00005C 010?           01220         BANKSEL _cen
+00005E 6B??           01221         CLRF    _cen, B
+000060 010?           01222         BANKSEL _uni
+000062 6B??           01223         CLRF    _uni, B
+000064 010?           01224         BANKSEL _dez
+000066 6B??           01225         CLRF    _dez, B
+000068 010?           01226         BANKSEL _code
+00006A 6B??           01227         CLRF    _code, B
+00006C CFE4 F000      01228         MOVFF   PREINC1, r0x00
+000070 CFE4 FFD9      01229         MOVFF   PREINC1, FSR2L
+000074 0012           01230         RETURN  
+                      01231 
+                      01232 ; ; Starting pCode block
+                      01233 S_serial__serialRead    code
+000000                01234 _serialRead:
+                      01235 ;       .line   34; serial.c    unsigned char serialRead(void) {
+000000 CFD9 FFE5      01236         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      01237         MOVFF   FSR1L, FSR2L
+000008 C??? F???      01238         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      01239         MOVFF   r0x01, POSTDEC1
+                      01240 ;       .line   35; serial.c    char resp = 0;    
+000010 6A??           01241         CLRF    r0x00
+                      01242 ;       .line   37; serial.c    if (bitTst(RCSTA, 1)) //Verifica se há erro de overrun e reseta a serial
+000012 EE0F F0AB      01243         LFSR    0x00, 0xfab
+000016 CFEF F000      01244         MOVFF   INDF0, r0x01
+00001A A2??           01245         BTFSS   r0x01, 1
+00001C D???           01246         BRA     _00137_DS_
+                      01247 ;       .line   39; serial.c    bitClr(RCSTA, 4);
+00001E EE0F F0AB      01248         LFSR    0x00, 0xfab
+000022 CFEF F000      01249         MOVFF   INDF0, r0x01
+000026 98??           01250         BCF     r0x01, 4
+000028 EE0F F0AB      01251         LFSR    0x00, 0xfab
+00002C C??? F???      01252         MOVFF   r0x01, INDF0
+                      01253 ;       .line   40; serial.c    bitSet(RCSTA, 4);
+000030 EE0F F0AB      01254         LFSR    0x00, 0xfab
+000034 CFEF F000      01255         MOVFF   INDF0, r0x01
+000038 88??           01256         BSF     r0x01, 4
+00003A EE0F F0AB      01257         LFSR    0x00, 0xfab
+00003E C??? F???      01258         MOVFF   r0x01, INDF0
+000042                01259 _00137_DS_:
+                      01260 ;       .line   43; serial.c    if (bitTst(PIR1, 5)) //Verifica se existe algum valor disponivel
+000042 EE0F F09E      01261         LFSR    0x00, 0xf9e
+000046 CFEF F000      01262         MOVFF   INDF0, r0x01
+00004A AA??           01263         BTFSS   r0x01, 5
+00004C D???           01264         BRA     _00139_DS_
+                      01265 ;       .line   45; serial.c    resp = RCREG; //retorna o valor
+00004E EE0F F0AE      01266         LFSR    0x00, 0xfae
+000052 CFEF F000      01267         MOVFF   INDF0, r0x00
+000056                01268 _00139_DS_:
+                      01269 ;       .line   47; serial.c    return resp; //retorna zero
+000056 50??           01270         MOVF    r0x00, W
+000058 CFE4 F000      01271         MOVFF   PREINC1, r0x01
+00005C CFE4 F000      01272         MOVFF   PREINC1, r0x00
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 25
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000060 CFE4 FFD9      01273         MOVFF   PREINC1, FSR2L
+000064 0012           01274         RETURN  
+                      01275 
+                      01276 ; ; Starting pCode block
+                      01277 S_serial__serialString  code
+000000                01278 _serialString:
+                      01279 ;       .line   23; serial.c    void serialString(char vector[])
+000000 CFD9 FFE5      01280         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      01281         MOVFF   FSR1L, FSR2L
+000008 C??? F???      01282         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      01283         MOVFF   r0x01, POSTDEC1
+000010 C??? F???      01284         MOVFF   r0x02, POSTDEC1
+000014 C??? F???      01285         MOVFF   r0x03, POSTDEC1
+000018 C??? F???      01286         MOVFF   r0x04, POSTDEC1
+00001C C??? F???      01287         MOVFF   r0x05, POSTDEC1
+000020 C??? F???      01288         MOVFF   r0x06, POSTDEC1
+000024 0E02           01289         MOVLW   0x02
+000026 CFDB F000      01290         MOVFF   PLUSW2, r0x00
+00002A 0E03           01291         MOVLW   0x03
+00002C CFDB F000      01292         MOVFF   PLUSW2, r0x01
+000030 0E04           01293         MOVLW   0x04
+000032 CFDB F000      01294         MOVFF   PLUSW2, r0x02
+                      01295 ;       .line   27; serial.c    while(vector[i])
+000036 6A??           01296         CLRF    r0x03
+000038                01297 _00128_DS_:
+000038 50??           01298         MOVF    r0x03, W
+00003A 24??           01299         ADDWF   r0x00, W
+00003C 6E??           01300         MOVWF   r0x04
+00003E 6AE8           01301         CLRF    WREG
+000040 20??           01302         ADDWFC  r0x01, W
+000042 6E??           01303         MOVWF   r0x05
+000044 6AE8           01304         CLRF    WREG
+000046 20??           01305         ADDWFC  r0x02, W
+000048 6E??           01306         MOVWF   r0x06
+00004A C??? F???      01307         MOVFF   r0x04, FSR0L
+00004E C??? F???      01308         MOVFF   r0x05, PRODL
+000052 50??           01309         MOVF    r0x06, W
+000054 EC?? F0??      01310         CALL    __gptrget1
+000058 6E??           01311         MOVWF   r0x04
+00005A 50??           01312         MOVF    r0x04, W
+00005C E0??           01313         BZ      _00131_DS_
+                      01314 ;       .line   29; serial.c    serialSend(vector[i]);
+00005E 50??           01315         MOVF    r0x04, W
+000060 6EE5           01316         MOVWF   POSTDEC1
+000062 EC?? F0??      01317         CALL    _serialSend
+000066 52E6           01318         MOVF    POSTINC1, F
+                      01319 ;       .line   30; serial.c    i++;
+000068 2A??           01320         INCF    r0x03, F
+00006A D???           01321         BRA     _00128_DS_
+00006C                01322 _00131_DS_:
+00006C CFE4 F000      01323         MOVFF   PREINC1, r0x06
+000070 CFE4 F000      01324         MOVFF   PREINC1, r0x05
+000074 CFE4 F000      01325         MOVFF   PREINC1, r0x04
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 26
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000078 CFE4 F000      01326         MOVFF   PREINC1, r0x03
+00007C CFE4 F000      01327         MOVFF   PREINC1, r0x02
+000080 CFE4 F000      01328         MOVFF   PREINC1, r0x01
+000084 CFE4 F000      01329         MOVFF   PREINC1, r0x00
+000088 CFE4 FFD9      01330         MOVFF   PREINC1, FSR2L
+00008C 0012           01331         RETURN  
+                      01332 
+                      01333 ; ; Starting pCode block
+                      01334 S_serial__serialInt     code
+000000                01335 _serialInt:
+                      01336 ;       .line   12; serial.c    void serialInt(int val) {
+000000 CFD9 FFE5      01337         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      01338         MOVFF   FSR1L, FSR2L
+000008 C??? F???      01339         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      01340         MOVFF   r0x01, POSTDEC1
+000010 C??? F???      01341         MOVFF   r0x02, POSTDEC1
+000014 C??? F???      01342         MOVFF   r0x03, POSTDEC1
+000018 0E02           01343         MOVLW   0x02
+00001A CFDB F000      01344         MOVFF   PLUSW2, r0x00
+00001E 0E03           01345         MOVLW   0x03
+000020 CFDB F000      01346         MOVFF   PLUSW2, r0x01
+                      01347 ;       .line   13; serial.c    if (val < 0) {
+000024 80D8           01348         BSF     STATUS, 0
+000026 AE??           01349         BTFSS   r0x01, 7
+000028 90D8           01350         BCF     STATUS, 0
+00002A E3??           01351         BNC     _00122_DS_
+                      01352 ;       .line   14; serial.c    val = val * (-1);
+00002C 1E??           01353         COMF    r0x01, F
+00002E 6C??           01354         NEGF    r0x00
+000030 B4D8           01355         BTFSC   STATUS, 2
+000032 2A??           01356         INCF    r0x01, F
+                      01357 ;       .line   15; serial.c    serialSend('-');
+000034 0E2D           01358         MOVLW   0x2d
+000036 6EE5           01359         MOVWF   POSTDEC1
+000038 EC?? F0??      01360         CALL    _serialSend
+00003C 52E6           01361         MOVF    POSTINC1, F
+00003E                01362 _00122_DS_:
+                      01363 ;       .line   17; serial.c    serialSend((val / 1000) % 10 + 48);
+00003E 0E03           01364         MOVLW   0x03
+000040 6EE5           01365         MOVWF   POSTDEC1
+000042 0EE8           01366         MOVLW   0xe8
+000044 6EE5           01367         MOVWF   POSTDEC1
+000046 50??           01368         MOVF    r0x01, W
+000048 6EE5           01369         MOVWF   POSTDEC1
+00004A 50??           01370         MOVF    r0x00, W
+00004C 6EE5           01371         MOVWF   POSTDEC1
+00004E EC?? F0??      01372         CALL    __divsint
+000052 6E??           01373         MOVWF   r0x02
+000054 CFF3 F000      01374         MOVFF   PRODL, r0x03
+000058 0E04           01375         MOVLW   0x04
+00005A 26E1           01376         ADDWF   FSR1L, F
+00005C 0E00           01377         MOVLW   0x00
+00005E 6EE5           01378         MOVWF   POSTDEC1
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 27
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000060 0E0A           01379         MOVLW   0x0a
+000062 6EE5           01380         MOVWF   POSTDEC1
+000064 50??           01381         MOVF    r0x03, W
+000066 6EE5           01382         MOVWF   POSTDEC1
+000068 50??           01383         MOVF    r0x02, W
+00006A 6EE5           01384         MOVWF   POSTDEC1
+00006C EC?? F0??      01385         CALL    __modsint
+000070 6E??           01386         MOVWF   r0x02
+000072 CFF3 F000      01387         MOVFF   PRODL, r0x03
+000076 0E04           01388         MOVLW   0x04
+000078 26E1           01389         ADDWF   FSR1L, F
+00007A 0E30           01390         MOVLW   0x30
+00007C 26??           01391         ADDWF   r0x02, F
+00007E 50??           01392         MOVF    r0x02, W
+000080 6EE5           01393         MOVWF   POSTDEC1
+000082 EC?? F0??      01394         CALL    _serialSend
+000086 52E6           01395         MOVF    POSTINC1, F
+                      01396 ;       .line   18; serial.c    serialSend((val / 100) % 10 + 48);
+000088 0E00           01397         MOVLW   0x00
+00008A 6EE5           01398         MOVWF   POSTDEC1
+00008C 0E64           01399         MOVLW   0x64
+00008E 6EE5           01400         MOVWF   POSTDEC1
+000090 50??           01401         MOVF    r0x01, W
+000092 6EE5           01402         MOVWF   POSTDEC1
+000094 50??           01403         MOVF    r0x00, W
+000096 6EE5           01404         MOVWF   POSTDEC1
+000098 EC?? F0??      01405         CALL    __divsint
+00009C 6E??           01406         MOVWF   r0x02
+00009E CFF3 F000      01407         MOVFF   PRODL, r0x03
+0000A2 0E04           01408         MOVLW   0x04
+0000A4 26E1           01409         ADDWF   FSR1L, F
+0000A6 0E00           01410         MOVLW   0x00
+0000A8 6EE5           01411         MOVWF   POSTDEC1
+0000AA 0E0A           01412         MOVLW   0x0a
+0000AC 6EE5           01413         MOVWF   POSTDEC1
+0000AE 50??           01414         MOVF    r0x03, W
+0000B0 6EE5           01415         MOVWF   POSTDEC1
+0000B2 50??           01416         MOVF    r0x02, W
+0000B4 6EE5           01417         MOVWF   POSTDEC1
+0000B6 EC?? F0??      01418         CALL    __modsint
+0000BA 6E??           01419         MOVWF   r0x02
+0000BC CFF3 F000      01420         MOVFF   PRODL, r0x03
+0000C0 0E04           01421         MOVLW   0x04
+0000C2 26E1           01422         ADDWF   FSR1L, F
+0000C4 0E30           01423         MOVLW   0x30
+0000C6 26??           01424         ADDWF   r0x02, F
+0000C8 50??           01425         MOVF    r0x02, W
+0000CA 6EE5           01426         MOVWF   POSTDEC1
+0000CC EC?? F0??      01427         CALL    _serialSend
+0000D0 52E6           01428         MOVF    POSTINC1, F
+                      01429 ;       .line   19; serial.c    serialSend((val / 10) % 10 + 48);
+0000D2 0E00           01430         MOVLW   0x00
+0000D4 6EE5           01431         MOVWF   POSTDEC1
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 28
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0000D6 0E0A           01432         MOVLW   0x0a
+0000D8 6EE5           01433         MOVWF   POSTDEC1
+0000DA 50??           01434         MOVF    r0x01, W
+0000DC 6EE5           01435         MOVWF   POSTDEC1
+0000DE 50??           01436         MOVF    r0x00, W
+0000E0 6EE5           01437         MOVWF   POSTDEC1
+0000E2 EC?? F0??      01438         CALL    __divsint
+0000E6 6E??           01439         MOVWF   r0x02
+0000E8 CFF3 F000      01440         MOVFF   PRODL, r0x03
+0000EC 0E04           01441         MOVLW   0x04
+0000EE 26E1           01442         ADDWF   FSR1L, F
+0000F0 0E00           01443         MOVLW   0x00
+0000F2 6EE5           01444         MOVWF   POSTDEC1
+0000F4 0E0A           01445         MOVLW   0x0a
+0000F6 6EE5           01446         MOVWF   POSTDEC1
+0000F8 50??           01447         MOVF    r0x03, W
+0000FA 6EE5           01448         MOVWF   POSTDEC1
+0000FC 50??           01449         MOVF    r0x02, W
+0000FE 6EE5           01450         MOVWF   POSTDEC1
+000100 EC?? F0??      01451         CALL    __modsint
+000104 6E??           01452         MOVWF   r0x02
+000106 CFF3 F000      01453         MOVFF   PRODL, r0x03
+00010A 0E04           01454         MOVLW   0x04
+00010C 26E1           01455         ADDWF   FSR1L, F
+00010E 0E30           01456         MOVLW   0x30
+000110 26??           01457         ADDWF   r0x02, F
+000112 50??           01458         MOVF    r0x02, W
+000114 6EE5           01459         MOVWF   POSTDEC1
+000116 EC?? F0??      01460         CALL    _serialSend
+00011A 52E6           01461         MOVF    POSTINC1, F
+                      01462 ;       .line   20; serial.c    serialSend((val / 1) % 10 + 48);
+00011C 0E00           01463         MOVLW   0x00
+00011E 6EE5           01464         MOVWF   POSTDEC1
+000120 0E0A           01465         MOVLW   0x0a
+000122 6EE5           01466         MOVWF   POSTDEC1
+000124 50??           01467         MOVF    r0x01, W
+000126 6EE5           01468         MOVWF   POSTDEC1
+000128 50??           01469         MOVF    r0x00, W
+00012A 6EE5           01470         MOVWF   POSTDEC1
+00012C EC?? F0??      01471         CALL    __modsint
+000130 6E??           01472         MOVWF   r0x00
+000132 CFF3 F000      01473         MOVFF   PRODL, r0x01
+000136 0E04           01474         MOVLW   0x04
+000138 26E1           01475         ADDWF   FSR1L, F
+00013A 0E30           01476         MOVLW   0x30
+00013C 26??           01477         ADDWF   r0x00, F
+00013E 50??           01478         MOVF    r0x00, W
+000140 6EE5           01479         MOVWF   POSTDEC1
+000142 EC?? F0??      01480         CALL    _serialSend
+000146 52E6           01481         MOVF    POSTINC1, F
+000148 CFE4 F000      01482         MOVFF   PREINC1, r0x03
+00014C CFE4 F000      01483         MOVFF   PREINC1, r0x02
+000150 CFE4 F000      01484         MOVFF   PREINC1, r0x01
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 29
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000154 CFE4 F000      01485         MOVFF   PREINC1, r0x00
+000158 CFE4 FFD9      01486         MOVFF   PREINC1, FSR2L
+00015C 0012           01487         RETURN  
+                      01488 
+                      01489 ; ; Starting pCode block
+                      01490 S_serial__serialSend    code
+000000                01491 _serialSend:
+                      01492 ;       .line   7; serial.c     void serialSend(unsigned char c) {
+000000 CFD9 FFE5      01493         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      01494         MOVFF   FSR1L, FSR2L
+000008 C??? F???      01495         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      01496         MOVFF   r0x01, POSTDEC1
+000010 0E02           01497         MOVLW   0x02
+000012 CFDB F000      01498         MOVFF   PLUSW2, r0x00
+000016                01499 _00105_DS_:
+                      01500 ;       .line   8; serial.c     while (!bitTst(PIR1, 4)); //Wait register becomes available 
+000016 EE0F F09E      01501         LFSR    0x00, 0xf9e
+00001A CFEF F000      01502         MOVFF   INDF0, r0x01
+00001E A8??           01503         BTFSS   r0x01, 4
+000020 D???           01504         BRA     _00105_DS_
+                      01505 ;       .line   9; serial.c     TXREG = c; //Puts the value to be send 
+000022 EE0F F0AD      01506         LFSR    0x00, 0xfad
+000026 C??? F???      01507         MOVFF   r0x00, INDF0
+00002A CFE4 F000      01508         MOVFF   PREINC1, r0x01
+00002E CFE4 F000      01509         MOVFF   PREINC1, r0x00
+000032 CFE4 FFD9      01510         MOVFF   PREINC1, FSR2L
+000036 0012           01511         RETURN  
+                      01512 
+                      01513 ; ; Starting pCode block
+000038                01514 ___str_0:
+000038 6552 7270 7365 01515         DB      0x52, 0x65, 0x70, 0x72, 0x65, 0x73, 0x65, 0x6e, 0x74, 0x61, 0xe7, 0xe3
+       6E65 6174 E3E7 
+000044 206F 7345 6F74 01516         DB      0x6f, 0x20, 0x45, 0x73, 0x74, 0x6f, 0x75, 0x72, 0x61, 0x64, 0x61, 0x00
+       7275 6461 0061 
+                      01517 
+                      01518 
+                      01519 ; Statistics:
+                      01520 ; code size:     2860 (0x0b2c) bytes ( 2.18%)
+                      01521 ;                1430 (0x0596) words
+                      01522 ; udata size:       5 (0x0005) bytes ( 0.28%)
+                      01523 ; access size:      7 (0x0007) bytes
+                      01524 
+                      01525 
+                      01526         end
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 30
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+FSR0L                             CONSTANT      00000FE9           4073
+FSR1L                             CONSTANT      00000FE1           4065
+FSR2L                             CONSTANT      00000FD9           4057
+INDF0                             CONSTANT      00000FEF           4079
+PLUSW2                            CONSTANT      00000FDB           4059
+POSTDEC1                          CONSTANT      00000FE5           4069
+POSTINC1                          CONSTANT      00000FE6           4070
+PREINC1                           CONSTANT      00000FE4           4068
+PRODL                             CONSTANT      00000FF3           4083
+STATUS                            CONSTANT      00000FD8           4056
+WREG                              CONSTANT      00000FE8           4072
+_00105_DS_                        ADDRESS       00000016             22
+_00122_DS_                        ADDRESS       0000003E             62
+_00128_DS_                        ADDRESS       00000038             56
+_00131_DS_                        ADDRESS       0000006C            108
+_00137_DS_                        ADDRESS       00000042             66
+_00139_DS_                        ADDRESS       00000056             86
+_00162_DS_                        ADDRESS       00000036             54
+_00165_DS_                        ADDRESS       000000A0            160
+_00167_DS_                        ADDRESS       000000B4            180
+_00170_DS_                        ADDRESS       000000C8            200
+_00173_DS_                        ADDRESS       000000DC            220
+_00177_DS_                        ADDRESS       000001B8            440
+_00179_DS_                        ADDRESS       000001C6            454
+_00181_DS_                        ADDRESS       000001DA            474
+_00184_DS_                        ADDRESS       000001EE            494
+_00187_DS_                        ADDRESS       00000202            514
+_00191_DS_                        ADDRESS       000002E6            742
+_00193_DS_                        ADDRESS       000002F4            756
+_00195_DS_                        ADDRESS       00000308            776
+_00198_DS_                        ADDRESS       0000031C            796
+_00201_DS_                        ADDRESS       00000330            816
+_00205_DS_                        ADDRESS       00000414           1044
+_00207_DS_                        ADDRESS       00000422           1058
+_00209_DS_                        ADDRESS       00000436           1078
+_00212_DS_                        ADDRESS       0000044A           1098
+_00215_DS_                        ADDRESS       0000045E           1118
+_00218_DS_                        ADDRESS       00000560           1376
+_00221_DS_                        ADDRESS       0000058A           1418
+_00223_DS_                        ADDRESS       00000598           1432
+_00225_DS_                        ADDRESS       000005AC           1452
+_00228_DS_                        ADDRESS       000005C0           1472
+_00231_DS_                        ADDRESS       000005D4           1492
+_00235_DS_                        ADDRESS       000006B4           1716
+_00237_DS_                        ADDRESS       000006C2           1730
+_00239_DS_                        ADDRESS       000006D6           1750
+_00243_DS_                        ADDRESS       000007B4           1972
+_00244_DS_                        ADDRESS       000007DC           2012
+_00245_DS_                        ADDRESS       000007F2           2034
+_00246_DS_                        ADDRESS       00000806           2054
+_00247_DS_                        ADDRESS       0000080A           2058
+_00412_DS_                        ADDRESS       00000042             66
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 31
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+_00414_DS_                        ADDRESS       0000004C             76
+_00416_DS_                        ADDRESS       00000058             88
+_00418_DS_                        ADDRESS       00000062             98
+_00420_DS_                        ADDRESS       0000006E            110
+_00422_DS_                        ADDRESS       0000007A            122
+_00424_DS_                        ADDRESS       00000086            134
+_00426_DS_                        ADDRESS       00000092            146
+_00427_DS_                        ADDRESS       00000522           1314
+__16_BIT                          CONSTANT      00000001              1
+__18F4550                         CONSTANT      00000001              1
+__ACC_RAM_LOW_END                 CONSTANT      0000005F             95
+__ACC_RAM_LOW_START               CONSTANT      00000000              0
+__ACTIVE_BANK_ADDR                VARIABLE      FFFFFFFF             -1
+__ASSUMED_BANK_ADDR               VARIABLE      FFFFFFFF             -1
+__BANK_0                          CONSTANT      00000000              0
+__BANK_1                          CONSTANT      00000100            256
+__BANK_2                          CONSTANT      00000200            512
+__BANK_3                          CONSTANT      00000300            768
+__BANK_4                          CONSTANT      00000400           1024
+__BANK_5                          CONSTANT      00000500           1280
+__BANK_6                          CONSTANT      00000600           1536
+__BANK_7                          CONSTANT      00000700           1792
+__BANK_8                          CONSTANT      00000800           2048
+__BANK_9                          CONSTANT      00000900           2304
+__BANK_10                         CONSTANT      00000A00           2560
+__BANK_11                         CONSTANT      00000B00           2816
+__BANK_12                         CONSTANT      00000C00           3072
+__BANK_13                         CONSTANT      00000D00           3328
+__BANK_14                         CONSTANT      00000E00           3584
+__BANK_15                         CONSTANT      00000F00           3840
+__BANK_BITS                       CONSTANT      00000F00           3840
+__BANK_FIRST                      CONSTANT      00000000              0
+__BANK_INV                        CONSTANT      FFFFFFFF             -1
+__BANK_LAST                       CONSTANT      00000F00           3840
+__BANK_MASK                       CONSTANT      000000FF            255
+__BANK_SHIFT                      CONSTANT      00000008              8
+__BANK_SIZE                       CONSTANT      00000100            256
+__CODE_END                        CONSTANT      00007FFF          32767
+__CODE_START                      CONSTANT      00000000              0
+__COMMON_RAM_END                  CONSTANT      0000005F             95
+__COMMON_RAM_START                CONSTANT      00000000              0
+__CONFIG_END                      CONSTANT      0030000D        3145741
+__CONFIG_START                    CONSTANT      00300000        3145728
+__EEPROM_END                      CONSTANT      00F000FF       15728895
+__EEPROM_START                    CONSTANT      00F00000       15728640
+__EXTENDED                        CONSTANT      00000001              1
+__GPUTILS_SVN_VERSION             CONSTANT      00000505           1285
+__GPUTILS_VERSION_MAJOR           CONSTANT      00000001              1
+__GPUTILS_VERSION_MICRO           CONSTANT      00000000              0
+__GPUTILS_VERSION_MINOR           CONSTANT      00000005              5
+__IDLOCS_END                      CONSTANT      00200007        2097159
+__IDLOCS_START                    CONSTANT      00200000        2097152
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 32
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+__NUM_BANKS                       CONSTANT      00000010             16
+__VECTOR_INT_HIGH                 CONSTANT      00000008              8
+__VECTOR_INT_LOW                  CONSTANT      00000018             24
+__VECTOR_RESET                    CONSTANT      00000000              0
+__WHILE_LOOP_COUNT_MAX            CONSTANT      000000FF            255
+___str_0                          ADDRESS       00000038             56
+__divsint                         EXTERNAL      00000000              0
+__gptrget1                        EXTERNAL      00000000              0
+__modsint                         EXTERNAL      00000000              0
+__mulint                          EXTERNAL      00000000              0
+_cen                              GLOBAL        00000000              0
+_code                             GLOBAL        00000000              0
+_dez                              GLOBAL        00000000              0
+_getIdiom                         EXTERNAL      00000000              0
+_mi                               GLOBAL        00000000              0
+_serialInit                       GLOBAL        00000000              0
+_serialInt                        GLOBAL        00000000              0
+_serialProtocol                   GLOBAL        00000000              0
+_serialRead                       GLOBAL        00000000              0
+_serialSend                       GLOBAL        00000000              0
+_serialString                     GLOBAL        00000000              0
+_setAlarmHigh                     EXTERNAL      00000000              0
+_setAlarmLow                      EXTERNAL      00000000              0
+_setIdiom                         EXTERNAL      00000000              0
+_setTime                          EXTERNAL      00000000              0
+_uni                              GLOBAL        00000000              0
+r0x00                             STATIC        00000000              0
+r0x01                             STATIC        00000001              1
+r0x02                             STATIC        00000002              2
+r0x03                             STATIC        00000003              3
+r0x04                             STATIC        00000004              4
+r0x05                             STATIC        00000005              5
+r0x06                             STATIC        00000006              6
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     0 reported,     0 suppressed
+
+

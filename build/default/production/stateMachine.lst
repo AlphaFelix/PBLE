@@ -1,0 +1,1186 @@
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE  1
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00001 ;--------------------------------------------------------
+                      00002 ; File Created by SDCC : free open source ANSI-C Compiler
+                      00003 ; Version 3.6.0 #9615 (MINGW64)
+                      00004 ;--------------------------------------------------------
+                      00005 ; PIC16 port for the Microchip 16-bit core micros
+                      00006 ;--------------------------------------------------------
+                      00007         list    p=18f4550
+                      00008         radix   dec
+                      00009 
+                      00010 
+                      00011 ;--------------------------------------------------------
+                      00012 ; public variables in this module
+                      00013 ;--------------------------------------------------------
+  0000                00014         global  _smInit
+  0000                00015         global  _smLoop
+                      00016 
+                      00017 ;--------------------------------------------------------
+                      00018 ; extern variables in this module
+                      00019 ;--------------------------------------------------------
+  0000                00020         extern  _varInit
+  0000                00021         extern  _getState
+  0000                00022         extern  _setState
+  0000                00023         extern  _getStateRst
+  0000                00024         extern  _setStateRst
+  0000                00025         extern  _getTime
+  0000                00026         extern  _setTime
+  0000                00027         extern  _getAlarmLow
+  0000                00028         extern  _setAlarmLow
+  0000                00029         extern  _getAlarmHigh
+  0000                00030         extern  _setAlarmHigh
+  0000                00031         extern  _getIdiom
+  0000                00032         extern  _setIdiom
+  0000                00033         extern  _eventRead
+  0000                00034         extern  _outputPrint
+  0000                00035         extern  _outputSerial
+                      00036 
+                      00037 ;--------------------------------------------------------
+                      00038 ;       Equates to used internal registers
+                      00039 ;--------------------------------------------------------
+  00000FD8            00040 STATUS  equ     0xfd8
+  00000FF9            00041 PCL     equ     0xff9
+  00000FFA            00042 PCLATH  equ     0xffa
+  00000FFB            00043 PCLATU  equ     0xffb
+  00000FE8            00044 WREG    equ     0xfe8
+  00000FE1            00045 FSR1L   equ     0xfe1
+  00000FD9            00046 FSR2L   equ     0xfd9
+  00000FE6            00047 POSTINC1        equ     0xfe6
+  00000FE5            00048 POSTDEC1        equ     0xfe5
+  00000FE4            00049 PREINC1 equ     0xfe4
+  00000FF3            00050 PRODL   equ     0xff3
+                      00051 
+                      00052 
+                      00053 ; Internal registers
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE  2
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00054 .registers      udata_ovr       0x0000
+000000                00055 r0x00   res     1
+000001                00056 r0x01   res     1
+000002                00057 r0x02   res     1
+                      00058 
+                      00059 udata_stateMachine_0    udata
+000000                00060 _stateRST       res     1
+                      00061 
+                      00062 ;--------------------------------------------------------
+                      00063 ; global & static initialisations
+                      00064 ;--------------------------------------------------------
+                      00065 ; I code from now on!
+                      00066 ; ; Starting pCode block
+                      00067 S_stateMachine__smLoop  code
+000000                00068 _smLoop:
+                      00069 ;       .line   12; stateMachine.c      void smLoop(void) {
+000000 CFD9 FFE5      00070         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00071         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00072         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      00073         MOVFF   r0x01, POSTDEC1
+000010 C??? F???      00074         MOVFF   r0x02, POSTDEC1
+                      00075 ;       .line   16; stateMachine.c      event = eventRead();
+000014 EC?? F0??      00076         CALL    _eventRead
+000018 6E??           00077         MOVWF   r0x00
+00001A CFF3 F000      00078         MOVFF   PRODL, r0x01
+                      00079 ;       .line   18; stateMachine.c      switch (getState()) {
+00001E EC?? F0??      00080         CALL    _getState
+000022 6E??           00081         MOVWF   r0x01
+000024 0E0D           00082         MOVLW   0x0d
+000026 5C??           00083         SUBWF   r0x01, W
+000028 B0D8           00084         BTFSC   STATUS, 0
+00002A EF?? F0??      00085         GOTO    _00221_DS_
+00002E 6AFA           00086         CLRF    PCLATH
+000030 6AFB           00087         CLRF    PCLATU
+000032 34??           00088         RLCF    r0x01, W
+000034 36FA           00089         RLCF    PCLATH, F
+000036 34E8           00090         RLCF    WREG, W
+000038 36FA           00091         RLCF    PCLATH, F
+00003A 0BFC           00092         ANDLW   0xfc
+00003C 0F??           00093         ADDLW   LOW(_00376_DS_)
+00003E 6EE5           00094         MOVWF   POSTDEC1
+000040 0E??           00095         MOVLW   HIGH(_00376_DS_)
+000042 22FA           00096         ADDWFC  PCLATH, F
+000044 0E??           00097         MOVLW   UPPER(_00376_DS_)
+000046 22FB           00098         ADDWFC  PCLATU, F
+000048 50E4           00099         MOVF    PREINC1, W
+00004A 6EF9           00100         MOVWF   PCL
+00004C                00101 _00376_DS_:
+00004C EF?? F0??      00102         GOTO    _00110_DS_
+000050 EF?? F0??      00103         GOTO    _00119_DS_
+000054 EF?? F0??      00104         GOTO    _00128_DS_
+000058 EF?? F0??      00105         GOTO    _00137_DS_
+00005C EF?? F0??      00106         GOTO    _00146_DS_
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE  3
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000060 EF?? F0??      00107         GOTO    _00155_DS_
+000064 EF?? F0??      00108         GOTO    _00164_DS_
+000068 EF?? F0??      00109         GOTO    _00173_DS_
+00006C EF?? F0??      00110         GOTO    _00182_DS_
+000070 EF?? F0??      00111         GOTO    _00191_DS_
+000074 EF?? F0??      00112         GOTO    _00200_DS_
+000078 EF?? F0??      00113         GOTO    _00209_DS_
+00007C EF?? F0??      00114         GOTO    _00216_DS_
+000080                00115 _00110_DS_:
+                      00116 ;       .line   21; stateMachine.c      if (event == EV_RIGHT) {
+000080 50??           00117         MOVF    r0x00, W
+000082 0A03           00118         XORLW   0x03
+000084 E1??           00119         BNZ     _00112_DS_
+                      00120 ;       .line   22; stateMachine.c      setState(STATE_ALARM_LOW_0);
+000086 0E02           00121         MOVLW   0x02
+000088 6EE5           00122         MOVWF   POSTDEC1
+00008A EC?? F0??      00123         CALL    _setState
+00008E 52E6           00124         MOVF    POSTINC1, F
+000090                00125 _00112_DS_:
+                      00126 ;       .line   24; stateMachine.c      if (event == EV_LEFT) {
+000090 50??           00127         MOVF    r0x00, W
+000092 0A02           00128         XORLW   0x02
+000094 E1??           00129         BNZ     _00114_DS_
+                      00130 ;       .line   25; stateMachine.c      setState(STATE_DATE);
+000096 0E0B           00131         MOVLW   0x0b
+000098 6EE5           00132         MOVWF   POSTDEC1
+00009A EC?? F0??      00133         CALL    _setState
+00009E 52E6           00134         MOVF    POSTINC1, F
+0000A0                00135 _00114_DS_:
+                      00136 ;       .line   29; stateMachine.c      if (event == EV_ENTER) {
+0000A0 50??           00137         MOVF    r0x00, W
+0000A2 0A04           00138         XORLW   0x04
+0000A4 E1??           00139         BNZ     _00116_DS_
+                      00140 ;       .line   30; stateMachine.c      setState(STATE_SET_AH_0);
+0000A6 0E01           00141         MOVLW   0x01
+0000A8 6EE5           00142         MOVWF   POSTDEC1
+0000AA EC?? F0??      00143         CALL    _setState
+0000AE 52E6           00144         MOVF    POSTINC1, F
+0000B0                00145 _00116_DS_:
+                      00146 ;       .line   32; stateMachine.c      if (event == EV_RESET) {
+0000B0 50??           00147         MOVF    r0x00, W
+0000B2 0A05           00148         XORLW   0x05
+0000B4 E0??           00149         BZ      _00384_DS_
+0000B6 EF?? F0??      00150         GOTO    _00222_DS_
+0000BA                00151 _00384_DS_:
+                      00152 ;       .line   33; stateMachine.c      setStateRst(STATE_ALARM_HIGH_0);
+0000BA 0E00           00153         MOVLW   0x00
+0000BC 6EE5           00154         MOVWF   POSTDEC1
+0000BE EC?? F0??      00155         CALL    _setStateRst
+0000C2 52E6           00156         MOVF    POSTINC1, F
+                      00157 ;       .line   34; stateMachine.c      setState(STATE_RST);
+0000C4 0E0C           00158         MOVLW   0x0c
+0000C6 6EE5           00159         MOVWF   POSTDEC1
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE  4
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0000C8 EC?? F0??      00160         CALL    _setState
+0000CC 52E6           00161         MOVF    POSTINC1, F
+                      00162 ;       .line   36; stateMachine.c      break; 
+0000CE EF?? F0??      00163         GOTO    _00222_DS_
+0000D2                00164 _00119_DS_:
+                      00165 ;       .line   39; stateMachine.c      if (event == EV_RIGHT) {
+0000D2 50??           00166         MOVF    r0x00, W
+0000D4 0A03           00167         XORLW   0x03
+0000D6 E1??           00168         BNZ     _00121_DS_
+                      00169 ;       .line   40; stateMachine.c      setAlarmHigh(0, getAlarmHigh(0) + 1);
+0000D8 0E00           00170         MOVLW   0x00
+0000DA 6EE5           00171         MOVWF   POSTDEC1
+0000DC EC?? F0??      00172         CALL    _getAlarmHigh
+0000E0 6E??           00173         MOVWF   r0x01
+0000E2 CFF3 F000      00174         MOVFF   PRODL, r0x02
+0000E6 52E6           00175         MOVF    POSTINC1, F
+0000E8 4A??           00176         INFSNZ  r0x01, F
+0000EA 2A??           00177         INCF    r0x02, F
+0000EC 50??           00178         MOVF    r0x02, W
+0000EE 6EE5           00179         MOVWF   POSTDEC1
+0000F0 50??           00180         MOVF    r0x01, W
+0000F2 6EE5           00181         MOVWF   POSTDEC1
+0000F4 0E00           00182         MOVLW   0x00
+0000F6 6EE5           00183         MOVWF   POSTDEC1
+0000F8 EC?? F0??      00184         CALL    _setAlarmHigh
+0000FC 0E03           00185         MOVLW   0x03
+0000FE 26E1           00186         ADDWF   FSR1L, F
+000100                00187 _00121_DS_:
+                      00188 ;       .line   42; stateMachine.c      if (event == EV_LEFT) {
+000100 50??           00189         MOVF    r0x00, W
+000102 0A02           00190         XORLW   0x02
+000104 E1??           00191         BNZ     _00123_DS_
+                      00192 ;       .line   43; stateMachine.c      setAlarmHigh(0, getAlarmHigh(0) - 1);
+000106 0E00           00193         MOVLW   0x00
+000108 6EE5           00194         MOVWF   POSTDEC1
+00010A EC?? F0??      00195         CALL    _getAlarmHigh
+00010E 6E??           00196         MOVWF   r0x01
+000110 CFF3 F000      00197         MOVFF   PRODL, r0x02
+000114 52E6           00198         MOVF    POSTINC1, F
+000116 0EFF           00199         MOVLW   0xff
+000118 26??           00200         ADDWF   r0x01, F
+00011A 22??           00201         ADDWFC  r0x02, F
+00011C 50??           00202         MOVF    r0x02, W
+00011E 6EE5           00203         MOVWF   POSTDEC1
+000120 50??           00204         MOVF    r0x01, W
+000122 6EE5           00205         MOVWF   POSTDEC1
+000124 0E00           00206         MOVLW   0x00
+000126 6EE5           00207         MOVWF   POSTDEC1
+000128 EC?? F0??      00208         CALL    _setAlarmHigh
+00012C 0E03           00209         MOVLW   0x03
+00012E 26E1           00210         ADDWF   FSR1L, F
+000130                00211 _00123_DS_:
+                      00212 ;       .line   47; stateMachine.c      if (event == EV_ENTER) {
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE  5
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000130 50??           00213         MOVF    r0x00, W
+000132 0A04           00214         XORLW   0x04
+000134 E1??           00215         BNZ     _00125_DS_
+                      00216 ;       .line   48; stateMachine.c      setState(STATE_ALARM_HIGH_0);
+000136 0E00           00217         MOVLW   0x00
+000138 6EE5           00218         MOVWF   POSTDEC1
+00013A EC?? F0??      00219         CALL    _setState
+00013E 52E6           00220         MOVF    POSTINC1, F
+000140                00221 _00125_DS_:
+                      00222 ;       .line   50; stateMachine.c      if (event == EV_RESET) {
+000140 50??           00223         MOVF    r0x00, W
+000142 0A05           00224         XORLW   0x05
+000144 E0??           00225         BZ      _00392_DS_
+000146 EF?? F0??      00226         GOTO    _00222_DS_
+00014A                00227 _00392_DS_:
+                      00228 ;       .line   51; stateMachine.c      setStateRst(STATE_SET_AH_0);
+00014A 0E01           00229         MOVLW   0x01
+00014C 6EE5           00230         MOVWF   POSTDEC1
+00014E EC?? F0??      00231         CALL    _setStateRst
+000152 52E6           00232         MOVF    POSTINC1, F
+                      00233 ;       .line   52; stateMachine.c      setState(STATE_RST);
+000154 0E0C           00234         MOVLW   0x0c
+000156 6EE5           00235         MOVWF   POSTDEC1
+000158 EC?? F0??      00236         CALL    _setState
+00015C 52E6           00237         MOVF    POSTINC1, F
+                      00238 ;       .line   54; stateMachine.c      break;
+00015E EF?? F0??      00239         GOTO    _00222_DS_
+000162                00240 _00128_DS_:
+                      00241 ;       .line   58; stateMachine.c      if (event == EV_RIGHT) {
+000162 50??           00242         MOVF    r0x00, W
+000164 0A03           00243         XORLW   0x03
+000166 E1??           00244         BNZ     _00130_DS_
+                      00245 ;       .line   59; stateMachine.c      setState(STATE_ALARM_HIGH_1);
+000168 0E04           00246         MOVLW   0x04
+00016A 6EE5           00247         MOVWF   POSTDEC1
+00016C EC?? F0??      00248         CALL    _setState
+000170 52E6           00249         MOVF    POSTINC1, F
+000172                00250 _00130_DS_:
+                      00251 ;       .line   61; stateMachine.c      if (event == EV_LEFT) {
+000172 50??           00252         MOVF    r0x00, W
+000174 0A02           00253         XORLW   0x02
+000176 E1??           00254         BNZ     _00132_DS_
+                      00255 ;       .line   62; stateMachine.c      setState(STATE_ALARM_HIGH_0);
+000178 0E00           00256         MOVLW   0x00
+00017A 6EE5           00257         MOVWF   POSTDEC1
+00017C EC?? F0??      00258         CALL    _setState
+000180 52E6           00259         MOVF    POSTINC1, F
+000182                00260 _00132_DS_:
+                      00261 ;       .line   66; stateMachine.c      if (event == EV_ENTER) {
+000182 50??           00262         MOVF    r0x00, W
+000184 0A04           00263         XORLW   0x04
+000186 E1??           00264         BNZ     _00134_DS_
+                      00265 ;       .line   67; stateMachine.c      setState(STATE_SET_AL_0);
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE  6
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000188 0E03           00266         MOVLW   0x03
+00018A 6EE5           00267         MOVWF   POSTDEC1
+00018C EC?? F0??      00268         CALL    _setState
+000190 52E6           00269         MOVF    POSTINC1, F
+000192                00270 _00134_DS_:
+                      00271 ;       .line   69; stateMachine.c      if (event == EV_RESET) {
+000192 50??           00272         MOVF    r0x00, W
+000194 0A05           00273         XORLW   0x05
+000196 E0??           00274         BZ      _00400_DS_
+000198 D???           00275         BRA     _00222_DS_
+00019A                00276 _00400_DS_:
+                      00277 ;       .line   70; stateMachine.c      setStateRst(STATE_ALARM_LOW_0);
+00019A 0E02           00278         MOVLW   0x02
+00019C 6EE5           00279         MOVWF   POSTDEC1
+00019E EC?? F0??      00280         CALL    _setStateRst
+0001A2 52E6           00281         MOVF    POSTINC1, F
+                      00282 ;       .line   71; stateMachine.c      setState(STATE_RST);
+0001A4 0E0C           00283         MOVLW   0x0c
+0001A6 6EE5           00284         MOVWF   POSTDEC1
+0001A8 EC?? F0??      00285         CALL    _setState
+0001AC 52E6           00286         MOVF    POSTINC1, F
+                      00287 ;       .line   73; stateMachine.c      break;            
+0001AE D???           00288         BRA     _00222_DS_
+0001B0                00289 _00137_DS_:
+                      00290 ;       .line   76; stateMachine.c      if (event == EV_RIGHT) {
+0001B0 50??           00291         MOVF    r0x00, W
+0001B2 0A03           00292         XORLW   0x03
+0001B4 E1??           00293         BNZ     _00139_DS_
+                      00294 ;       .line   77; stateMachine.c      setAlarmLow(0, getAlarmLow(0) + 1);
+0001B6 0E00           00295         MOVLW   0x00
+0001B8 6EE5           00296         MOVWF   POSTDEC1
+0001BA EC?? F0??      00297         CALL    _getAlarmLow
+0001BE 6E??           00298         MOVWF   r0x01
+0001C0 CFF3 F000      00299         MOVFF   PRODL, r0x02
+0001C4 52E6           00300         MOVF    POSTINC1, F
+0001C6 4A??           00301         INFSNZ  r0x01, F
+0001C8 2A??           00302         INCF    r0x02, F
+0001CA 50??           00303         MOVF    r0x02, W
+0001CC 6EE5           00304         MOVWF   POSTDEC1
+0001CE 50??           00305         MOVF    r0x01, W
+0001D0 6EE5           00306         MOVWF   POSTDEC1
+0001D2 0E00           00307         MOVLW   0x00
+0001D4 6EE5           00308         MOVWF   POSTDEC1
+0001D6 EC?? F0??      00309         CALL    _setAlarmLow
+0001DA 0E03           00310         MOVLW   0x03
+0001DC 26E1           00311         ADDWF   FSR1L, F
+0001DE                00312 _00139_DS_:
+                      00313 ;       .line   79; stateMachine.c      if (event == EV_LEFT) {
+0001DE 50??           00314         MOVF    r0x00, W
+0001E0 0A02           00315         XORLW   0x02
+0001E2 E1??           00316         BNZ     _00141_DS_
+                      00317 ;       .line   80; stateMachine.c      setAlarmLow(0, getAlarmLow(0) - 1);
+0001E4 0E00           00318         MOVLW   0x00
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE  7
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0001E6 6EE5           00319         MOVWF   POSTDEC1
+0001E8 EC?? F0??      00320         CALL    _getAlarmLow
+0001EC 6E??           00321         MOVWF   r0x01
+0001EE CFF3 F000      00322         MOVFF   PRODL, r0x02
+0001F2 52E6           00323         MOVF    POSTINC1, F
+0001F4 0EFF           00324         MOVLW   0xff
+0001F6 26??           00325         ADDWF   r0x01, F
+0001F8 22??           00326         ADDWFC  r0x02, F
+0001FA 50??           00327         MOVF    r0x02, W
+0001FC 6EE5           00328         MOVWF   POSTDEC1
+0001FE 50??           00329         MOVF    r0x01, W
+000200 6EE5           00330         MOVWF   POSTDEC1
+000202 0E00           00331         MOVLW   0x00
+000204 6EE5           00332         MOVWF   POSTDEC1
+000206 EC?? F0??      00333         CALL    _setAlarmLow
+00020A 0E03           00334         MOVLW   0x03
+00020C 26E1           00335         ADDWF   FSR1L, F
+00020E                00336 _00141_DS_:
+                      00337 ;       .line   84; stateMachine.c      if (event == EV_ENTER) {
+00020E 50??           00338         MOVF    r0x00, W
+000210 0A04           00339         XORLW   0x04
+000212 E1??           00340         BNZ     _00143_DS_
+                      00341 ;       .line   85; stateMachine.c      setState(STATE_ALARM_LOW_0);
+000214 0E02           00342         MOVLW   0x02
+000216 6EE5           00343         MOVWF   POSTDEC1
+000218 EC?? F0??      00344         CALL    _setState
+00021C 52E6           00345         MOVF    POSTINC1, F
+00021E                00346 _00143_DS_:
+                      00347 ;       .line   87; stateMachine.c      if (event == EV_RESET) {
+00021E 50??           00348         MOVF    r0x00, W
+000220 0A05           00349         XORLW   0x05
+000222 E0??           00350         BZ      _00408_DS_
+000224 D???           00351         BRA     _00222_DS_
+000226                00352 _00408_DS_:
+                      00353 ;       .line   88; stateMachine.c      setStateRst(STATE_SET_AL_0);
+000226 0E03           00354         MOVLW   0x03
+000228 6EE5           00355         MOVWF   POSTDEC1
+00022A EC?? F0??      00356         CALL    _setStateRst
+00022E 52E6           00357         MOVF    POSTINC1, F
+                      00358 ;       .line   89; stateMachine.c      setState(STATE_RST);
+000230 0E0C           00359         MOVLW   0x0c
+000232 6EE5           00360         MOVWF   POSTDEC1
+000234 EC?? F0??      00361         CALL    _setState
+000238 52E6           00362         MOVF    POSTINC1, F
+                      00363 ;       .line   91; stateMachine.c      break;
+00023A D???           00364         BRA     _00222_DS_
+00023C                00365 _00146_DS_:
+                      00366 ;       .line   95; stateMachine.c      if (event == EV_RIGHT) {
+00023C 50??           00367         MOVF    r0x00, W
+00023E 0A03           00368         XORLW   0x03
+000240 E1??           00369         BNZ     _00148_DS_
+                      00370 ;       .line   96; stateMachine.c      setState(STATE_ALARM_LOW_1);
+000242 0E06           00371         MOVLW   0x06
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE  8
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000244 6EE5           00372         MOVWF   POSTDEC1
+000246 EC?? F0??      00373         CALL    _setState
+00024A 52E6           00374         MOVF    POSTINC1, F
+00024C                00375 _00148_DS_:
+                      00376 ;       .line   98; stateMachine.c      if (event == EV_LEFT) {
+00024C 50??           00377         MOVF    r0x00, W
+00024E 0A02           00378         XORLW   0x02
+000250 E1??           00379         BNZ     _00150_DS_
+                      00380 ;       .line   99; stateMachine.c      setState(STATE_ALARM_LOW_0);
+000252 0E02           00381         MOVLW   0x02
+000254 6EE5           00382         MOVWF   POSTDEC1
+000256 EC?? F0??      00383         CALL    _setState
+00025A 52E6           00384         MOVF    POSTINC1, F
+00025C                00385 _00150_DS_:
+                      00386 ;       .line   103; stateMachine.c     if (event == EV_ENTER) {
+00025C 50??           00387         MOVF    r0x00, W
+00025E 0A04           00388         XORLW   0x04
+000260 E1??           00389         BNZ     _00152_DS_
+                      00390 ;       .line   104; stateMachine.c     setState(STATE_SET_AH_1);
+000262 0E05           00391         MOVLW   0x05
+000264 6EE5           00392         MOVWF   POSTDEC1
+000266 EC?? F0??      00393         CALL    _setState
+00026A 52E6           00394         MOVF    POSTINC1, F
+00026C                00395 _00152_DS_:
+                      00396 ;       .line   106; stateMachine.c     if (event == EV_RESET) {
+00026C 50??           00397         MOVF    r0x00, W
+00026E 0A05           00398         XORLW   0x05
+000270 E0??           00399         BZ      _00416_DS_
+000272 D???           00400         BRA     _00222_DS_
+000274                00401 _00416_DS_:
+                      00402 ;       .line   107; stateMachine.c     setStateRst(STATE_ALARM_HIGH_1);
+000274 0E04           00403         MOVLW   0x04
+000276 6EE5           00404         MOVWF   POSTDEC1
+000278 EC?? F0??      00405         CALL    _setStateRst
+00027C 52E6           00406         MOVF    POSTINC1, F
+                      00407 ;       .line   108; stateMachine.c     setState(STATE_RST);
+00027E 0E0C           00408         MOVLW   0x0c
+000280 6EE5           00409         MOVWF   POSTDEC1
+000282 EC?? F0??      00410         CALL    _setState
+000286 52E6           00411         MOVF    POSTINC1, F
+                      00412 ;       .line   110; stateMachine.c     break; 
+000288 D???           00413         BRA     _00222_DS_
+00028A                00414 _00155_DS_:
+                      00415 ;       .line   113; stateMachine.c     if (event == EV_RIGHT) {
+00028A 50??           00416         MOVF    r0x00, W
+00028C 0A03           00417         XORLW   0x03
+00028E E1??           00418         BNZ     _00157_DS_
+                      00419 ;       .line   114; stateMachine.c     setAlarmHigh(1, getAlarmHigh(1) + 1);
+000290 0E01           00420         MOVLW   0x01
+000292 6EE5           00421         MOVWF   POSTDEC1
+000294 EC?? F0??      00422         CALL    _getAlarmHigh
+000298 6E??           00423         MOVWF   r0x01
+00029A CFF3 F000      00424         MOVFF   PRODL, r0x02
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE  9
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00029E 52E6           00425         MOVF    POSTINC1, F
+0002A0 4A??           00426         INFSNZ  r0x01, F
+0002A2 2A??           00427         INCF    r0x02, F
+0002A4 50??           00428         MOVF    r0x02, W
+0002A6 6EE5           00429         MOVWF   POSTDEC1
+0002A8 50??           00430         MOVF    r0x01, W
+0002AA 6EE5           00431         MOVWF   POSTDEC1
+0002AC 0E01           00432         MOVLW   0x01
+0002AE 6EE5           00433         MOVWF   POSTDEC1
+0002B0 EC?? F0??      00434         CALL    _setAlarmHigh
+0002B4 0E03           00435         MOVLW   0x03
+0002B6 26E1           00436         ADDWF   FSR1L, F
+0002B8                00437 _00157_DS_:
+                      00438 ;       .line   116; stateMachine.c     if (event == EV_LEFT) {
+0002B8 50??           00439         MOVF    r0x00, W
+0002BA 0A02           00440         XORLW   0x02
+0002BC E1??           00441         BNZ     _00159_DS_
+                      00442 ;       .line   117; stateMachine.c     setAlarmHigh(1, getAlarmHigh(1) - 1);
+0002BE 0E01           00443         MOVLW   0x01
+0002C0 6EE5           00444         MOVWF   POSTDEC1
+0002C2 EC?? F0??      00445         CALL    _getAlarmHigh
+0002C6 6E??           00446         MOVWF   r0x01
+0002C8 CFF3 F000      00447         MOVFF   PRODL, r0x02
+0002CC 52E6           00448         MOVF    POSTINC1, F
+0002CE 0EFF           00449         MOVLW   0xff
+0002D0 26??           00450         ADDWF   r0x01, F
+0002D2 22??           00451         ADDWFC  r0x02, F
+0002D4 50??           00452         MOVF    r0x02, W
+0002D6 6EE5           00453         MOVWF   POSTDEC1
+0002D8 50??           00454         MOVF    r0x01, W
+0002DA 6EE5           00455         MOVWF   POSTDEC1
+0002DC 0E01           00456         MOVLW   0x01
+0002DE 6EE5           00457         MOVWF   POSTDEC1
+0002E0 EC?? F0??      00458         CALL    _setAlarmHigh
+0002E4 0E03           00459         MOVLW   0x03
+0002E6 26E1           00460         ADDWF   FSR1L, F
+0002E8                00461 _00159_DS_:
+                      00462 ;       .line   121; stateMachine.c     if (event == EV_ENTER) {
+0002E8 50??           00463         MOVF    r0x00, W
+0002EA 0A04           00464         XORLW   0x04
+0002EC E1??           00465         BNZ     _00161_DS_
+                      00466 ;       .line   122; stateMachine.c     setState(STATE_ALARM_HIGH_1);
+0002EE 0E04           00467         MOVLW   0x04
+0002F0 6EE5           00468         MOVWF   POSTDEC1
+0002F2 EC?? F0??      00469         CALL    _setState
+0002F6 52E6           00470         MOVF    POSTINC1, F
+0002F8                00471 _00161_DS_:
+                      00472 ;       .line   124; stateMachine.c     if (event == EV_RESET) {
+0002F8 50??           00473         MOVF    r0x00, W
+0002FA 0A05           00474         XORLW   0x05
+0002FC E0??           00475         BZ      _00424_DS_
+0002FE D???           00476         BRA     _00222_DS_
+000300                00477 _00424_DS_:
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE 10
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00478 ;       .line   125; stateMachine.c     setStateRst(STATE_SET_AH_1);
+000300 0E05           00479         MOVLW   0x05
+000302 6EE5           00480         MOVWF   POSTDEC1
+000304 EC?? F0??      00481         CALL    _setStateRst
+000308 52E6           00482         MOVF    POSTINC1, F
+                      00483 ;       .line   126; stateMachine.c     setState(STATE_RST);
+00030A 0E0C           00484         MOVLW   0x0c
+00030C 6EE5           00485         MOVWF   POSTDEC1
+00030E EC?? F0??      00486         CALL    _setState
+000312 52E6           00487         MOVF    POSTINC1, F
+                      00488 ;       .line   128; stateMachine.c     break;
+000314 D???           00489         BRA     _00222_DS_
+000316                00490 _00164_DS_:
+                      00491 ;       .line   132; stateMachine.c     if (event == EV_RIGHT) {
+000316 50??           00492         MOVF    r0x00, W
+000318 0A03           00493         XORLW   0x03
+00031A E1??           00494         BNZ     _00166_DS_
+                      00495 ;       .line   133; stateMachine.c     setState(STATE_TIME);
+00031C 0E08           00496         MOVLW   0x08
+00031E 6EE5           00497         MOVWF   POSTDEC1
+000320 EC?? F0??      00498         CALL    _setState
+000324 52E6           00499         MOVF    POSTINC1, F
+000326                00500 _00166_DS_:
+                      00501 ;       .line   135; stateMachine.c     if (event == EV_LEFT) {
+000326 50??           00502         MOVF    r0x00, W
+000328 0A02           00503         XORLW   0x02
+00032A E1??           00504         BNZ     _00168_DS_
+                      00505 ;       .line   136; stateMachine.c     setState(STATE_ALARM_HIGH_1);
+00032C 0E04           00506         MOVLW   0x04
+00032E 6EE5           00507         MOVWF   POSTDEC1
+000330 EC?? F0??      00508         CALL    _setState
+000334 52E6           00509         MOVF    POSTINC1, F
+000336                00510 _00168_DS_:
+                      00511 ;       .line   140; stateMachine.c     if (event == EV_ENTER) {
+000336 50??           00512         MOVF    r0x00, W
+000338 0A04           00513         XORLW   0x04
+00033A E1??           00514         BNZ     _00170_DS_
+                      00515 ;       .line   141; stateMachine.c     setState(STATE_SET_AL_1);
+00033C 0E07           00516         MOVLW   0x07
+00033E 6EE5           00517         MOVWF   POSTDEC1
+000340 EC?? F0??      00518         CALL    _setState
+000344 52E6           00519         MOVF    POSTINC1, F
+000346                00520 _00170_DS_:
+                      00521 ;       .line   143; stateMachine.c     if (event == EV_RESET) {
+000346 50??           00522         MOVF    r0x00, W
+000348 0A05           00523         XORLW   0x05
+00034A E0??           00524         BZ      _00432_DS_
+00034C D???           00525         BRA     _00222_DS_
+00034E                00526 _00432_DS_:
+                      00527 ;       .line   144; stateMachine.c     setStateRst(STATE_ALARM_LOW_1);
+00034E 0E06           00528         MOVLW   0x06
+000350 6EE5           00529         MOVWF   POSTDEC1
+000352 EC?? F0??      00530         CALL    _setStateRst
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE 11
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000356 52E6           00531         MOVF    POSTINC1, F
+                      00532 ;       .line   145; stateMachine.c     setState(STATE_RST);
+000358 0E0C           00533         MOVLW   0x0c
+00035A 6EE5           00534         MOVWF   POSTDEC1
+00035C EC?? F0??      00535         CALL    _setState
+000360 52E6           00536         MOVF    POSTINC1, F
+                      00537 ;       .line   147; stateMachine.c     break;
+000362 D???           00538         BRA     _00222_DS_
+000364                00539 _00173_DS_:
+                      00540 ;       .line   151; stateMachine.c     if (event == EV_RIGHT) {
+000364 50??           00541         MOVF    r0x00, W
+000366 0A03           00542         XORLW   0x03
+000368 E1??           00543         BNZ     _00175_DS_
+                      00544 ;       .line   152; stateMachine.c     setAlarmLow(1, getAlarmLow(1) + 1);
+00036A 0E01           00545         MOVLW   0x01
+00036C 6EE5           00546         MOVWF   POSTDEC1
+00036E EC?? F0??      00547         CALL    _getAlarmLow
+000372 6E??           00548         MOVWF   r0x01
+000374 CFF3 F000      00549         MOVFF   PRODL, r0x02
+000378 52E6           00550         MOVF    POSTINC1, F
+00037A 4A??           00551         INFSNZ  r0x01, F
+00037C 2A??           00552         INCF    r0x02, F
+00037E 50??           00553         MOVF    r0x02, W
+000380 6EE5           00554         MOVWF   POSTDEC1
+000382 50??           00555         MOVF    r0x01, W
+000384 6EE5           00556         MOVWF   POSTDEC1
+000386 0E01           00557         MOVLW   0x01
+000388 6EE5           00558         MOVWF   POSTDEC1
+00038A EC?? F0??      00559         CALL    _setAlarmLow
+00038E 0E03           00560         MOVLW   0x03
+000390 26E1           00561         ADDWF   FSR1L, F
+000392                00562 _00175_DS_:
+                      00563 ;       .line   154; stateMachine.c     if (event == EV_LEFT) {
+000392 50??           00564         MOVF    r0x00, W
+000394 0A02           00565         XORLW   0x02
+000396 E1??           00566         BNZ     _00177_DS_
+                      00567 ;       .line   155; stateMachine.c     setAlarmLow(1, getAlarmLow(1) - 1);
+000398 0E01           00568         MOVLW   0x01
+00039A 6EE5           00569         MOVWF   POSTDEC1
+00039C EC?? F0??      00570         CALL    _getAlarmLow
+0003A0 6E??           00571         MOVWF   r0x01
+0003A2 CFF3 F000      00572         MOVFF   PRODL, r0x02
+0003A6 52E6           00573         MOVF    POSTINC1, F
+0003A8 0EFF           00574         MOVLW   0xff
+0003AA 26??           00575         ADDWF   r0x01, F
+0003AC 22??           00576         ADDWFC  r0x02, F
+0003AE 50??           00577         MOVF    r0x02, W
+0003B0 6EE5           00578         MOVWF   POSTDEC1
+0003B2 50??           00579         MOVF    r0x01, W
+0003B4 6EE5           00580         MOVWF   POSTDEC1
+0003B6 0E01           00581         MOVLW   0x01
+0003B8 6EE5           00582         MOVWF   POSTDEC1
+0003BA EC?? F0??      00583         CALL    _setAlarmLow
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE 12
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0003BE 0E03           00584         MOVLW   0x03
+0003C0 26E1           00585         ADDWF   FSR1L, F
+0003C2                00586 _00177_DS_:
+                      00587 ;       .line   159; stateMachine.c     if (event == EV_ENTER) {
+0003C2 50??           00588         MOVF    r0x00, W
+0003C4 0A04           00589         XORLW   0x04
+0003C6 E1??           00590         BNZ     _00179_DS_
+                      00591 ;       .line   160; stateMachine.c     setState(STATE_ALARM_LOW_1);
+0003C8 0E06           00592         MOVLW   0x06
+0003CA 6EE5           00593         MOVWF   POSTDEC1
+0003CC EC?? F0??      00594         CALL    _setState
+0003D0 52E6           00595         MOVF    POSTINC1, F
+0003D2                00596 _00179_DS_:
+                      00597 ;       .line   162; stateMachine.c     if (event == EV_RESET) {
+0003D2 50??           00598         MOVF    r0x00, W
+0003D4 0A05           00599         XORLW   0x05
+0003D6 E0??           00600         BZ      _00440_DS_
+0003D8 D???           00601         BRA     _00222_DS_
+0003DA                00602 _00440_DS_:
+                      00603 ;       .line   163; stateMachine.c     setStateRst(STATE_SET_AL_1);
+0003DA 0E07           00604         MOVLW   0x07
+0003DC 6EE5           00605         MOVWF   POSTDEC1
+0003DE EC?? F0??      00606         CALL    _setStateRst
+0003E2 52E6           00607         MOVF    POSTINC1, F
+                      00608 ;       .line   164; stateMachine.c     setState(STATE_RST);
+0003E4 0E0C           00609         MOVLW   0x0c
+0003E6 6EE5           00610         MOVWF   POSTDEC1
+0003E8 EC?? F0??      00611         CALL    _setState
+0003EC 52E6           00612         MOVF    POSTINC1, F
+                      00613 ;       .line   166; stateMachine.c     break;
+0003EE D???           00614         BRA     _00222_DS_
+0003F0                00615 _00182_DS_:
+                      00616 ;       .line   170; stateMachine.c     if (event == EV_RIGHT) {
+0003F0 50??           00617         MOVF    r0x00, W
+0003F2 0A03           00618         XORLW   0x03
+0003F4 E1??           00619         BNZ     _00184_DS_
+                      00620 ;       .line   171; stateMachine.c     setState(STATE_IDIOM);
+0003F6 0E0A           00621         MOVLW   0x0a
+0003F8 6EE5           00622         MOVWF   POSTDEC1
+0003FA EC?? F0??      00623         CALL    _setState
+0003FE 52E6           00624         MOVF    POSTINC1, F
+000400                00625 _00184_DS_:
+                      00626 ;       .line   173; stateMachine.c     if (event == EV_LEFT) {
+000400 50??           00627         MOVF    r0x00, W
+000402 0A02           00628         XORLW   0x02
+000404 E1??           00629         BNZ     _00186_DS_
+                      00630 ;       .line   174; stateMachine.c     setState(STATE_ALARM_LOW_1);
+000406 0E06           00631         MOVLW   0x06
+000408 6EE5           00632         MOVWF   POSTDEC1
+00040A EC?? F0??      00633         CALL    _setState
+00040E 52E6           00634         MOVF    POSTINC1, F
+000410                00635 _00186_DS_:
+                      00636 ;       .line   178; stateMachine.c     if (event == EV_ENTER) {
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE 13
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000410 50??           00637         MOVF    r0x00, W
+000412 0A04           00638         XORLW   0x04
+000414 E1??           00639         BNZ     _00188_DS_
+                      00640 ;       .line   179; stateMachine.c     setState(STATE_SET_T);
+000416 0E09           00641         MOVLW   0x09
+000418 6EE5           00642         MOVWF   POSTDEC1
+00041A EC?? F0??      00643         CALL    _setState
+00041E 52E6           00644         MOVF    POSTINC1, F
+000420                00645 _00188_DS_:
+                      00646 ;       .line   181; stateMachine.c     if (event == EV_RESET) {
+000420 50??           00647         MOVF    r0x00, W
+000422 0A05           00648         XORLW   0x05
+000424 E0??           00649         BZ      _00448_DS_
+000426 D???           00650         BRA     _00222_DS_
+000428                00651 _00448_DS_:
+                      00652 ;       .line   182; stateMachine.c     setStateRst(STATE_TIME);
+000428 0E08           00653         MOVLW   0x08
+00042A 6EE5           00654         MOVWF   POSTDEC1
+00042C EC?? F0??      00655         CALL    _setStateRst
+000430 52E6           00656         MOVF    POSTINC1, F
+                      00657 ;       .line   183; stateMachine.c     setState(STATE_RST);
+000432 0E0C           00658         MOVLW   0x0c
+000434 6EE5           00659         MOVWF   POSTDEC1
+000436 EC?? F0??      00660         CALL    _setState
+00043A 52E6           00661         MOVF    POSTINC1, F
+                      00662 ;       .line   185; stateMachine.c     break;    
+00043C D???           00663         BRA     _00222_DS_
+00043E                00664 _00191_DS_:
+                      00665 ;       .line   188; stateMachine.c     if (event == EV_RIGHT) {
+00043E 50??           00666         MOVF    r0x00, W
+000440 0A03           00667         XORLW   0x03
+000442 E1??           00668         BNZ     _00193_DS_
+                      00669 ;       .line   189; stateMachine.c     setTime(getTime() + 1);
+000444 EC?? F0??      00670         CALL    _getTime
+000448 6E??           00671         MOVWF   r0x01
+00044A CFF3 F000      00672         MOVFF   PRODL, r0x02
+00044E 4A??           00673         INFSNZ  r0x01, F
+000450 2A??           00674         INCF    r0x02, F
+000452 50??           00675         MOVF    r0x02, W
+000454 6EE5           00676         MOVWF   POSTDEC1
+000456 50??           00677         MOVF    r0x01, W
+000458 6EE5           00678         MOVWF   POSTDEC1
+00045A EC?? F0??      00679         CALL    _setTime
+00045E 52E6           00680         MOVF    POSTINC1, F
+000460 52E6           00681         MOVF    POSTINC1, F
+000462                00682 _00193_DS_:
+                      00683 ;       .line   191; stateMachine.c     if (event == EV_LEFT) {
+000462 50??           00684         MOVF    r0x00, W
+000464 0A02           00685         XORLW   0x02
+000466 E1??           00686         BNZ     _00195_DS_
+                      00687 ;       .line   192; stateMachine.c     setTime(getTime() - 1);
+000468 EC?? F0??      00688         CALL    _getTime
+00046C 6E??           00689         MOVWF   r0x01
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE 14
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00046E CFF3 F000      00690         MOVFF   PRODL, r0x02
+000472 0EFF           00691         MOVLW   0xff
+000474 26??           00692         ADDWF   r0x01, F
+000476 22??           00693         ADDWFC  r0x02, F
+000478 50??           00694         MOVF    r0x02, W
+00047A 6EE5           00695         MOVWF   POSTDEC1
+00047C 50??           00696         MOVF    r0x01, W
+00047E 6EE5           00697         MOVWF   POSTDEC1
+000480 EC?? F0??      00698         CALL    _setTime
+000484 52E6           00699         MOVF    POSTINC1, F
+000486 52E6           00700         MOVF    POSTINC1, F
+000488                00701 _00195_DS_:
+                      00702 ;       .line   196; stateMachine.c     if (event == EV_ENTER) {
+000488 50??           00703         MOVF    r0x00, W
+00048A 0A04           00704         XORLW   0x04
+00048C E1??           00705         BNZ     _00197_DS_
+                      00706 ;       .line   197; stateMachine.c     setState(STATE_TIME);
+00048E 0E08           00707         MOVLW   0x08
+000490 6EE5           00708         MOVWF   POSTDEC1
+000492 EC?? F0??      00709         CALL    _setState
+000496 52E6           00710         MOVF    POSTINC1, F
+000498                00711 _00197_DS_:
+                      00712 ;       .line   199; stateMachine.c     if (event == EV_RESET) {
+000498 50??           00713         MOVF    r0x00, W
+00049A 0A05           00714         XORLW   0x05
+00049C E0??           00715         BZ      _00456_DS_
+00049E D???           00716         BRA     _00222_DS_
+0004A0                00717 _00456_DS_:
+                      00718 ;       .line   200; stateMachine.c     setStateRst(STATE_SET_T);
+0004A0 0E09           00719         MOVLW   0x09
+0004A2 6EE5           00720         MOVWF   POSTDEC1
+0004A4 EC?? F0??      00721         CALL    _setStateRst
+0004A8 52E6           00722         MOVF    POSTINC1, F
+                      00723 ;       .line   201; stateMachine.c     setState(STATE_RST);
+0004AA 0E0C           00724         MOVLW   0x0c
+0004AC 6EE5           00725         MOVWF   POSTDEC1
+0004AE EC?? F0??      00726         CALL    _setState
+0004B2 52E6           00727         MOVF    POSTINC1, F
+                      00728 ;       .line   203; stateMachine.c     break;
+0004B4 D???           00729         BRA     _00222_DS_
+0004B6                00730 _00200_DS_:
+                      00731 ;       .line   207; stateMachine.c     if (event == EV_RIGHT) {
+0004B6 50??           00732         MOVF    r0x00, W
+0004B8 0A03           00733         XORLW   0x03
+0004BA E1??           00734         BNZ     _00202_DS_
+                      00735 ;       .line   208; stateMachine.c     setState(STATE_DATE);
+0004BC 0E0B           00736         MOVLW   0x0b
+0004BE 6EE5           00737         MOVWF   POSTDEC1
+0004C0 EC?? F0??      00738         CALL    _setState
+0004C4 52E6           00739         MOVF    POSTINC1, F
+0004C6                00740 _00202_DS_:
+                      00741 ;       .line   210; stateMachine.c     if (event == EV_LEFT) {
+0004C6 50??           00742         MOVF    r0x00, W
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE 15
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0004C8 0A02           00743         XORLW   0x02
+0004CA E1??           00744         BNZ     _00204_DS_
+                      00745 ;       .line   211; stateMachine.c     setState(STATE_TIME);
+0004CC 0E08           00746         MOVLW   0x08
+0004CE 6EE5           00747         MOVWF   POSTDEC1
+0004D0 EC?? F0??      00748         CALL    _setState
+0004D4 52E6           00749         MOVF    POSTINC1, F
+0004D6                00750 _00204_DS_:
+                      00751 ;       .line   215; stateMachine.c     if (event == EV_ENTER) {
+0004D6 50??           00752         MOVF    r0x00, W
+0004D8 0A04           00753         XORLW   0x04
+0004DA E1??           00754         BNZ     _00206_DS_
+                      00755 ;       .line   216; stateMachine.c     setIdiom(getIdiom() + 1);
+0004DC EC?? F0??      00756         CALL    _getIdiom
+0004E0 6E??           00757         MOVWF   r0x01
+0004E2 2A??           00758         INCF    r0x01, F
+0004E4 50??           00759         MOVF    r0x01, W
+0004E6 6EE5           00760         MOVWF   POSTDEC1
+0004E8 EC?? F0??      00761         CALL    _setIdiom
+0004EC 52E6           00762         MOVF    POSTINC1, F
+0004EE                00763 _00206_DS_:
+                      00764 ;       .line   218; stateMachine.c     if (event == EV_RESET) {
+0004EE 50??           00765         MOVF    r0x00, W
+0004F0 0A05           00766         XORLW   0x05
+0004F2 E0??           00767         BZ      _00464_DS_
+0004F4 D???           00768         BRA     _00222_DS_
+0004F6                00769 _00464_DS_:
+                      00770 ;       .line   219; stateMachine.c     setStateRst(STATE_IDIOM);
+0004F6 0E0A           00771         MOVLW   0x0a
+0004F8 6EE5           00772         MOVWF   POSTDEC1
+0004FA EC?? F0??      00773         CALL    _setStateRst
+0004FE 52E6           00774         MOVF    POSTINC1, F
+                      00775 ;       .line   220; stateMachine.c     setState(STATE_RST);
+000500 0E0C           00776         MOVLW   0x0c
+000502 6EE5           00777         MOVWF   POSTDEC1
+000504 EC?? F0??      00778         CALL    _setState
+000508 52E6           00779         MOVF    POSTINC1, F
+                      00780 ;       .line   222; stateMachine.c     break; 
+00050A D???           00781         BRA     _00222_DS_
+00050C                00782 _00209_DS_:
+                      00783 ;       .line   225; stateMachine.c     if (event == EV_RIGHT) {
+00050C 50??           00784         MOVF    r0x00, W
+00050E 0A03           00785         XORLW   0x03
+000510 E1??           00786         BNZ     _00211_DS_
+                      00787 ;       .line   226; stateMachine.c     setState(STATE_ALARM_HIGH_0);
+000512 0E00           00788         MOVLW   0x00
+000514 6EE5           00789         MOVWF   POSTDEC1
+000516 EC?? F0??      00790         CALL    _setState
+00051A 52E6           00791         MOVF    POSTINC1, F
+00051C                00792 _00211_DS_:
+                      00793 ;       .line   228; stateMachine.c     if (event == EV_LEFT) {
+00051C 50??           00794         MOVF    r0x00, W
+00051E 0A02           00795         XORLW   0x02
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE 16
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000520 E1??           00796         BNZ     _00213_DS_
+                      00797 ;       .line   229; stateMachine.c     setState(STATE_IDIOM);
+000522 0E0A           00798         MOVLW   0x0a
+000524 6EE5           00799         MOVWF   POSTDEC1
+000526 EC?? F0??      00800         CALL    _setState
+00052A 52E6           00801         MOVF    POSTINC1, F
+00052C                00802 _00213_DS_:
+                      00803 ;       .line   233; stateMachine.c     if (event == EV_RESET) {
+00052C 50??           00804         MOVF    r0x00, W
+00052E 0A05           00805         XORLW   0x05
+000530 E1??           00806         BNZ     _00222_DS_
+                      00807 ;       .line   234; stateMachine.c     setStateRst(STATE_DATE);
+000532 0E0B           00808         MOVLW   0x0b
+000534 6EE5           00809         MOVWF   POSTDEC1
+000536 EC?? F0??      00810         CALL    _setStateRst
+00053A 52E6           00811         MOVF    POSTINC1, F
+                      00812 ;       .line   235; stateMachine.c     setState(STATE_RST);
+00053C 0E0C           00813         MOVLW   0x0c
+00053E 6EE5           00814         MOVWF   POSTDEC1
+000540 EC?? F0??      00815         CALL    _setState
+000544 52E6           00816         MOVF    POSTINC1, F
+                      00817 ;       .line   237; stateMachine.c     break; 
+000546 D???           00818         BRA     _00222_DS_
+000548                00819 _00216_DS_:
+                      00820 ;       .line   242; stateMachine.c     if (event == EV_RIGHT) {
+000548 50??           00821         MOVF    r0x00, W
+00054A 0A03           00822         XORLW   0x03
+00054C E1??           00823         BNZ     _00218_DS_
+                      00824 ;       .line   243; stateMachine.c     setState(getStateRst());
+00054E EC?? F0??      00825         CALL    _getStateRst
+000552 6E??           00826         MOVWF   r0x01
+000554 50??           00827         MOVF    r0x01, W
+000556 6EE5           00828         MOVWF   POSTDEC1
+000558 EC?? F0??      00829         CALL    _setState
+00055C 52E6           00830         MOVF    POSTINC1, F
+00055E                00831 _00218_DS_:
+                      00832 ;       .line   245; stateMachine.c     if (event == EV_LEFT) {
+00055E 50??           00833         MOVF    r0x00, W
+000560 0A02           00834         XORLW   0x02
+000562 E1??           00835         BNZ     _00222_DS_
+                      00836 ;       .line   246; stateMachine.c     varInit();
+000564 EC?? F0??      00837         CALL    _varInit
+                      00838 ;       .line   248; stateMachine.c     break;
+000568 D???           00839         BRA     _00222_DS_
+00056A                00840 _00221_DS_:
+                      00841 ;       .line   250; stateMachine.c     default: setState(STATE_ALARM_HIGH_0);
+00056A 0E00           00842         MOVLW   0x00
+00056C 6EE5           00843         MOVWF   POSTDEC1
+00056E EC?? F0??      00844         CALL    _setState
+000572 52E6           00845         MOVF    POSTINC1, F
+000574                00846 _00222_DS_:
+                      00847 ;       .line   254; stateMachine.c     outputPrint(getState(), getIdiom());
+000574 EC?? F0??      00848         CALL    _getState
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE 17
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000578 6E??           00849         MOVWF   r0x00
+00057A 6A??           00850         CLRF    r0x01
+00057C EC?? F0??      00851         CALL    _getIdiom
+000580 6E??           00852         MOVWF   r0x02
+000582 50??           00853         MOVF    r0x02, W
+000584 6EE5           00854         MOVWF   POSTDEC1
+000586 50??           00855         MOVF    r0x01, W
+000588 6EE5           00856         MOVWF   POSTDEC1
+00058A 50??           00857         MOVF    r0x00, W
+00058C 6EE5           00858         MOVWF   POSTDEC1
+00058E EC?? F0??      00859         CALL    _outputPrint
+000592 0E03           00860         MOVLW   0x03
+000594 26E1           00861         ADDWF   FSR1L, F
+                      00862 ;       .line   255; stateMachine.c     outputSerial(getState(), getIdiom());
+000596 EC?? F0??      00863         CALL    _getState
+00059A 6E??           00864         MOVWF   r0x00
+00059C 6A??           00865         CLRF    r0x01
+00059E EC?? F0??      00866         CALL    _getIdiom
+0005A2 6E??           00867         MOVWF   r0x02
+0005A4 50??           00868         MOVF    r0x02, W
+0005A6 6EE5           00869         MOVWF   POSTDEC1
+0005A8 50??           00870         MOVF    r0x01, W
+0005AA 6EE5           00871         MOVWF   POSTDEC1
+0005AC 50??           00872         MOVF    r0x00, W
+0005AE 6EE5           00873         MOVWF   POSTDEC1
+0005B0 EC?? F0??      00874         CALL    _outputSerial
+0005B4 0E03           00875         MOVLW   0x03
+0005B6 26E1           00876         ADDWF   FSR1L, F
+0005B8 CFE4 F000      00877         MOVFF   PREINC1, r0x02
+0005BC CFE4 F000      00878         MOVFF   PREINC1, r0x01
+0005C0 CFE4 F000      00879         MOVFF   PREINC1, r0x00
+0005C4 CFE4 FFD9      00880         MOVFF   PREINC1, FSR2L
+0005C8 0012           00881         RETURN  
+                      00882 
+                      00883 ; ; Starting pCode block
+                      00884 S_stateMachine__smInit  code
+000000                00885 _smInit:
+                      00886 ;       .line   8; stateMachine.c       void smInit(void) {
+000000 CFD9 FFE5      00887         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00888         MOVFF   FSR1L, FSR2L
+                      00889 ;       .line   9; stateMachine.c       setState(STATE_TIME);    
+000008 0E08           00890         MOVLW   0x08
+00000A 6EE5           00891         MOVWF   POSTDEC1
+00000C EC?? F0??      00892         CALL    _setState
+000010 52E6           00893         MOVF    POSTINC1, F
+000012 CFE4 FFD9      00894         MOVFF   PREINC1, FSR2L
+000016 0012           00895         RETURN  
+                      00896 
+                      00897 
+                      00898 
+                      00899 ; Statistics:
+                      00900 ; code size:     1506 (0x05e2) bytes ( 1.15%)
+                      00901 ;                 753 (0x02f1) words
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE 18
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00902 ; udata size:       1 (0x0001) bytes ( 0.06%)
+                      00903 ; access size:      3 (0x0003) bytes
+                      00904 
+                      00905 
+                      00906         end
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE 19
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+FSR1L                             CONSTANT      00000FE1           4065
+FSR2L                             CONSTANT      00000FD9           4057
+PCL                               CONSTANT      00000FF9           4089
+PCLATH                            CONSTANT      00000FFA           4090
+PCLATU                            CONSTANT      00000FFB           4091
+POSTDEC1                          CONSTANT      00000FE5           4069
+POSTINC1                          CONSTANT      00000FE6           4070
+PREINC1                           CONSTANT      00000FE4           4068
+PRODL                             CONSTANT      00000FF3           4083
+STATUS                            CONSTANT      00000FD8           4056
+WREG                              CONSTANT      00000FE8           4072
+_00110_DS_                        ADDRESS       00000080            128
+_00112_DS_                        ADDRESS       00000090            144
+_00114_DS_                        ADDRESS       000000A0            160
+_00116_DS_                        ADDRESS       000000B0            176
+_00119_DS_                        ADDRESS       000000D2            210
+_00121_DS_                        ADDRESS       00000100            256
+_00123_DS_                        ADDRESS       00000130            304
+_00125_DS_                        ADDRESS       00000140            320
+_00128_DS_                        ADDRESS       00000162            354
+_00130_DS_                        ADDRESS       00000172            370
+_00132_DS_                        ADDRESS       00000182            386
+_00134_DS_                        ADDRESS       00000192            402
+_00137_DS_                        ADDRESS       000001B0            432
+_00139_DS_                        ADDRESS       000001DE            478
+_00141_DS_                        ADDRESS       0000020E            526
+_00143_DS_                        ADDRESS       0000021E            542
+_00146_DS_                        ADDRESS       0000023C            572
+_00148_DS_                        ADDRESS       0000024C            588
+_00150_DS_                        ADDRESS       0000025C            604
+_00152_DS_                        ADDRESS       0000026C            620
+_00155_DS_                        ADDRESS       0000028A            650
+_00157_DS_                        ADDRESS       000002B8            696
+_00159_DS_                        ADDRESS       000002E8            744
+_00161_DS_                        ADDRESS       000002F8            760
+_00164_DS_                        ADDRESS       00000316            790
+_00166_DS_                        ADDRESS       00000326            806
+_00168_DS_                        ADDRESS       00000336            822
+_00170_DS_                        ADDRESS       00000346            838
+_00173_DS_                        ADDRESS       00000364            868
+_00175_DS_                        ADDRESS       00000392            914
+_00177_DS_                        ADDRESS       000003C2            962
+_00179_DS_                        ADDRESS       000003D2            978
+_00182_DS_                        ADDRESS       000003F0           1008
+_00184_DS_                        ADDRESS       00000400           1024
+_00186_DS_                        ADDRESS       00000410           1040
+_00188_DS_                        ADDRESS       00000420           1056
+_00191_DS_                        ADDRESS       0000043E           1086
+_00193_DS_                        ADDRESS       00000462           1122
+_00195_DS_                        ADDRESS       00000488           1160
+_00197_DS_                        ADDRESS       00000498           1176
+_00200_DS_                        ADDRESS       000004B6           1206
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE 20
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+_00202_DS_                        ADDRESS       000004C6           1222
+_00204_DS_                        ADDRESS       000004D6           1238
+_00206_DS_                        ADDRESS       000004EE           1262
+_00209_DS_                        ADDRESS       0000050C           1292
+_00211_DS_                        ADDRESS       0000051C           1308
+_00213_DS_                        ADDRESS       0000052C           1324
+_00216_DS_                        ADDRESS       00000548           1352
+_00218_DS_                        ADDRESS       0000055E           1374
+_00221_DS_                        ADDRESS       0000056A           1386
+_00222_DS_                        ADDRESS       00000574           1396
+_00376_DS_                        ADDRESS       0000004C             76
+_00384_DS_                        ADDRESS       000000BA            186
+_00392_DS_                        ADDRESS       0000014A            330
+_00400_DS_                        ADDRESS       0000019A            410
+_00408_DS_                        ADDRESS       00000226            550
+_00416_DS_                        ADDRESS       00000274            628
+_00424_DS_                        ADDRESS       00000300            768
+_00432_DS_                        ADDRESS       0000034E            846
+_00440_DS_                        ADDRESS       000003DA            986
+_00448_DS_                        ADDRESS       00000428           1064
+_00456_DS_                        ADDRESS       000004A0           1184
+_00464_DS_                        ADDRESS       000004F6           1270
+__16_BIT                          CONSTANT      00000001              1
+__18F4550                         CONSTANT      00000001              1
+__ACC_RAM_LOW_END                 CONSTANT      0000005F             95
+__ACC_RAM_LOW_START               CONSTANT      00000000              0
+__ACTIVE_BANK_ADDR                VARIABLE      FFFFFFFF             -1
+__ASSUMED_BANK_ADDR               VARIABLE      FFFFFFFF             -1
+__BANK_0                          CONSTANT      00000000              0
+__BANK_1                          CONSTANT      00000100            256
+__BANK_2                          CONSTANT      00000200            512
+__BANK_3                          CONSTANT      00000300            768
+__BANK_4                          CONSTANT      00000400           1024
+__BANK_5                          CONSTANT      00000500           1280
+__BANK_6                          CONSTANT      00000600           1536
+__BANK_7                          CONSTANT      00000700           1792
+__BANK_8                          CONSTANT      00000800           2048
+__BANK_9                          CONSTANT      00000900           2304
+__BANK_10                         CONSTANT      00000A00           2560
+__BANK_11                         CONSTANT      00000B00           2816
+__BANK_12                         CONSTANT      00000C00           3072
+__BANK_13                         CONSTANT      00000D00           3328
+__BANK_14                         CONSTANT      00000E00           3584
+__BANK_15                         CONSTANT      00000F00           3840
+__BANK_BITS                       CONSTANT      00000F00           3840
+__BANK_FIRST                      CONSTANT      00000000              0
+__BANK_INV                        CONSTANT      FFFFFFFF             -1
+__BANK_LAST                       CONSTANT      00000F00           3840
+__BANK_MASK                       CONSTANT      000000FF            255
+__BANK_SHIFT                      CONSTANT      00000008              8
+__BANK_SIZE                       CONSTANT      00000100            256
+__CODE_END                        CONSTANT      00007FFF          32767
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:02        PAGE 21
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+__CODE_START                      CONSTANT      00000000              0
+__COMMON_RAM_END                  CONSTANT      0000005F             95
+__COMMON_RAM_START                CONSTANT      00000000              0
+__CONFIG_END                      CONSTANT      0030000D        3145741
+__CONFIG_START                    CONSTANT      00300000        3145728
+__EEPROM_END                      CONSTANT      00F000FF       15728895
+__EEPROM_START                    CONSTANT      00F00000       15728640
+__EXTENDED                        CONSTANT      00000001              1
+__GPUTILS_SVN_VERSION             CONSTANT      00000505           1285
+__GPUTILS_VERSION_MAJOR           CONSTANT      00000001              1
+__GPUTILS_VERSION_MICRO           CONSTANT      00000000              0
+__GPUTILS_VERSION_MINOR           CONSTANT      00000005              5
+__IDLOCS_END                      CONSTANT      00200007        2097159
+__IDLOCS_START                    CONSTANT      00200000        2097152
+__NUM_BANKS                       CONSTANT      00000010             16
+__VECTOR_INT_HIGH                 CONSTANT      00000008              8
+__VECTOR_INT_LOW                  CONSTANT      00000018             24
+__VECTOR_RESET                    CONSTANT      00000000              0
+__WHILE_LOOP_COUNT_MAX            CONSTANT      000000FF            255
+_eventRead                        EXTERNAL      00000000              0
+_getAlarmHigh                     EXTERNAL      00000000              0
+_getAlarmLow                      EXTERNAL      00000000              0
+_getIdiom                         EXTERNAL      00000000              0
+_getState                         EXTERNAL      00000000              0
+_getStateRst                      EXTERNAL      00000000              0
+_getTime                          EXTERNAL      00000000              0
+_outputPrint                      EXTERNAL      00000000              0
+_outputSerial                     EXTERNAL      00000000              0
+_setAlarmHigh                     EXTERNAL      00000000              0
+_setAlarmLow                      EXTERNAL      00000000              0
+_setIdiom                         EXTERNAL      00000000              0
+_setState                         EXTERNAL      00000000              0
+_setStateRst                      EXTERNAL      00000000              0
+_setTime                          EXTERNAL      00000000              0
+_smInit                           GLOBAL        00000000              0
+_smLoop                           GLOBAL        00000000              0
+_stateRST                         STATIC        00000000              0
+_varInit                          EXTERNAL      00000000              0
+r0x00                             STATIC        00000000              0
+r0x01                             STATIC        00000001              1
+r0x02                             STATIC        00000002              2
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     0 reported,     0 suppressed
+
+

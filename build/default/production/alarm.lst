@@ -1,0 +1,1395 @@
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE  1
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00001 ;--------------------------------------------------------
+                      00002 ; File Created by SDCC : free open source ANSI-C Compiler
+                      00003 ; Version 3.6.0 #9615 (MINGW64)
+                      00004 ;--------------------------------------------------------
+                      00005 ; PIC16 port for the Microchip 16-bit core micros
+                      00006 ;--------------------------------------------------------
+                      00007         list    p=18f4550
+                      00008         radix   dec
+                      00009 
+                      00010 
+                      00011 ;--------------------------------------------------------
+                      00012 ; public variables in this module
+                      00013 ;--------------------------------------------------------
+  0000                00014         global  _testAlarmHigh
+  0000                00015         global  _testAlarmLow
+  0000                00016         global  _controlAlarms
+                      00017 
+                      00018 ;--------------------------------------------------------
+                      00019 ; extern variables in this module
+                      00020 ;--------------------------------------------------------
+  0000                00021         extern  _ledOn
+  0000                00022         extern  _ledOff
+  0000                00023         extern  _ledBlink
+  0000                00024         extern  _getAlarmLow
+  0000                00025         extern  _getAlarmHigh
+  0000                00026         extern  _adcScale
+  0000                00027         extern  _BCD2UpperCh
+  0000                00028         extern  _BCD2LowerCh
+  0000                00029         extern  _rtcRead
+  0000                00030         extern  _serialSend
+  0000                00031         extern  _serialString
+                      00032 
+                      00033 ;--------------------------------------------------------
+                      00034 ;       Equates to used internal registers
+                      00035 ;--------------------------------------------------------
+  00000FD8            00036 STATUS  equ     0xfd8
+  00000FE8            00037 WREG    equ     0xfe8
+  00000FE1            00038 FSR1L   equ     0xfe1
+  00000FD9            00039 FSR2L   equ     0xfd9
+  00000FE6            00040 POSTINC1        equ     0xfe6
+  00000FE5            00041 POSTDEC1        equ     0xfe5
+  00000FE4            00042 PREINC1 equ     0xfe4
+  00000FDB            00043 PLUSW2  equ     0xfdb
+  00000FF3            00044 PRODL   equ     0xff3
+                      00045 
+                      00046 
+                      00047         idata
+000000 00             00048 _alarmNewH0     db      0x00
+000001 01             00049 _alarmAntH0     db      0x01
+000002 00             00050 _alarmNewH1     db      0x00
+000003 01             00051 _alarmAntH1     db      0x01
+000004 00             00052 _alarmNewL0     db      0x00
+000005 01             00053 _alarmAntL0     db      0x01
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE  2
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000006 00             00054 _alarmNewL1     db      0x00
+000007 01             00055 _alarmAntL1     db      0x01
+                      00056 
+                      00057 
+                      00058 ; Internal registers
+                      00059 .registers      udata_ovr       0x0000
+000000                00060 r0x00   res     1
+000001                00061 r0x01   res     1
+000002                00062 r0x02   res     1
+000003                00063 r0x03   res     1
+000004                00064 r0x04   res     1
+000005                00065 r0x05   res     1
+000006                00066 r0x06   res     1
+000007                00067 r0x07   res     1
+000008                00068 r0x08   res     1
+000009                00069 r0x09   res     1
+00000A                00070 r0x0a   res     1
+00000B                00071 r0x0b   res     1
+00000C                00072 r0x0c   res     1
+00000D                00073 r0x0d   res     1
+00000E                00074 r0x0e   res     1
+                      00075 
+                      00076 ;--------------------------------------------------------
+                      00077 ; global & static initialisations
+                      00078 ;--------------------------------------------------------
+                      00079 ; I code from now on!
+                      00080 ; ; Starting pCode block
+                      00081 S_alarm__controlAlarms  code
+000000                00082 _controlAlarms:
+                      00083 ;       .line   32; alarm.c     void controlAlarms(void){
+000000 CFD9 FFE5      00084         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00085         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00086         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      00087         MOVFF   r0x01, POSTDEC1
+000010 C??? F???      00088         MOVFF   r0x02, POSTDEC1
+000014 C??? F???      00089         MOVFF   r0x03, POSTDEC1
+000018 C??? F???      00090         MOVFF   r0x04, POSTDEC1
+00001C C??? F???      00091         MOVFF   r0x05, POSTDEC1
+000020 C??? F???      00092         MOVFF   r0x06, POSTDEC1
+000024 C??? F???      00093         MOVFF   r0x07, POSTDEC1
+000028 C??? F???      00094         MOVFF   r0x08, POSTDEC1
+00002C C??? F???      00095         MOVFF   r0x09, POSTDEC1
+000030 C??? F???      00096         MOVFF   r0x0a, POSTDEC1
+000034 C??? F???      00097         MOVFF   r0x0b, POSTDEC1
+000038 C??? F???      00098         MOVFF   r0x0c, POSTDEC1
+00003C C??? F???      00099         MOVFF   r0x0d, POSTDEC1
+000040 C??? F???      00100         MOVFF   r0x0e, POSTDEC1
+                      00101 ;       .line   34; alarm.c     alarmNewH0 = testAlarmHigh(0);
+000044 0E00           00102         MOVLW   0x00
+000046 6EE5           00103         MOVWF   POSTDEC1
+000048 EC?? F0??      00104         CALL    _testAlarmHigh
+00004C 010?           00105         BANKSEL _alarmNewH0
+00004E 6F??           00106         MOVWF   _alarmNewH0, B
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE  3
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000050 52E6           00107         MOVF    POSTINC1, F
+                      00108 ;       .line   35; alarm.c     alarmNewL0 = testAlarmLow(0);
+000052 0E00           00109         MOVLW   0x00
+000054 6EE5           00110         MOVWF   POSTDEC1
+000056 EC?? F0??      00111         CALL    _testAlarmLow
+00005A 010?           00112         BANKSEL _alarmNewL0
+00005C 6F??           00113         MOVWF   _alarmNewL0, B
+00005E 52E6           00114         MOVF    POSTINC1, F
+                      00115 ;       .line   36; alarm.c     alarmNewH1 = testAlarmHigh(1);
+000060 0E01           00116         MOVLW   0x01
+000062 6EE5           00117         MOVWF   POSTDEC1
+000064 EC?? F0??      00118         CALL    _testAlarmHigh
+000068 010?           00119         BANKSEL _alarmNewH1
+00006A 6F??           00120         MOVWF   _alarmNewH1, B
+00006C 52E6           00121         MOVF    POSTINC1, F
+                      00122 ;       .line   37; alarm.c     alarmNewL1 = testAlarmLow(1);
+00006E 0E01           00123         MOVLW   0x01
+000070 6EE5           00124         MOVWF   POSTDEC1
+000072 EC?? F0??      00125         CALL    _testAlarmLow
+000076 010?           00126         BANKSEL _alarmNewL1
+000078 6F??           00127         MOVWF   _alarmNewL1, B
+00007A 52E6           00128         MOVF    POSTINC1, F
+00007C 010?           00129         BANKSEL _alarmNewL0
+                      00130 ;       .line   39; alarm.c     if(alarmNewL0 == 1)
+00007E 51??           00131         MOVF    _alarmNewL0, W, B
+000080 0A01           00132         XORLW   0x01
+000082 E1??           00133         BNZ     _00132_DS_
+                      00134 ;       .line   40; alarm.c     ledBlink(0);
+000084 0E00           00135         MOVLW   0x00
+000086 6EE5           00136         MOVWF   POSTDEC1
+000088 EC?? F0??      00137         CALL    _ledBlink
+00008C 52E6           00138         MOVF    POSTINC1, F
+00008E                00139 _00132_DS_:
+00008E 010?           00140         BANKSEL _alarmNewH0
+                      00141 ;       .line   41; alarm.c     if(alarmNewH0 == 1)
+000090 51??           00142         MOVF    _alarmNewH0, W, B
+000092 0A01           00143         XORLW   0x01
+000094 E1??           00144         BNZ     _00134_DS_
+                      00145 ;       .line   42; alarm.c     ledOn(0);
+000096 0E00           00146         MOVLW   0x00
+000098 6EE5           00147         MOVWF   POSTDEC1
+00009A EC?? F0??      00148         CALL    _ledOn
+00009E 52E6           00149         MOVF    POSTINC1, F
+0000A0                00150 _00134_DS_:
+                      00151 ;       .line   43; alarm.c     if(alarmNewH0 != alarmAntH0 & alarmNewH0 == 1)
+0000A0 6A??           00152         CLRF    r0x00
+0000A2 010?           00153         BANKSEL _alarmNewH0
+0000A4 51??           00154         MOVF    _alarmNewH0, W, B
+0000A6 010?           00155         BANKSEL _alarmAntH0
+0000A8 19??           00156         XORWF   _alarmAntH0, W, B
+0000AA E1??           00157         BNZ     _00213_DS_
+0000AC 2A??           00158         INCF    r0x00, F
+0000AE                00159 _00213_DS_:
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE  4
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0000AE 50??           00160         MOVF    r0x00, W
+0000B0 80D8           00161         BSF     STATUS, 0
+0000B2 66E8           00162         TSTFSZ  WREG
+0000B4 90D8           00163         BCF     STATUS, 0
+0000B6 6A??           00164         CLRF    r0x00
+0000B8 36??           00165         RLCF    r0x00, F
+0000BA 6A??           00166         CLRF    r0x01
+0000BC 010?           00167         BANKSEL _alarmNewH0
+0000BE 51??           00168         MOVF    _alarmNewH0, W, B
+0000C0 0A01           00169         XORLW   0x01
+0000C2 E1??           00170         BNZ     _00215_DS_
+0000C4 2A??           00171         INCF    r0x01, F
+0000C6                00172 _00215_DS_:
+0000C6 50??           00173         MOVF    r0x00, W
+0000C8 16??           00174         ANDWF   r0x01, F
+0000CA 50??           00175         MOVF    r0x01, W
+0000CC E0??           00176         BZ      _00136_DS_
+                      00177 ;       .line   45; alarm.c     serialString("Alarm High 0 Acionado");
+0000CE 0E??           00178         MOVLW   UPPER(___str_0)
+0000D0 6E??           00179         MOVWF   r0x02
+0000D2 0E??           00180         MOVLW   HIGH(___str_0)
+0000D4 6E??           00181         MOVWF   r0x01
+0000D6 0E??           00182         MOVLW   LOW(___str_0)
+0000D8 6E??           00183         MOVWF   r0x00
+0000DA 50??           00184         MOVF    r0x02, W
+0000DC 6EE5           00185         MOVWF   POSTDEC1
+0000DE 50??           00186         MOVF    r0x01, W
+0000E0 6EE5           00187         MOVWF   POSTDEC1
+0000E2 50??           00188         MOVF    r0x00, W
+0000E4 6EE5           00189         MOVWF   POSTDEC1
+0000E6 EC?? F0??      00190         CALL    _serialString
+0000EA 0E03           00191         MOVLW   0x03
+0000EC 26E1           00192         ADDWF   FSR1L, F
+                      00193 ;       .line   46; alarm.c     serialSend(13);      
+0000EE 0E0D           00194         MOVLW   0x0d
+0000F0 6EE5           00195         MOVWF   POSTDEC1
+0000F2 EC?? F0??      00196         CALL    _serialSend
+0000F6 52E6           00197         MOVF    POSTINC1, F
+0000F8                00198 _00136_DS_:
+                      00199 ;       .line   48; alarm.c     if(alarmNewH0 != alarmAntH0 & alarmNewH0 == 0)
+0000F8 6A??           00200         CLRF    r0x00
+0000FA 010?           00201         BANKSEL _alarmNewH0
+0000FC 51??           00202         MOVF    _alarmNewH0, W, B
+0000FE 010?           00203         BANKSEL _alarmAntH0
+000100 19??           00204         XORWF   _alarmAntH0, W, B
+000102 E1??           00205         BNZ     _00217_DS_
+000104 2A??           00206         INCF    r0x00, F
+000106                00207 _00217_DS_:
+000106 50??           00208         MOVF    r0x00, W
+000108 80D8           00209         BSF     STATUS, 0
+00010A 66E8           00210         TSTFSZ  WREG
+00010C 90D8           00211         BCF     STATUS, 0
+00010E 6A??           00212         CLRF    r0x00
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE  5
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000110 36??           00213         RLCF    r0x00, F
+000112 010?           00214         BANKSEL _alarmNewH0
+000114 51??           00215         MOVF    _alarmNewH0, W, B
+000116 80D8           00216         BSF     STATUS, 0
+000118 66E8           00217         TSTFSZ  WREG
+00011A 90D8           00218         BCF     STATUS, 0
+00011C 6A??           00219         CLRF    r0x01
+00011E 36??           00220         RLCF    r0x01, F
+000120 50??           00221         MOVF    r0x01, W
+000122 16??           00222         ANDWF   r0x00, F
+000124 50??           00223         MOVF    r0x00, W
+000126 E0??           00224         BZ      _00138_DS_
+                      00225 ;       .line   50; alarm.c     serialString("Alarm High 0 Desligado");
+000128 0E??           00226         MOVLW   UPPER(___str_1)
+00012A 6E??           00227         MOVWF   r0x02
+00012C 0E??           00228         MOVLW   HIGH(___str_1)
+00012E 6E??           00229         MOVWF   r0x01
+000130 0E??           00230         MOVLW   LOW(___str_1)
+000132 6E??           00231         MOVWF   r0x00
+000134 50??           00232         MOVF    r0x02, W
+000136 6EE5           00233         MOVWF   POSTDEC1
+000138 50??           00234         MOVF    r0x01, W
+00013A 6EE5           00235         MOVWF   POSTDEC1
+00013C 50??           00236         MOVF    r0x00, W
+00013E 6EE5           00237         MOVWF   POSTDEC1
+000140 EC?? F0??      00238         CALL    _serialString
+000144 0E03           00239         MOVLW   0x03
+000146 26E1           00240         ADDWF   FSR1L, F
+                      00241 ;       .line   51; alarm.c     serialSend(13);        
+000148 0E0D           00242         MOVLW   0x0d
+00014A 6EE5           00243         MOVWF   POSTDEC1
+00014C EC?? F0??      00244         CALL    _serialSend
+000150 52E6           00245         MOVF    POSTINC1, F
+000152                00246 _00138_DS_:
+                      00247 ;       .line   53; alarm.c     if(alarmNewL0 != alarmAntL0 & alarmNewL0 == 1)
+000152 6A??           00248         CLRF    r0x00
+000154 010?           00249         BANKSEL _alarmNewL0
+000156 51??           00250         MOVF    _alarmNewL0, W, B
+000158 010?           00251         BANKSEL _alarmAntL0
+00015A 19??           00252         XORWF   _alarmAntL0, W, B
+00015C E1??           00253         BNZ     _00219_DS_
+00015E 2A??           00254         INCF    r0x00, F
+000160                00255 _00219_DS_:
+000160 50??           00256         MOVF    r0x00, W
+000162 80D8           00257         BSF     STATUS, 0
+000164 66E8           00258         TSTFSZ  WREG
+000166 90D8           00259         BCF     STATUS, 0
+000168 6A??           00260         CLRF    r0x00
+00016A 36??           00261         RLCF    r0x00, F
+00016C 6A??           00262         CLRF    r0x01
+00016E 010?           00263         BANKSEL _alarmNewL0
+000170 51??           00264         MOVF    _alarmNewL0, W, B
+000172 0A01           00265         XORLW   0x01
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE  6
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000174 E1??           00266         BNZ     _00221_DS_
+000176 2A??           00267         INCF    r0x01, F
+000178                00268 _00221_DS_:
+000178 50??           00269         MOVF    r0x00, W
+00017A 16??           00270         ANDWF   r0x01, F
+00017C 50??           00271         MOVF    r0x01, W
+00017E E0??           00272         BZ      _00140_DS_
+                      00273 ;       .line   55; alarm.c     serialString("Alarm Low 0 Acionado");
+000180 0E??           00274         MOVLW   UPPER(___str_2)
+000182 6E??           00275         MOVWF   r0x02
+000184 0E??           00276         MOVLW   HIGH(___str_2)
+000186 6E??           00277         MOVWF   r0x01
+000188 0E??           00278         MOVLW   LOW(___str_2)
+00018A 6E??           00279         MOVWF   r0x00
+00018C 50??           00280         MOVF    r0x02, W
+00018E 6EE5           00281         MOVWF   POSTDEC1
+000190 50??           00282         MOVF    r0x01, W
+000192 6EE5           00283         MOVWF   POSTDEC1
+000194 50??           00284         MOVF    r0x00, W
+000196 6EE5           00285         MOVWF   POSTDEC1
+000198 EC?? F0??      00286         CALL    _serialString
+00019C 0E03           00287         MOVLW   0x03
+00019E 26E1           00288         ADDWF   FSR1L, F
+                      00289 ;       .line   56; alarm.c     serialSend(13);      
+0001A0 0E0D           00290         MOVLW   0x0d
+0001A2 6EE5           00291         MOVWF   POSTDEC1
+0001A4 EC?? F0??      00292         CALL    _serialSend
+0001A8 52E6           00293         MOVF    POSTINC1, F
+0001AA                00294 _00140_DS_:
+                      00295 ;       .line   58; alarm.c     if(alarmNewL0 != alarmAntL0 & alarmNewL0 == 0)
+0001AA 6A??           00296         CLRF    r0x00
+0001AC 010?           00297         BANKSEL _alarmNewL0
+0001AE 51??           00298         MOVF    _alarmNewL0, W, B
+0001B0 010?           00299         BANKSEL _alarmAntL0
+0001B2 19??           00300         XORWF   _alarmAntL0, W, B
+0001B4 E1??           00301         BNZ     _00223_DS_
+0001B6 2A??           00302         INCF    r0x00, F
+0001B8                00303 _00223_DS_:
+0001B8 50??           00304         MOVF    r0x00, W
+0001BA 80D8           00305         BSF     STATUS, 0
+0001BC 66E8           00306         TSTFSZ  WREG
+0001BE 90D8           00307         BCF     STATUS, 0
+0001C0 6A??           00308         CLRF    r0x00
+0001C2 36??           00309         RLCF    r0x00, F
+0001C4 010?           00310         BANKSEL _alarmNewL0
+0001C6 51??           00311         MOVF    _alarmNewL0, W, B
+0001C8 80D8           00312         BSF     STATUS, 0
+0001CA 66E8           00313         TSTFSZ  WREG
+0001CC 90D8           00314         BCF     STATUS, 0
+0001CE 6A??           00315         CLRF    r0x01
+0001D0 36??           00316         RLCF    r0x01, F
+0001D2 50??           00317         MOVF    r0x01, W
+0001D4 16??           00318         ANDWF   r0x00, F
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE  7
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0001D6 50??           00319         MOVF    r0x00, W
+0001D8 E0??           00320         BZ      _00142_DS_
+                      00321 ;       .line   60; alarm.c     serialString("Alarm Low 0 Desligado");
+0001DA 0E??           00322         MOVLW   UPPER(___str_3)
+0001DC 6E??           00323         MOVWF   r0x02
+0001DE 0E??           00324         MOVLW   HIGH(___str_3)
+0001E0 6E??           00325         MOVWF   r0x01
+0001E2 0E??           00326         MOVLW   LOW(___str_3)
+0001E4 6E??           00327         MOVWF   r0x00
+0001E6 50??           00328         MOVF    r0x02, W
+0001E8 6EE5           00329         MOVWF   POSTDEC1
+0001EA 50??           00330         MOVF    r0x01, W
+0001EC 6EE5           00331         MOVWF   POSTDEC1
+0001EE 50??           00332         MOVF    r0x00, W
+0001F0 6EE5           00333         MOVWF   POSTDEC1
+0001F2 EC?? F0??      00334         CALL    _serialString
+0001F6 0E03           00335         MOVLW   0x03
+0001F8 26E1           00336         ADDWF   FSR1L, F
+                      00337 ;       .line   61; alarm.c     serialSend(13);        
+0001FA 0E0D           00338         MOVLW   0x0d
+0001FC 6EE5           00339         MOVWF   POSTDEC1
+0001FE EC?? F0??      00340         CALL    _serialSend
+000202 52E6           00341         MOVF    POSTINC1, F
+000204                00342 _00142_DS_:
+000204 010?           00343         BANKSEL _alarmNewH0
+                      00344 ;       .line   63; alarm.c     if(alarmNewH0 == 0 & alarmNewL0 == 0)
+000206 51??           00345         MOVF    _alarmNewH0, W, B
+000208 80D8           00346         BSF     STATUS, 0
+00020A 66E8           00347         TSTFSZ  WREG
+00020C 90D8           00348         BCF     STATUS, 0
+00020E 6A??           00349         CLRF    r0x00
+000210 36??           00350         RLCF    r0x00, F
+000212 010?           00351         BANKSEL _alarmNewL0
+000214 51??           00352         MOVF    _alarmNewL0, W, B
+000216 80D8           00353         BSF     STATUS, 0
+000218 66E8           00354         TSTFSZ  WREG
+00021A 90D8           00355         BCF     STATUS, 0
+00021C 6A??           00356         CLRF    r0x01
+00021E 36??           00357         RLCF    r0x01, F
+000220 50??           00358         MOVF    r0x01, W
+000222 16??           00359         ANDWF   r0x00, F
+000224 50??           00360         MOVF    r0x00, W
+000226 E0??           00361         BZ      _00144_DS_
+                      00362 ;       .line   65; alarm.c     ledOff(0);
+000228 0E00           00363         MOVLW   0x00
+00022A 6EE5           00364         MOVWF   POSTDEC1
+00022C EC?? F0??      00365         CALL    _ledOff
+000230 52E6           00366         MOVF    POSTINC1, F
+000232                00367 _00144_DS_:
+000232 010?           00368         BANKSEL _alarmNewL1
+                      00369 ;       .line   67; alarm.c     if(alarmNewL1 == 1)
+000234 51??           00370         MOVF    _alarmNewL1, W, B
+000236 0A01           00371         XORLW   0x01
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE  8
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000238 E1??           00372         BNZ     _00146_DS_
+                      00373 ;       .line   68; alarm.c     ledBlink(1);
+00023A 0E01           00374         MOVLW   0x01
+00023C 6EE5           00375         MOVWF   POSTDEC1
+00023E EC?? F0??      00376         CALL    _ledBlink
+000242 52E6           00377         MOVF    POSTINC1, F
+000244                00378 _00146_DS_:
+000244 010?           00379         BANKSEL _alarmNewH1
+                      00380 ;       .line   69; alarm.c     if(alarmNewH1 == 1)
+000246 51??           00381         MOVF    _alarmNewH1, W, B
+000248 0A01           00382         XORLW   0x01
+00024A E1??           00383         BNZ     _00148_DS_
+                      00384 ;       .line   70; alarm.c     ledOn(1); 
+00024C 0E01           00385         MOVLW   0x01
+00024E 6EE5           00386         MOVWF   POSTDEC1
+000250 EC?? F0??      00387         CALL    _ledOn
+000254 52E6           00388         MOVF    POSTINC1, F
+000256                00389 _00148_DS_:
+                      00390 ;       .line   71; alarm.c     if(alarmNewH1 != alarmAntH1 & alarmNewH1 == 1)
+000256 6A??           00391         CLRF    r0x00
+000258 010?           00392         BANKSEL _alarmNewH1
+00025A 51??           00393         MOVF    _alarmNewH1, W, B
+00025C 010?           00394         BANKSEL _alarmAntH1
+00025E 19??           00395         XORWF   _alarmAntH1, W, B
+000260 E1??           00396         BNZ     _00229_DS_
+000262 2A??           00397         INCF    r0x00, F
+000264                00398 _00229_DS_:
+000264 50??           00399         MOVF    r0x00, W
+000266 80D8           00400         BSF     STATUS, 0
+000268 66E8           00401         TSTFSZ  WREG
+00026A 90D8           00402         BCF     STATUS, 0
+00026C 6A??           00403         CLRF    r0x00
+00026E 36??           00404         RLCF    r0x00, F
+000270 6A??           00405         CLRF    r0x01
+000272 010?           00406         BANKSEL _alarmNewH1
+000274 51??           00407         MOVF    _alarmNewH1, W, B
+000276 0A01           00408         XORLW   0x01
+000278 E1??           00409         BNZ     _00231_DS_
+00027A 2A??           00410         INCF    r0x01, F
+00027C                00411 _00231_DS_:
+00027C 50??           00412         MOVF    r0x00, W
+00027E 16??           00413         ANDWF   r0x01, F
+000280 50??           00414         MOVF    r0x01, W
+000282 E0??           00415         BZ      _00150_DS_
+                      00416 ;       .line   73; alarm.c     serialString("Alarm High 1 Acionado");
+000284 0E??           00417         MOVLW   UPPER(___str_4)
+000286 6E??           00418         MOVWF   r0x02
+000288 0E??           00419         MOVLW   HIGH(___str_4)
+00028A 6E??           00420         MOVWF   r0x01
+00028C 0E??           00421         MOVLW   LOW(___str_4)
+00028E 6E??           00422         MOVWF   r0x00
+000290 50??           00423         MOVF    r0x02, W
+000292 6EE5           00424         MOVWF   POSTDEC1
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE  9
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000294 50??           00425         MOVF    r0x01, W
+000296 6EE5           00426         MOVWF   POSTDEC1
+000298 50??           00427         MOVF    r0x00, W
+00029A 6EE5           00428         MOVWF   POSTDEC1
+00029C EC?? F0??      00429         CALL    _serialString
+0002A0 0E03           00430         MOVLW   0x03
+0002A2 26E1           00431         ADDWF   FSR1L, F
+                      00432 ;       .line   74; alarm.c     serialSend(13);      
+0002A4 0E0D           00433         MOVLW   0x0d
+0002A6 6EE5           00434         MOVWF   POSTDEC1
+0002A8 EC?? F0??      00435         CALL    _serialSend
+0002AC 52E6           00436         MOVF    POSTINC1, F
+0002AE                00437 _00150_DS_:
+                      00438 ;       .line   76; alarm.c     if(alarmNewH1 != alarmAntH1 & alarmNewH1 == 0)
+0002AE 6A??           00439         CLRF    r0x00
+0002B0 010?           00440         BANKSEL _alarmNewH1
+0002B2 51??           00441         MOVF    _alarmNewH1, W, B
+0002B4 010?           00442         BANKSEL _alarmAntH1
+0002B6 19??           00443         XORWF   _alarmAntH1, W, B
+0002B8 E1??           00444         BNZ     _00233_DS_
+0002BA 2A??           00445         INCF    r0x00, F
+0002BC                00446 _00233_DS_:
+0002BC 50??           00447         MOVF    r0x00, W
+0002BE 80D8           00448         BSF     STATUS, 0
+0002C0 66E8           00449         TSTFSZ  WREG
+0002C2 90D8           00450         BCF     STATUS, 0
+0002C4 6A??           00451         CLRF    r0x00
+0002C6 36??           00452         RLCF    r0x00, F
+0002C8 010?           00453         BANKSEL _alarmNewH1
+0002CA 51??           00454         MOVF    _alarmNewH1, W, B
+0002CC 80D8           00455         BSF     STATUS, 0
+0002CE 66E8           00456         TSTFSZ  WREG
+0002D0 90D8           00457         BCF     STATUS, 0
+0002D2 6A??           00458         CLRF    r0x01
+0002D4 36??           00459         RLCF    r0x01, F
+0002D6 50??           00460         MOVF    r0x01, W
+0002D8 16??           00461         ANDWF   r0x00, F
+0002DA 50??           00462         MOVF    r0x00, W
+0002DC E0??           00463         BZ      _00152_DS_
+                      00464 ;       .line   78; alarm.c     serialString("Alarm High 1 Desligado");
+0002DE 0E??           00465         MOVLW   UPPER(___str_5)
+0002E0 6E??           00466         MOVWF   r0x02
+0002E2 0E??           00467         MOVLW   HIGH(___str_5)
+0002E4 6E??           00468         MOVWF   r0x01
+0002E6 0E??           00469         MOVLW   LOW(___str_5)
+0002E8 6E??           00470         MOVWF   r0x00
+0002EA 50??           00471         MOVF    r0x02, W
+0002EC 6EE5           00472         MOVWF   POSTDEC1
+0002EE 50??           00473         MOVF    r0x01, W
+0002F0 6EE5           00474         MOVWF   POSTDEC1
+0002F2 50??           00475         MOVF    r0x00, W
+0002F4 6EE5           00476         MOVWF   POSTDEC1
+0002F6 EC?? F0??      00477         CALL    _serialString
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 10
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0002FA 0E03           00478         MOVLW   0x03
+0002FC 26E1           00479         ADDWF   FSR1L, F
+                      00480 ;       .line   79; alarm.c     serialSend(13);        
+0002FE 0E0D           00481         MOVLW   0x0d
+000300 6EE5           00482         MOVWF   POSTDEC1
+000302 EC?? F0??      00483         CALL    _serialSend
+000306 52E6           00484         MOVF    POSTINC1, F
+000308                00485 _00152_DS_:
+                      00486 ;       .line   81; alarm.c     if(alarmNewL1 != alarmAntL1 & alarmNewL1 == 1)
+000308 6A??           00487         CLRF    r0x00
+00030A 010?           00488         BANKSEL _alarmNewL1
+00030C 51??           00489         MOVF    _alarmNewL1, W, B
+00030E 010?           00490         BANKSEL _alarmAntL1
+000310 19??           00491         XORWF   _alarmAntL1, W, B
+000312 E1??           00492         BNZ     _00235_DS_
+000314 2A??           00493         INCF    r0x00, F
+000316                00494 _00235_DS_:
+000316 50??           00495         MOVF    r0x00, W
+000318 80D8           00496         BSF     STATUS, 0
+00031A 66E8           00497         TSTFSZ  WREG
+00031C 90D8           00498         BCF     STATUS, 0
+00031E 6A??           00499         CLRF    r0x00
+000320 36??           00500         RLCF    r0x00, F
+000322 6A??           00501         CLRF    r0x01
+000324 010?           00502         BANKSEL _alarmNewL1
+000326 51??           00503         MOVF    _alarmNewL1, W, B
+000328 0A01           00504         XORLW   0x01
+00032A E1??           00505         BNZ     _00237_DS_
+00032C 2A??           00506         INCF    r0x01, F
+00032E                00507 _00237_DS_:
+00032E 50??           00508         MOVF    r0x00, W
+000330 16??           00509         ANDWF   r0x01, F
+000332 50??           00510         MOVF    r0x01, W
+000334 E0??           00511         BZ      _00154_DS_
+                      00512 ;       .line   83; alarm.c     serialString("Alarm Low 1 Acionado");
+000336 0E??           00513         MOVLW   UPPER(___str_6)
+000338 6E??           00514         MOVWF   r0x02
+00033A 0E??           00515         MOVLW   HIGH(___str_6)
+00033C 6E??           00516         MOVWF   r0x01
+00033E 0E??           00517         MOVLW   LOW(___str_6)
+000340 6E??           00518         MOVWF   r0x00
+000342 50??           00519         MOVF    r0x02, W
+000344 6EE5           00520         MOVWF   POSTDEC1
+000346 50??           00521         MOVF    r0x01, W
+000348 6EE5           00522         MOVWF   POSTDEC1
+00034A 50??           00523         MOVF    r0x00, W
+00034C 6EE5           00524         MOVWF   POSTDEC1
+00034E EC?? F0??      00525         CALL    _serialString
+000352 0E03           00526         MOVLW   0x03
+000354 26E1           00527         ADDWF   FSR1L, F
+                      00528 ;       .line   84; alarm.c     serialSend(13);      
+000356 0E0D           00529         MOVLW   0x0d
+000358 6EE5           00530         MOVWF   POSTDEC1
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 11
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00035A EC?? F0??      00531         CALL    _serialSend
+00035E 52E6           00532         MOVF    POSTINC1, F
+000360                00533 _00154_DS_:
+                      00534 ;       .line   86; alarm.c     if(alarmNewL1 != alarmAntL1 & alarmNewL1 == 0)
+000360 6A??           00535         CLRF    r0x00
+000362 010?           00536         BANKSEL _alarmNewL1
+000364 51??           00537         MOVF    _alarmNewL1, W, B
+000366 010?           00538         BANKSEL _alarmAntL1
+000368 19??           00539         XORWF   _alarmAntL1, W, B
+00036A E1??           00540         BNZ     _00239_DS_
+00036C 2A??           00541         INCF    r0x00, F
+00036E                00542 _00239_DS_:
+00036E 50??           00543         MOVF    r0x00, W
+000370 80D8           00544         BSF     STATUS, 0
+000372 66E8           00545         TSTFSZ  WREG
+000374 90D8           00546         BCF     STATUS, 0
+000376 6A??           00547         CLRF    r0x00
+000378 36??           00548         RLCF    r0x00, F
+00037A 010?           00549         BANKSEL _alarmNewL1
+00037C 51??           00550         MOVF    _alarmNewL1, W, B
+00037E 80D8           00551         BSF     STATUS, 0
+000380 66E8           00552         TSTFSZ  WREG
+000382 90D8           00553         BCF     STATUS, 0
+000384 6A??           00554         CLRF    r0x01
+000386 36??           00555         RLCF    r0x01, F
+000388 50??           00556         MOVF    r0x01, W
+00038A 16??           00557         ANDWF   r0x00, F
+00038C 50??           00558         MOVF    r0x00, W
+00038E E0??           00559         BZ      _00156_DS_
+                      00560 ;       .line   88; alarm.c     serialString("Alarm Low 1 Desligado");
+000390 0E??           00561         MOVLW   UPPER(___str_7)
+000392 6E??           00562         MOVWF   r0x02
+000394 0E??           00563         MOVLW   HIGH(___str_7)
+000396 6E??           00564         MOVWF   r0x01
+000398 0E??           00565         MOVLW   LOW(___str_7)
+00039A 6E??           00566         MOVWF   r0x00
+00039C 50??           00567         MOVF    r0x02, W
+00039E 6EE5           00568         MOVWF   POSTDEC1
+0003A0 50??           00569         MOVF    r0x01, W
+0003A2 6EE5           00570         MOVWF   POSTDEC1
+0003A4 50??           00571         MOVF    r0x00, W
+0003A6 6EE5           00572         MOVWF   POSTDEC1
+0003A8 EC?? F0??      00573         CALL    _serialString
+0003AC 0E03           00574         MOVLW   0x03
+0003AE 26E1           00575         ADDWF   FSR1L, F
+                      00576 ;       .line   89; alarm.c     serialSend(13);        
+0003B0 0E0D           00577         MOVLW   0x0d
+0003B2 6EE5           00578         MOVWF   POSTDEC1
+0003B4 EC?? F0??      00579         CALL    _serialSend
+0003B8 52E6           00580         MOVF    POSTINC1, F
+0003BA                00581 _00156_DS_:
+0003BA 010?           00582         BANKSEL _alarmNewH1
+                      00583 ;       .line   91; alarm.c     if(alarmNewH1 == 0 & alarmNewL1 == 0)
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 12
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0003BC 51??           00584         MOVF    _alarmNewH1, W, B
+0003BE 80D8           00585         BSF     STATUS, 0
+0003C0 66E8           00586         TSTFSZ  WREG
+0003C2 90D8           00587         BCF     STATUS, 0
+0003C4 6A??           00588         CLRF    r0x00
+0003C6 36??           00589         RLCF    r0x00, F
+0003C8 010?           00590         BANKSEL _alarmNewL1
+0003CA 51??           00591         MOVF    _alarmNewL1, W, B
+0003CC 80D8           00592         BSF     STATUS, 0
+0003CE 66E8           00593         TSTFSZ  WREG
+0003D0 90D8           00594         BCF     STATUS, 0
+0003D2 6A??           00595         CLRF    r0x01
+0003D4 36??           00596         RLCF    r0x01, F
+0003D6 50??           00597         MOVF    r0x01, W
+0003D8 16??           00598         ANDWF   r0x00, F
+0003DA 50??           00599         MOVF    r0x00, W
+0003DC E0??           00600         BZ      _00158_DS_
+                      00601 ;       .line   93; alarm.c     ledOff(1);
+0003DE 0E01           00602         MOVLW   0x01
+0003E0 6EE5           00603         MOVWF   POSTDEC1
+0003E2 EC?? F0??      00604         CALL    _ledOff
+0003E6 52E6           00605         MOVF    POSTINC1, F
+0003E8                00606 _00158_DS_:
+                      00607 ;       .line   95; alarm.c     if(alarmNewL0 != alarmAntL0 | alarmNewH0 != alarmAntH0 | alarmNewL1 != a
+                            larmAntL1 | alarmNewH1 != alarmAntH1)
+0003E8 6A??           00608         CLRF    r0x00
+0003EA 010?           00609         BANKSEL _alarmNewL0
+0003EC 51??           00610         MOVF    _alarmNewL0, W, B
+0003EE 010?           00611         BANKSEL _alarmAntL0
+0003F0 19??           00612         XORWF   _alarmAntL0, W, B
+0003F2 E1??           00613         BNZ     _00241_DS_
+0003F4 2A??           00614         INCF    r0x00, F
+0003F6                00615 _00241_DS_:
+0003F6 50??           00616         MOVF    r0x00, W
+0003F8 80D8           00617         BSF     STATUS, 0
+0003FA 66E8           00618         TSTFSZ  WREG
+0003FC 90D8           00619         BCF     STATUS, 0
+0003FE 6A??           00620         CLRF    r0x00
+000400 36??           00621         RLCF    r0x00, F
+000402 6A??           00622         CLRF    r0x01
+000404 010?           00623         BANKSEL _alarmNewH0
+000406 51??           00624         MOVF    _alarmNewH0, W, B
+000408 010?           00625         BANKSEL _alarmAntH0
+00040A 19??           00626         XORWF   _alarmAntH0, W, B
+00040C E1??           00627         BNZ     _00243_DS_
+00040E 2A??           00628         INCF    r0x01, F
+000410                00629 _00243_DS_:
+000410 50??           00630         MOVF    r0x01, W
+000412 80D8           00631         BSF     STATUS, 0
+000414 66E8           00632         TSTFSZ  WREG
+000416 90D8           00633         BCF     STATUS, 0
+000418 6A??           00634         CLRF    r0x01
+00041A 36??           00635         RLCF    r0x01, F
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 13
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00041C 50??           00636         MOVF    r0x01, W
+00041E 12??           00637         IORWF   r0x00, F
+000420 6A??           00638         CLRF    r0x01
+000422 010?           00639         BANKSEL _alarmNewL1
+000424 51??           00640         MOVF    _alarmNewL1, W, B
+000426 010?           00641         BANKSEL _alarmAntL1
+000428 19??           00642         XORWF   _alarmAntL1, W, B
+00042A E1??           00643         BNZ     _00246_DS_
+00042C 2A??           00644         INCF    r0x01, F
+00042E                00645 _00246_DS_:
+00042E 50??           00646         MOVF    r0x01, W
+000430 80D8           00647         BSF     STATUS, 0
+000432 66E8           00648         TSTFSZ  WREG
+000434 90D8           00649         BCF     STATUS, 0
+000436 6A??           00650         CLRF    r0x01
+000438 36??           00651         RLCF    r0x01, F
+00043A 50??           00652         MOVF    r0x01, W
+00043C 12??           00653         IORWF   r0x00, F
+00043E 6A??           00654         CLRF    r0x01
+000440 010?           00655         BANKSEL _alarmNewH1
+000442 51??           00656         MOVF    _alarmNewH1, W, B
+000444 010?           00657         BANKSEL _alarmAntH1
+000446 19??           00658         XORWF   _alarmAntH1, W, B
+000448 E1??           00659         BNZ     _00249_DS_
+00044A 2A??           00660         INCF    r0x01, F
+00044C                00661 _00249_DS_:
+00044C 50??           00662         MOVF    r0x01, W
+00044E 80D8           00663         BSF     STATUS, 0
+000450 66E8           00664         TSTFSZ  WREG
+000452 90D8           00665         BCF     STATUS, 0
+000454 6A??           00666         CLRF    r0x01
+000456 36??           00667         RLCF    r0x01, F
+000458 50??           00668         MOVF    r0x01, W
+00045A 12??           00669         IORWF   r0x00, F
+00045C 50??           00670         MOVF    r0x00, W
+00045E B4D8           00671         BTFSC   STATUS, 2
+000460 D???           00672         BRA     _00160_DS_
+                      00673 ;       .line   97; alarm.c     min = rtcRead(0x01);
+000462 0E01           00674         MOVLW   0x01
+000464 6EE5           00675         MOVWF   POSTDEC1
+000466 EC?? F0??      00676         CALL    _rtcRead
+00046A 6E??           00677         MOVWF   r0x00
+00046C 52E6           00678         MOVF    POSTINC1, F
+00046E 6A??           00679         CLRF    r0x01
+                      00680 ;       .line   98; alarm.c     hour = rtcRead(0x02);
+000470 0E02           00681         MOVLW   0x02
+000472 6EE5           00682         MOVWF   POSTDEC1
+000474 EC?? F0??      00683         CALL    _rtcRead
+000478 6E??           00684         MOVWF   r0x02
+00047A 52E6           00685         MOVF    POSTINC1, F
+00047C 6A??           00686         CLRF    r0x03
+                      00687 ;       .line   99; alarm.c     sec = rtcRead(0x00);
+00047E 0E00           00688         MOVLW   0x00
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 14
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000480 6EE5           00689         MOVWF   POSTDEC1
+000482 EC?? F0??      00690         CALL    _rtcRead
+000486 6E??           00691         MOVWF   r0x04
+000488 52E6           00692         MOVF    POSTINC1, F
+00048A 6A??           00693         CLRF    r0x05
+                      00694 ;       .line   100; alarm.c    date = rtcRead(0x04);
+00048C 0E04           00695         MOVLW   0x04
+00048E 6EE5           00696         MOVWF   POSTDEC1
+000490 EC?? F0??      00697         CALL    _rtcRead
+000494 6E??           00698         MOVWF   r0x06
+000496 52E6           00699         MOVF    POSTINC1, F
+000498 6A??           00700         CLRF    r0x07
+                      00701 ;       .line   101; alarm.c    month = rtcRead(0x05);
+00049A 0E05           00702         MOVLW   0x05
+00049C 6EE5           00703         MOVWF   POSTDEC1
+00049E EC?? F0??      00704         CALL    _rtcRead
+0004A2 6E??           00705         MOVWF   r0x08
+0004A4 52E6           00706         MOVF    POSTINC1, F
+0004A6 6A??           00707         CLRF    r0x09
+                      00708 ;       .line   102; alarm.c    year = rtcRead(0x06);
+0004A8 0E06           00709         MOVLW   0x06
+0004AA 6EE5           00710         MOVWF   POSTDEC1
+0004AC EC?? F0??      00711         CALL    _rtcRead
+0004B0 6E??           00712         MOVWF   r0x0a
+0004B2 52E6           00713         MOVF    POSTINC1, F
+0004B4 6A??           00714         CLRF    r0x0b
+                      00715 ;       .line   103; alarm.c    serialString("Time: ");
+0004B6 0E??           00716         MOVLW   UPPER(___str_8)
+0004B8 6E??           00717         MOVWF   r0x0e
+0004BA 0E??           00718         MOVLW   HIGH(___str_8)
+0004BC 6E??           00719         MOVWF   r0x0d
+0004BE 0E??           00720         MOVLW   LOW(___str_8)
+0004C0 6E??           00721         MOVWF   r0x0c
+0004C2 50??           00722         MOVF    r0x0e, W
+0004C4 6EE5           00723         MOVWF   POSTDEC1
+0004C6 50??           00724         MOVF    r0x0d, W
+0004C8 6EE5           00725         MOVWF   POSTDEC1
+0004CA 50??           00726         MOVF    r0x0c, W
+0004CC 6EE5           00727         MOVWF   POSTDEC1
+0004CE EC?? F0??      00728         CALL    _serialString
+0004D2 0E03           00729         MOVLW   0x03
+0004D4 26E1           00730         ADDWF   FSR1L, F
+                      00731 ;       .line   104; alarm.c    serialSend(BCD2UpperCh(hour));
+0004D6 50??           00732         MOVF    r0x02, W
+0004D8 6EE5           00733         MOVWF   POSTDEC1
+0004DA EC?? F0??      00734         CALL    _BCD2UpperCh
+0004DE 6E??           00735         MOVWF   r0x03
+0004E0 52E6           00736         MOVF    POSTINC1, F
+0004E2 50??           00737         MOVF    r0x03, W
+0004E4 6EE5           00738         MOVWF   POSTDEC1
+0004E6 EC?? F0??      00739         CALL    _serialSend
+0004EA 52E6           00740         MOVF    POSTINC1, F
+                      00741 ;       .line   105; alarm.c    serialSend(BCD2LowerCh(hour));
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 15
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0004EC 50??           00742         MOVF    r0x02, W
+0004EE 6EE5           00743         MOVWF   POSTDEC1
+0004F0 EC?? F0??      00744         CALL    _BCD2LowerCh
+0004F4 6E??           00745         MOVWF   r0x02
+0004F6 52E6           00746         MOVF    POSTINC1, F
+0004F8 50??           00747         MOVF    r0x02, W
+0004FA 6EE5           00748         MOVWF   POSTDEC1
+0004FC EC?? F0??      00749         CALL    _serialSend
+000500 52E6           00750         MOVF    POSTINC1, F
+                      00751 ;       .line   106; alarm.c    serialSend(':');
+000502 0E3A           00752         MOVLW   0x3a
+000504 6EE5           00753         MOVWF   POSTDEC1
+000506 EC?? F0??      00754         CALL    _serialSend
+00050A 52E6           00755         MOVF    POSTINC1, F
+                      00756 ;       .line   107; alarm.c    serialSend(BCD2UpperCh(min));
+00050C 50??           00757         MOVF    r0x00, W
+00050E 6EE5           00758         MOVWF   POSTDEC1
+000510 EC?? F0??      00759         CALL    _BCD2UpperCh
+000514 6E??           00760         MOVWF   r0x01
+000516 52E6           00761         MOVF    POSTINC1, F
+000518 50??           00762         MOVF    r0x01, W
+00051A 6EE5           00763         MOVWF   POSTDEC1
+00051C EC?? F0??      00764         CALL    _serialSend
+000520 52E6           00765         MOVF    POSTINC1, F
+                      00766 ;       .line   108; alarm.c    serialSend(BCD2LowerCh(min));
+000522 50??           00767         MOVF    r0x00, W
+000524 6EE5           00768         MOVWF   POSTDEC1
+000526 EC?? F0??      00769         CALL    _BCD2LowerCh
+00052A 6E??           00770         MOVWF   r0x00
+00052C 52E6           00771         MOVF    POSTINC1, F
+00052E 50??           00772         MOVF    r0x00, W
+000530 6EE5           00773         MOVWF   POSTDEC1
+000532 EC?? F0??      00774         CALL    _serialSend
+000536 52E6           00775         MOVF    POSTINC1, F
+                      00776 ;       .line   109; alarm.c    serialSend(':');
+000538 0E3A           00777         MOVLW   0x3a
+00053A 6EE5           00778         MOVWF   POSTDEC1
+00053C EC?? F0??      00779         CALL    _serialSend
+000540 52E6           00780         MOVF    POSTINC1, F
+                      00781 ;       .line   110; alarm.c    serialSend(BCD2UpperCh(sec));
+000542 50??           00782         MOVF    r0x04, W
+000544 6EE5           00783         MOVWF   POSTDEC1
+000546 EC?? F0??      00784         CALL    _BCD2UpperCh
+00054A 6E??           00785         MOVWF   r0x00
+00054C 52E6           00786         MOVF    POSTINC1, F
+00054E 50??           00787         MOVF    r0x00, W
+000550 6EE5           00788         MOVWF   POSTDEC1
+000552 EC?? F0??      00789         CALL    _serialSend
+000556 52E6           00790         MOVF    POSTINC1, F
+                      00791 ;       .line   111; alarm.c    serialSend(BCD2LowerCh(sec));
+000558 50??           00792         MOVF    r0x04, W
+00055A 6EE5           00793         MOVWF   POSTDEC1
+00055C EC?? F0??      00794         CALL    _BCD2LowerCh
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 16
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000560 6E??           00795         MOVWF   r0x00
+000562 52E6           00796         MOVF    POSTINC1, F
+000564 50??           00797         MOVF    r0x00, W
+000566 6EE5           00798         MOVWF   POSTDEC1
+000568 EC?? F0??      00799         CALL    _serialSend
+00056C 52E6           00800         MOVF    POSTINC1, F
+                      00801 ;       .line   112; alarm.c    serialSend(13);
+00056E 0E0D           00802         MOVLW   0x0d
+000570 6EE5           00803         MOVWF   POSTDEC1
+000572 EC?? F0??      00804         CALL    _serialSend
+000576 52E6           00805         MOVF    POSTINC1, F
+                      00806 ;       .line   113; alarm.c    serialString("Date: ");
+000578 0E??           00807         MOVLW   UPPER(___str_9)
+00057A 6E??           00808         MOVWF   r0x02
+00057C 0E??           00809         MOVLW   HIGH(___str_9)
+00057E 6E??           00810         MOVWF   r0x01
+000580 0E??           00811         MOVLW   LOW(___str_9)
+000582 6E??           00812         MOVWF   r0x00
+000584 50??           00813         MOVF    r0x02, W
+000586 6EE5           00814         MOVWF   POSTDEC1
+000588 50??           00815         MOVF    r0x01, W
+00058A 6EE5           00816         MOVWF   POSTDEC1
+00058C 50??           00817         MOVF    r0x00, W
+00058E 6EE5           00818         MOVWF   POSTDEC1
+000590 EC?? F0??      00819         CALL    _serialString
+000594 0E03           00820         MOVLW   0x03
+000596 26E1           00821         ADDWF   FSR1L, F
+                      00822 ;       .line   114; alarm.c    serialSend(BCD2UpperCh(date));
+000598 50??           00823         MOVF    r0x06, W
+00059A 6EE5           00824         MOVWF   POSTDEC1
+00059C EC?? F0??      00825         CALL    _BCD2UpperCh
+0005A0 6E??           00826         MOVWF   r0x00
+0005A2 52E6           00827         MOVF    POSTINC1, F
+0005A4 50??           00828         MOVF    r0x00, W
+0005A6 6EE5           00829         MOVWF   POSTDEC1
+0005A8 EC?? F0??      00830         CALL    _serialSend
+0005AC 52E6           00831         MOVF    POSTINC1, F
+                      00832 ;       .line   115; alarm.c    serialSend(BCD2LowerCh(date));
+0005AE 50??           00833         MOVF    r0x06, W
+0005B0 6EE5           00834         MOVWF   POSTDEC1
+0005B2 EC?? F0??      00835         CALL    _BCD2LowerCh
+0005B6 6E??           00836         MOVWF   r0x00
+0005B8 52E6           00837         MOVF    POSTINC1, F
+0005BA 50??           00838         MOVF    r0x00, W
+0005BC 6EE5           00839         MOVWF   POSTDEC1
+0005BE EC?? F0??      00840         CALL    _serialSend
+0005C2 52E6           00841         MOVF    POSTINC1, F
+                      00842 ;       .line   116; alarm.c    serialSend('/');
+0005C4 0E2F           00843         MOVLW   0x2f
+0005C6 6EE5           00844         MOVWF   POSTDEC1
+0005C8 EC?? F0??      00845         CALL    _serialSend
+0005CC 52E6           00846         MOVF    POSTINC1, F
+                      00847 ;       .line   117; alarm.c    serialSend(BCD2UpperCh(month));
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 17
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0005CE 50??           00848         MOVF    r0x08, W
+0005D0 6EE5           00849         MOVWF   POSTDEC1
+0005D2 EC?? F0??      00850         CALL    _BCD2UpperCh
+0005D6 6E??           00851         MOVWF   r0x00
+0005D8 52E6           00852         MOVF    POSTINC1, F
+0005DA 50??           00853         MOVF    r0x00, W
+0005DC 6EE5           00854         MOVWF   POSTDEC1
+0005DE EC?? F0??      00855         CALL    _serialSend
+0005E2 52E6           00856         MOVF    POSTINC1, F
+                      00857 ;       .line   118; alarm.c    serialSend(BCD2LowerCh(month));
+0005E4 50??           00858         MOVF    r0x08, W
+0005E6 6EE5           00859         MOVWF   POSTDEC1
+0005E8 EC?? F0??      00860         CALL    _BCD2LowerCh
+0005EC 6E??           00861         MOVWF   r0x00
+0005EE 52E6           00862         MOVF    POSTINC1, F
+0005F0 50??           00863         MOVF    r0x00, W
+0005F2 6EE5           00864         MOVWF   POSTDEC1
+0005F4 EC?? F0??      00865         CALL    _serialSend
+0005F8 52E6           00866         MOVF    POSTINC1, F
+                      00867 ;       .line   119; alarm.c    serialSend('/');
+0005FA 0E2F           00868         MOVLW   0x2f
+0005FC 6EE5           00869         MOVWF   POSTDEC1
+0005FE EC?? F0??      00870         CALL    _serialSend
+000602 52E6           00871         MOVF    POSTINC1, F
+                      00872 ;       .line   120; alarm.c    serialSend(BCD2UpperCh(year));
+000604 50??           00873         MOVF    r0x0a, W
+000606 6EE5           00874         MOVWF   POSTDEC1
+000608 EC?? F0??      00875         CALL    _BCD2UpperCh
+00060C 6E??           00876         MOVWF   r0x00
+00060E 52E6           00877         MOVF    POSTINC1, F
+000610 50??           00878         MOVF    r0x00, W
+000612 6EE5           00879         MOVWF   POSTDEC1
+000614 EC?? F0??      00880         CALL    _serialSend
+000618 52E6           00881         MOVF    POSTINC1, F
+                      00882 ;       .line   121; alarm.c    serialSend(BCD2LowerCh(year));
+00061A 50??           00883         MOVF    r0x0a, W
+00061C 6EE5           00884         MOVWF   POSTDEC1
+00061E EC?? F0??      00885         CALL    _BCD2LowerCh
+000622 6E??           00886         MOVWF   r0x00
+000624 52E6           00887         MOVF    POSTINC1, F
+000626 50??           00888         MOVF    r0x00, W
+000628 6EE5           00889         MOVWF   POSTDEC1
+00062A EC?? F0??      00890         CALL    _serialSend
+00062E 52E6           00891         MOVF    POSTINC1, F
+                      00892 ;       .line   122; alarm.c    serialSend(13);
+000630 0E0D           00893         MOVLW   0x0d
+000632 6EE5           00894         MOVWF   POSTDEC1
+000634 EC?? F0??      00895         CALL    _serialSend
+000638 52E6           00896         MOVF    POSTINC1, F
+00063A                00897 _00160_DS_:
+                      00898 ;       .line   124; alarm.c    alarmAntL1 = alarmNewL1;    
+00063A C??? F???      00899         MOVFF   _alarmNewL1, _alarmAntL1
+                      00900 ;       .line   125; alarm.c    alarmAntH1 = alarmNewH1;
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 18
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00063E C??? F???      00901         MOVFF   _alarmNewH1, _alarmAntH1
+                      00902 ;       .line   126; alarm.c    alarmAntL0 = alarmNewL0;
+000642 C??? F???      00903         MOVFF   _alarmNewL0, _alarmAntL0
+                      00904 ;       .line   127; alarm.c    alarmAntH0 = alarmNewH0;          
+000646 C??? F???      00905         MOVFF   _alarmNewH0, _alarmAntH0
+00064A CFE4 F000      00906         MOVFF   PREINC1, r0x0e
+00064E CFE4 F000      00907         MOVFF   PREINC1, r0x0d
+000652 CFE4 F000      00908         MOVFF   PREINC1, r0x0c
+000656 CFE4 F000      00909         MOVFF   PREINC1, r0x0b
+00065A CFE4 F000      00910         MOVFF   PREINC1, r0x0a
+00065E CFE4 F000      00911         MOVFF   PREINC1, r0x09
+000662 CFE4 F000      00912         MOVFF   PREINC1, r0x08
+000666 CFE4 F000      00913         MOVFF   PREINC1, r0x07
+00066A CFE4 F000      00914         MOVFF   PREINC1, r0x06
+00066E CFE4 F000      00915         MOVFF   PREINC1, r0x05
+000672 CFE4 F000      00916         MOVFF   PREINC1, r0x04
+000676 CFE4 F000      00917         MOVFF   PREINC1, r0x03
+00067A CFE4 F000      00918         MOVFF   PREINC1, r0x02
+00067E CFE4 F000      00919         MOVFF   PREINC1, r0x01
+000682 CFE4 F000      00920         MOVFF   PREINC1, r0x00
+000686 CFE4 FFD9      00921         MOVFF   PREINC1, FSR2L
+00068A 0012           00922         RETURN  
+                      00923 
+                      00924 ; ; Starting pCode block
+                      00925 S_alarm__testAlarmLow   code
+000000                00926 _testAlarmLow:
+                      00927 ;       .line   23; alarm.c     char testAlarmLow(char alarm){    
+000000 CFD9 FFE5      00928         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00929         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00930         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      00931         MOVFF   r0x01, POSTDEC1
+000010 C??? F???      00932         MOVFF   r0x02, POSTDEC1
+000014 C??? F???      00933         MOVFF   r0x03, POSTDEC1
+000018 0E02           00934         MOVLW   0x02
+00001A CFDB F000      00935         MOVFF   PLUSW2, r0x00
+                      00936 ;       .line   24; alarm.c     if(adcScale(POT, 1023) <= getAlarmLow(alarm)){
+00001E 0E03           00937         MOVLW   0x03
+000020 6EE5           00938         MOVWF   POSTDEC1
+000022 0EFF           00939         MOVLW   0xff
+000024 6EE5           00940         MOVWF   POSTDEC1
+000026 0E02           00941         MOVLW   0x02
+000028 6EE5           00942         MOVWF   POSTDEC1
+00002A EC?? F0??      00943         CALL    _adcScale
+00002E 6E??           00944         MOVWF   r0x01
+000030 CFF3 F000      00945         MOVFF   PRODL, r0x02
+000034 0E03           00946         MOVLW   0x03
+000036 26E1           00947         ADDWF   FSR1L, F
+000038 50??           00948         MOVF    r0x00, W
+00003A 6EE5           00949         MOVWF   POSTDEC1
+00003C EC?? F0??      00950         CALL    _getAlarmLow
+000040 6E??           00951         MOVWF   r0x00
+000042 CFF3 F000      00952         MOVFF   PRODL, r0x03
+000046 52E6           00953         MOVF    POSTINC1, F
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 19
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000048 50??           00954         MOVF    r0x03, W
+00004A 0F80           00955         ADDLW   0x80
+00004C 6EF3           00956         MOVWF   PRODL
+00004E 50??           00957         MOVF    r0x02, W
+000050 0F80           00958         ADDLW   0x80
+000052 5CF3           00959         SUBWF   PRODL, W
+000054 E1??           00960         BNZ     _00126_DS_
+000056 50??           00961         MOVF    r0x01, W
+000058 5C??           00962         SUBWF   r0x00, W
+00005A                00963 _00126_DS_:
+00005A E3??           00964         BNC     _00119_DS_
+                      00965 ;       .line   25; alarm.c     return 1;        
+00005C 0E01           00966         MOVLW   0x01
+00005E D???           00967         BRA     _00121_DS_
+000060                00968 _00119_DS_:
+                      00969 ;       .line   28; alarm.c     return 0;   
+000060 6AE8           00970         CLRF    WREG
+000062                00971 _00121_DS_:
+000062 CFE4 F000      00972         MOVFF   PREINC1, r0x03
+000066 CFE4 F000      00973         MOVFF   PREINC1, r0x02
+00006A CFE4 F000      00974         MOVFF   PREINC1, r0x01
+00006E CFE4 F000      00975         MOVFF   PREINC1, r0x00
+000072 CFE4 FFD9      00976         MOVFF   PREINC1, FSR2L
+000076 0012           00977         RETURN  
+                      00978 
+                      00979 ; ; Starting pCode block
+                      00980 S_alarm__testAlarmHigh  code
+000000                00981 _testAlarmHigh:
+                      00982 ;       .line   14; alarm.c     char testAlarmHigh(char alarm){    
+000000 CFD9 FFE5      00983         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00984         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00985         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      00986         MOVFF   r0x01, POSTDEC1
+000010 C??? F???      00987         MOVFF   r0x02, POSTDEC1
+000014 C??? F???      00988         MOVFF   r0x03, POSTDEC1
+000018 0E02           00989         MOVLW   0x02
+00001A CFDB F000      00990         MOVFF   PLUSW2, r0x00
+                      00991 ;       .line   15; alarm.c     if(adcScale(POT, 1023) >= getAlarmHigh(alarm)){
+00001E 0E03           00992         MOVLW   0x03
+000020 6EE5           00993         MOVWF   POSTDEC1
+000022 0EFF           00994         MOVLW   0xff
+000024 6EE5           00995         MOVWF   POSTDEC1
+000026 0E02           00996         MOVLW   0x02
+000028 6EE5           00997         MOVWF   POSTDEC1
+00002A EC?? F0??      00998         CALL    _adcScale
+00002E 6E??           00999         MOVWF   r0x01
+000030 CFF3 F000      01000         MOVFF   PRODL, r0x02
+000034 0E03           01001         MOVLW   0x03
+000036 26E1           01002         ADDWF   FSR1L, F
+000038 50??           01003         MOVF    r0x00, W
+00003A 6EE5           01004         MOVWF   POSTDEC1
+00003C EC?? F0??      01005         CALL    _getAlarmHigh
+000040 6E??           01006         MOVWF   r0x00
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 20
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000042 CFF3 F000      01007         MOVFF   PRODL, r0x03
+000046 52E6           01008         MOVF    POSTINC1, F
+000048 50??           01009         MOVF    r0x02, W
+00004A 0F80           01010         ADDLW   0x80
+00004C 6EF3           01011         MOVWF   PRODL
+00004E 50??           01012         MOVF    r0x03, W
+000050 0F80           01013         ADDLW   0x80
+000052 5CF3           01014         SUBWF   PRODL, W
+000054 E1??           01015         BNZ     _00113_DS_
+000056 50??           01016         MOVF    r0x00, W
+000058 5C??           01017         SUBWF   r0x01, W
+00005A                01018 _00113_DS_:
+00005A E3??           01019         BNC     _00106_DS_
+                      01020 ;       .line   16; alarm.c     return 1;                                 
+00005C 0E01           01021         MOVLW   0x01
+00005E D???           01022         BRA     _00108_DS_
+000060                01023 _00106_DS_:
+                      01024 ;       .line   19; alarm.c     return 0;           
+000060 6AE8           01025         CLRF    WREG
+000062                01026 _00108_DS_:
+000062 CFE4 F000      01027         MOVFF   PREINC1, r0x03
+000066 CFE4 F000      01028         MOVFF   PREINC1, r0x02
+00006A CFE4 F000      01029         MOVFF   PREINC1, r0x01
+00006E CFE4 F000      01030         MOVFF   PREINC1, r0x00
+000072 CFE4 FFD9      01031         MOVFF   PREINC1, FSR2L
+000076 0012           01032         RETURN  
+                      01033 
+                      01034 ; ; Starting pCode block
+000078                01035 ___str_0:
+000078 6C41 7261 206D 01036         DB      0x41, 0x6c, 0x61, 0x72, 0x6d, 0x20, 0x48, 0x69, 0x67, 0x68, 0x20, 0x30
+       6948 6867 3020 
+000084 4120 6963 6E6F 01037         DB      0x20, 0x41, 0x63, 0x69, 0x6f, 0x6e, 0x61, 0x64, 0x6f, 0x00
+       6461 006F      
+                      01038 ; ; Starting pCode block
+00008E                01039 ___str_1:
+00008E 6C41 7261 206D 01040         DB      0x41, 0x6c, 0x61, 0x72, 0x6d, 0x20, 0x48, 0x69, 0x67, 0x68, 0x20, 0x30
+       6948 6867 3020 
+00009A 4420 7365 696C 01041         DB      0x20, 0x44, 0x65, 0x73, 0x6c, 0x69, 0x67, 0x61, 0x64, 0x6f, 0x00
+       6167 6F64 0000 
+                      01042 ; ; Starting pCode block
+0000A6                01043 ___str_2:
+0000A6 6C41 7261 206D 01044         DB      0x41, 0x6c, 0x61, 0x72, 0x6d, 0x20, 0x4c, 0x6f, 0x77, 0x20, 0x30, 0x20
+       6F4C 2077 2030 
+0000B2 6341 6F69 616E 01045         DB      0x41, 0x63, 0x69, 0x6f, 0x6e, 0x61, 0x64, 0x6f, 0x00
+       6F64 0000      
+                      01046 ; ; Starting pCode block
+0000BC                01047 ___str_3:
+0000BC 6C41 7261 206D 01048         DB      0x41, 0x6c, 0x61, 0x72, 0x6d, 0x20, 0x4c, 0x6f, 0x77, 0x20, 0x30, 0x20
+       6F4C 2077 2030 
+0000C8 6544 6C73 6769 01049         DB      0x44, 0x65, 0x73, 0x6c, 0x69, 0x67, 0x61, 0x64, 0x6f, 0x00
+       6461 006F      
+                      01050 ; ; Starting pCode block
+0000D2                01051 ___str_4:
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 21
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0000D2 6C41 7261 206D 01052         DB      0x41, 0x6c, 0x61, 0x72, 0x6d, 0x20, 0x48, 0x69, 0x67, 0x68, 0x20, 0x31
+       6948 6867 3120 
+0000DE 4120 6963 6E6F 01053         DB      0x20, 0x41, 0x63, 0x69, 0x6f, 0x6e, 0x61, 0x64, 0x6f, 0x00
+       6461 006F      
+                      01054 ; ; Starting pCode block
+0000E8                01055 ___str_5:
+0000E8 6C41 7261 206D 01056         DB      0x41, 0x6c, 0x61, 0x72, 0x6d, 0x20, 0x48, 0x69, 0x67, 0x68, 0x20, 0x31
+       6948 6867 3120 
+0000F4 4420 7365 696C 01057         DB      0x20, 0x44, 0x65, 0x73, 0x6c, 0x69, 0x67, 0x61, 0x64, 0x6f, 0x00
+       6167 6F64 0000 
+                      01058 ; ; Starting pCode block
+000100                01059 ___str_6:
+000100 6C41 7261 206D 01060         DB      0x41, 0x6c, 0x61, 0x72, 0x6d, 0x20, 0x4c, 0x6f, 0x77, 0x20, 0x31, 0x20
+       6F4C 2077 2031 
+00010C 6341 6F69 616E 01061         DB      0x41, 0x63, 0x69, 0x6f, 0x6e, 0x61, 0x64, 0x6f, 0x00
+       6F64 0000      
+                      01062 ; ; Starting pCode block
+000116                01063 ___str_7:
+000116 6C41 7261 206D 01064         DB      0x41, 0x6c, 0x61, 0x72, 0x6d, 0x20, 0x4c, 0x6f, 0x77, 0x20, 0x31, 0x20
+       6F4C 2077 2031 
+000122 6544 6C73 6769 01065         DB      0x44, 0x65, 0x73, 0x6c, 0x69, 0x67, 0x61, 0x64, 0x6f, 0x00
+       6461 006F      
+                      01066 ; ; Starting pCode block
+00012C                01067 ___str_8:
+00012C 6954 656D 203A 01068         DB      0x54, 0x69, 0x6d, 0x65, 0x3a, 0x20, 0x00
+       0000           
+                      01069 ; ; Starting pCode block
+000134                01070 ___str_9:
+000134 6144 6574 203A 01071         DB      0x44, 0x61, 0x74, 0x65, 0x3a, 0x20, 0x00
+       0000           
+                      01072 
+                      01073 
+                      01074 ; Statistics:
+                      01075 ; code size:     1952 (0x07a0) bytes ( 1.49%)
+                      01076 ;                 976 (0x03d0) words
+                      01077 ; udata size:       0 (0x0000) bytes ( 0.00%)
+                      01078 ; access size:     15 (0x000f) bytes
+                      01079 
+                      01080 
+                      01081         end
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 22
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+FSR1L                             CONSTANT      00000FE1           4065
+FSR2L                             CONSTANT      00000FD9           4057
+PLUSW2                            CONSTANT      00000FDB           4059
+POSTDEC1                          CONSTANT      00000FE5           4069
+POSTINC1                          CONSTANT      00000FE6           4070
+PREINC1                           CONSTANT      00000FE4           4068
+PRODL                             CONSTANT      00000FF3           4083
+STATUS                            CONSTANT      00000FD8           4056
+WREG                              CONSTANT      00000FE8           4072
+_00106_DS_                        ADDRESS       00000060             96
+_00108_DS_                        ADDRESS       00000062             98
+_00113_DS_                        ADDRESS       0000005A             90
+_00119_DS_                        ADDRESS       00000060             96
+_00121_DS_                        ADDRESS       00000062             98
+_00126_DS_                        ADDRESS       0000005A             90
+_00132_DS_                        ADDRESS       0000008E            142
+_00134_DS_                        ADDRESS       000000A0            160
+_00136_DS_                        ADDRESS       000000F8            248
+_00138_DS_                        ADDRESS       00000152            338
+_00140_DS_                        ADDRESS       000001AA            426
+_00142_DS_                        ADDRESS       00000204            516
+_00144_DS_                        ADDRESS       00000232            562
+_00146_DS_                        ADDRESS       00000244            580
+_00148_DS_                        ADDRESS       00000256            598
+_00150_DS_                        ADDRESS       000002AE            686
+_00152_DS_                        ADDRESS       00000308            776
+_00154_DS_                        ADDRESS       00000360            864
+_00156_DS_                        ADDRESS       000003BA            954
+_00158_DS_                        ADDRESS       000003E8           1000
+_00160_DS_                        ADDRESS       0000063A           1594
+_00213_DS_                        ADDRESS       000000AE            174
+_00215_DS_                        ADDRESS       000000C6            198
+_00217_DS_                        ADDRESS       00000106            262
+_00219_DS_                        ADDRESS       00000160            352
+_00221_DS_                        ADDRESS       00000178            376
+_00223_DS_                        ADDRESS       000001B8            440
+_00229_DS_                        ADDRESS       00000264            612
+_00231_DS_                        ADDRESS       0000027C            636
+_00233_DS_                        ADDRESS       000002BC            700
+_00235_DS_                        ADDRESS       00000316            790
+_00237_DS_                        ADDRESS       0000032E            814
+_00239_DS_                        ADDRESS       0000036E            878
+_00241_DS_                        ADDRESS       000003F6           1014
+_00243_DS_                        ADDRESS       00000410           1040
+_00246_DS_                        ADDRESS       0000042E           1070
+_00249_DS_                        ADDRESS       0000044C           1100
+_BCD2LowerCh                      EXTERNAL      00000000              0
+_BCD2UpperCh                      EXTERNAL      00000000              0
+__16_BIT                          CONSTANT      00000001              1
+__18F4550                         CONSTANT      00000001              1
+__ACC_RAM_LOW_END                 CONSTANT      0000005F             95
+__ACC_RAM_LOW_START               CONSTANT      00000000              0
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 23
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+__ACTIVE_BANK_ADDR                VARIABLE      FFFFFFFF             -1
+__ASSUMED_BANK_ADDR               VARIABLE      FFFFFFFF             -1
+__BANK_0                          CONSTANT      00000000              0
+__BANK_1                          CONSTANT      00000100            256
+__BANK_2                          CONSTANT      00000200            512
+__BANK_3                          CONSTANT      00000300            768
+__BANK_4                          CONSTANT      00000400           1024
+__BANK_5                          CONSTANT      00000500           1280
+__BANK_6                          CONSTANT      00000600           1536
+__BANK_7                          CONSTANT      00000700           1792
+__BANK_8                          CONSTANT      00000800           2048
+__BANK_9                          CONSTANT      00000900           2304
+__BANK_10                         CONSTANT      00000A00           2560
+__BANK_11                         CONSTANT      00000B00           2816
+__BANK_12                         CONSTANT      00000C00           3072
+__BANK_13                         CONSTANT      00000D00           3328
+__BANK_14                         CONSTANT      00000E00           3584
+__BANK_15                         CONSTANT      00000F00           3840
+__BANK_BITS                       CONSTANT      00000F00           3840
+__BANK_FIRST                      CONSTANT      00000000              0
+__BANK_INV                        CONSTANT      FFFFFFFF             -1
+__BANK_LAST                       CONSTANT      00000F00           3840
+__BANK_MASK                       CONSTANT      000000FF            255
+__BANK_SHIFT                      CONSTANT      00000008              8
+__BANK_SIZE                       CONSTANT      00000100            256
+__CODE_END                        CONSTANT      00007FFF          32767
+__CODE_START                      CONSTANT      00000000              0
+__COMMON_RAM_END                  CONSTANT      0000005F             95
+__COMMON_RAM_START                CONSTANT      00000000              0
+__CONFIG_END                      CONSTANT      0030000D        3145741
+__CONFIG_START                    CONSTANT      00300000        3145728
+__EEPROM_END                      CONSTANT      00F000FF       15728895
+__EEPROM_START                    CONSTANT      00F00000       15728640
+__EXTENDED                        CONSTANT      00000001              1
+__GPUTILS_SVN_VERSION             CONSTANT      00000505           1285
+__GPUTILS_VERSION_MAJOR           CONSTANT      00000001              1
+__GPUTILS_VERSION_MICRO           CONSTANT      00000000              0
+__GPUTILS_VERSION_MINOR           CONSTANT      00000005              5
+__IDLOCS_END                      CONSTANT      00200007        2097159
+__IDLOCS_START                    CONSTANT      00200000        2097152
+__NUM_BANKS                       CONSTANT      00000010             16
+__VECTOR_INT_HIGH                 CONSTANT      00000008              8
+__VECTOR_INT_LOW                  CONSTANT      00000018             24
+__VECTOR_RESET                    CONSTANT      00000000              0
+__WHILE_LOOP_COUNT_MAX            CONSTANT      000000FF            255
+___str_0                          ADDRESS       00000078            120
+___str_1                          ADDRESS       0000008E            142
+___str_2                          ADDRESS       000000A6            166
+___str_3                          ADDRESS       000000BC            188
+___str_4                          ADDRESS       000000D2            210
+___str_5                          ADDRESS       000000E8            232
+___str_6                          ADDRESS       00000100            256
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:03        PAGE 24
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+___str_7                          ADDRESS       00000116            278
+___str_8                          ADDRESS       0000012C            300
+___str_9                          ADDRESS       00000134            308
+_adcScale                         EXTERNAL      00000000              0
+_alarmAntH0                       STATIC        00000001              1
+_alarmAntH1                       STATIC        00000003              3
+_alarmAntL0                       STATIC        00000005              5
+_alarmAntL1                       STATIC        00000007              7
+_alarmNewH0                       STATIC        00000000              0
+_alarmNewH1                       STATIC        00000002              2
+_alarmNewL0                       STATIC        00000004              4
+_alarmNewL1                       STATIC        00000006              6
+_controlAlarms                    GLOBAL        00000000              0
+_getAlarmHigh                     EXTERNAL      00000000              0
+_getAlarmLow                      EXTERNAL      00000000              0
+_ledBlink                         EXTERNAL      00000000              0
+_ledOff                           EXTERNAL      00000000              0
+_ledOn                            EXTERNAL      00000000              0
+_rtcRead                          EXTERNAL      00000000              0
+_serialSend                       EXTERNAL      00000000              0
+_serialString                     EXTERNAL      00000000              0
+_testAlarmHigh                    GLOBAL        00000000              0
+_testAlarmLow                     GLOBAL        00000000              0
+r0x00                             STATIC        00000000              0
+r0x01                             STATIC        00000001              1
+r0x02                             STATIC        00000002              2
+r0x03                             STATIC        00000003              3
+r0x04                             STATIC        00000004              4
+r0x05                             STATIC        00000005              5
+r0x06                             STATIC        00000006              6
+r0x07                             STATIC        00000007              7
+r0x08                             STATIC        00000008              8
+r0x09                             STATIC        00000009              9
+r0x0a                             STATIC        0000000A             10
+r0x0b                             STATIC        0000000B             11
+r0x0c                             STATIC        0000000C             12
+r0x0d                             STATIC        0000000D             13
+r0x0e                             STATIC        0000000E             14
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     0 reported,     0 suppressed
+
+

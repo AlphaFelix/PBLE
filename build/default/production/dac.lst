@@ -1,0 +1,219 @@
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:01        PAGE  1
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00001 ;--------------------------------------------------------
+                      00002 ; File Created by SDCC : free open source ANSI-C Compiler
+                      00003 ; Version 3.6.0 #9615 (MINGW64)
+                      00004 ;--------------------------------------------------------
+                      00005 ; PIC16 port for the Microchip 16-bit core micros
+                      00006 ;--------------------------------------------------------
+                      00007         list    p=18f4550
+                      00008         radix   dec
+                      00009 
+                      00010 
+                      00011 ;--------------------------------------------------------
+                      00012 ; public variables in this module
+                      00013 ;--------------------------------------------------------
+  0000                00014         global  _dacI2c
+                      00015 
+                      00016 ;--------------------------------------------------------
+                      00017 ; extern variables in this module
+                      00018 ;--------------------------------------------------------
+  0000                00019         extern  _i2cStart
+  0000                00020         extern  _i2cStop
+  0000                00021         extern  _i2cSend
+                      00022 
+                      00023 ;--------------------------------------------------------
+                      00024 ;       Equates to used internal registers
+                      00025 ;--------------------------------------------------------
+  00000FE1            00026 FSR1L   equ     0xfe1
+  00000FD9            00027 FSR2L   equ     0xfd9
+  00000FE6            00028 POSTINC1        equ     0xfe6
+  00000FE5            00029 POSTDEC1        equ     0xfe5
+  00000FE4            00030 PREINC1 equ     0xfe4
+  00000FDB            00031 PLUSW2  equ     0xfdb
+                      00032 
+                      00033 
+                      00034 ; Internal registers
+                      00035 .registers      udata_ovr       0x0000
+000000                00036 r0x00   res     1
+000001                00037 r0x01   res     1
+000002                00038 r0x02   res     1
+000003                00039 r0x03   res     1
+                      00040 
+                      00041 ;--------------------------------------------------------
+                      00042 ; global & static initialisations
+                      00043 ;--------------------------------------------------------
+                      00044 ; I code from now on!
+                      00045 ; ; Starting pCode block
+                      00046 S_dac__dacI2c   code
+000000                00047 _dacI2c:
+                      00048 ;       .line   3; dac.c        void dacI2c(unsigned int sample){
+000000 CFD9 FFE5      00049         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00050         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00051         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      00052         MOVFF   r0x01, POSTDEC1
+000010 C??? F???      00053         MOVFF   r0x02, POSTDEC1
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:01        PAGE  2
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000014 C??? F???      00054         MOVFF   r0x03, POSTDEC1
+000018 0E02           00055         MOVLW   0x02
+00001A CFDB F000      00056         MOVFF   PLUSW2, r0x00
+00001E 0E03           00057         MOVLW   0x03
+000020 CFDB F000      00058         MOVFF   PLUSW2, r0x01
+                      00059 ;       .line   4; dac.c        i2cStart();    
+000024 EC?? F0??      00060         CALL    _i2cStart
+                      00061 ;       .line   5; dac.c        i2cSend(0xC0);
+000028 0EC0           00062         MOVLW   0xc0
+00002A 6EE5           00063         MOVWF   POSTDEC1
+00002C EC?? F0??      00064         CALL    _i2cSend
+000030 52E6           00065         MOVF    POSTINC1, F
+                      00066 ;       .line   6; dac.c        i2cSend(0x40);
+000032 0E40           00067         MOVLW   0x40
+000034 6EE5           00068         MOVWF   POSTDEC1
+000036 EC?? F0??      00069         CALL    _i2cSend
+00003A 52E6           00070         MOVF    POSTINC1, F
+                      00071 ;       .line   7; dac.c        i2cSend((sample & 0xFF0) >> 4);
+00003C 0EF0           00072         MOVLW   0xf0
+00003E 14??           00073         ANDWF   r0x00, W
+000040 6E??           00074         MOVWF   r0x02
+000042 0E0F           00075         MOVLW   0x0f
+000044 14??           00076         ANDWF   r0x01, W
+000046 6E??           00077         MOVWF   r0x03
+000048 0EF0           00078         MOVLW   0xf0
+00004A 16??           00079         ANDWF   r0x02, F
+00004C 3A??           00080         SWAPF   r0x02, F
+00004E 3A??           00081         SWAPF   r0x03, F
+000050 14??           00082         ANDWF   r0x03, W
+000052 1A??           00083         XORWF   r0x03, F
+000054 26??           00084         ADDWF   r0x02, F
+000056 50??           00085         MOVF    r0x02, W
+000058 6EE5           00086         MOVWF   POSTDEC1
+00005A EC?? F0??      00087         CALL    _i2cSend
+00005E 52E6           00088         MOVF    POSTINC1, F
+                      00089 ;       .line   8; dac.c        i2cSend((sample & 0xF) << 4);
+000060 0E0F           00090         MOVLW   0x0f
+000062 16??           00091         ANDWF   r0x00, F
+000064 6A??           00092         CLRF    r0x01
+000066 38??           00093         SWAPF   r0x00, W
+000068 0BF0           00094         ANDLW   0xf0
+00006A 6E??           00095         MOVWF   r0x01
+00006C 50??           00096         MOVF    r0x01, W
+00006E 6EE5           00097         MOVWF   POSTDEC1
+000070 EC?? F0??      00098         CALL    _i2cSend
+000074 52E6           00099         MOVF    POSTINC1, F
+                      00100 ;       .line   9; dac.c        i2cStop();
+000076 EC?? F0??      00101         CALL    _i2cStop
+00007A CFE4 F000      00102         MOVFF   PREINC1, r0x03
+00007E CFE4 F000      00103         MOVFF   PREINC1, r0x02
+000082 CFE4 F000      00104         MOVFF   PREINC1, r0x01
+000086 CFE4 F000      00105         MOVFF   PREINC1, r0x00
+00008A CFE4 FFD9      00106         MOVFF   PREINC1, FSR2L
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:01        PAGE  3
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00008E 0012           00107         RETURN  
+                      00108 
+                      00109 
+                      00110 
+                      00111 ; Statistics:
+                      00112 ; code size:      144 (0x0090) bytes ( 0.11%)
+                      00113 ;                  72 (0x0048) words
+                      00114 ; udata size:       0 (0x0000) bytes ( 0.00%)
+                      00115 ; access size:      4 (0x0004) bytes
+                      00116 
+                      00117 
+                      00118         end
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:01        PAGE  4
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+FSR1L                             CONSTANT      00000FE1           4065
+FSR2L                             CONSTANT      00000FD9           4057
+PLUSW2                            CONSTANT      00000FDB           4059
+POSTDEC1                          CONSTANT      00000FE5           4069
+POSTINC1                          CONSTANT      00000FE6           4070
+PREINC1                           CONSTANT      00000FE4           4068
+__16_BIT                          CONSTANT      00000001              1
+__18F4550                         CONSTANT      00000001              1
+__ACC_RAM_LOW_END                 CONSTANT      0000005F             95
+__ACC_RAM_LOW_START               CONSTANT      00000000              0
+__ACTIVE_BANK_ADDR                VARIABLE      FFFFFFFF             -1
+__ASSUMED_BANK_ADDR               VARIABLE      FFFFFFFF             -1
+__BANK_0                          CONSTANT      00000000              0
+__BANK_1                          CONSTANT      00000100            256
+__BANK_2                          CONSTANT      00000200            512
+__BANK_3                          CONSTANT      00000300            768
+__BANK_4                          CONSTANT      00000400           1024
+__BANK_5                          CONSTANT      00000500           1280
+__BANK_6                          CONSTANT      00000600           1536
+__BANK_7                          CONSTANT      00000700           1792
+__BANK_8                          CONSTANT      00000800           2048
+__BANK_9                          CONSTANT      00000900           2304
+__BANK_10                         CONSTANT      00000A00           2560
+__BANK_11                         CONSTANT      00000B00           2816
+__BANK_12                         CONSTANT      00000C00           3072
+__BANK_13                         CONSTANT      00000D00           3328
+__BANK_14                         CONSTANT      00000E00           3584
+__BANK_15                         CONSTANT      00000F00           3840
+__BANK_BITS                       CONSTANT      00000F00           3840
+__BANK_FIRST                      CONSTANT      00000000              0
+__BANK_INV                        CONSTANT      FFFFFFFF             -1
+__BANK_LAST                       CONSTANT      00000F00           3840
+__BANK_MASK                       CONSTANT      000000FF            255
+__BANK_SHIFT                      CONSTANT      00000008              8
+__BANK_SIZE                       CONSTANT      00000100            256
+__CODE_END                        CONSTANT      00007FFF          32767
+__CODE_START                      CONSTANT      00000000              0
+__COMMON_RAM_END                  CONSTANT      0000005F             95
+__COMMON_RAM_START                CONSTANT      00000000              0
+__CONFIG_END                      CONSTANT      0030000D        3145741
+__CONFIG_START                    CONSTANT      00300000        3145728
+__EEPROM_END                      CONSTANT      00F000FF       15728895
+__EEPROM_START                    CONSTANT      00F00000       15728640
+__EXTENDED                        CONSTANT      00000001              1
+__GPUTILS_SVN_VERSION             CONSTANT      00000505           1285
+__GPUTILS_VERSION_MAJOR           CONSTANT      00000001              1
+__GPUTILS_VERSION_MICRO           CONSTANT      00000000              0
+__GPUTILS_VERSION_MINOR           CONSTANT      00000005              5
+__IDLOCS_END                      CONSTANT      00200007        2097159
+__IDLOCS_START                    CONSTANT      00200000        2097152
+__NUM_BANKS                       CONSTANT      00000010             16
+__VECTOR_INT_HIGH                 CONSTANT      00000008              8
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:05:01        PAGE  5
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+__VECTOR_INT_LOW                  CONSTANT      00000018             24
+__VECTOR_RESET                    CONSTANT      00000000              0
+__WHILE_LOOP_COUNT_MAX            CONSTANT      000000FF            255
+_dacI2c                           GLOBAL        00000000              0
+_i2cSend                          EXTERNAL      00000000              0
+_i2cStart                         EXTERNAL      00000000              0
+_i2cStop                          EXTERNAL      00000000              0
+r0x00                             STATIC        00000000              0
+r0x01                             STATIC        00000001              1
+r0x02                             STATIC        00000002              2
+r0x03                             STATIC        00000003              3
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     0 reported,     0 suppressed
+
+

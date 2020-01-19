@@ -1,0 +1,336 @@
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:27:50        PAGE  1
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00001 ;--------------------------------------------------------
+                      00002 ; File Created by SDCC : free open source ANSI-C Compiler
+                      00003 ; Version 3.6.0 #9615 (MINGW64)
+                      00004 ;--------------------------------------------------------
+                      00005 ; PIC16 port for the Microchip 16-bit core micros
+                      00006 ;--------------------------------------------------------
+                      00007         list    p=18f4550
+                      00008         radix   dec
+                      00009 
+                      00010 
+                      00011 ;--------------------------------------------------------
+                      00012 ; public variables in this module
+                      00013 ;--------------------------------------------------------
+  0000                00014         global  _eventInit
+  0000                00015         global  _eventRead
+                      00016 
+                      00017 ;--------------------------------------------------------
+                      00018 ; extern variables in this module
+                      00019 ;--------------------------------------------------------
+  0000                00020         extern  _kpRead
+  0000                00021         extern  _kpInit
+  0000                00022         extern  _serialInit
+  0000                00023         extern  _serialProtocol
+                      00024 
+                      00025 ;--------------------------------------------------------
+                      00026 ;       Equates to used internal registers
+                      00027 ;--------------------------------------------------------
+  00000FD8            00028 STATUS  equ     0xfd8
+  00000FE8            00029 WREG    equ     0xfe8
+  00000FE1            00030 FSR1L   equ     0xfe1
+  00000FD9            00031 FSR2L   equ     0xfd9
+  00000FE5            00032 POSTDEC1        equ     0xfe5
+  00000FE4            00033 PREINC1 equ     0xfe4
+  00000FF3            00034 PRODL   equ     0xff3
+                      00035 
+                      00036 
+                      00037 ; Internal registers
+                      00038 .registers      udata_ovr       0x0000
+000000                00039 r0x00   res     1
+000001                00040 r0x01   res     1
+000002                00041 r0x02   res     1
+000003                00042 r0x03   res     1
+000004                00043 r0x04   res     1
+000005                00044 r0x05   res     1
+                      00045 
+                      00046 udata_event_0   udata
+000000                00047 _key_ant        res     1
+                      00048 
+                      00049 ;--------------------------------------------------------
+                      00050 ; global & static initialisations
+                      00051 ;--------------------------------------------------------
+                      00052 ; I code from now on!
+                      00053 ; ; Starting pCode block
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:27:50        PAGE  2
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00054 S_event__eventRead      code
+000000                00055 _eventRead:
+                      00056 ;       .line   14; event.c     unsigned int eventRead(void) {
+000000 CFD9 FFE5      00057         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00058         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00059         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      00060         MOVFF   r0x01, POSTDEC1
+000010 C??? F???      00061         MOVFF   r0x02, POSTDEC1
+000014 C??? F???      00062         MOVFF   r0x03, POSTDEC1
+000018 C??? F???      00063         MOVFF   r0x04, POSTDEC1
+00001C C??? F???      00064         MOVFF   r0x05, POSTDEC1
+                      00065 ;       .line   16; event.c     int ev = EV_NOEVENT;
+000020 0E06           00066         MOVLW   0x06
+000022 6E??           00067         MOVWF   r0x00
+000024 6A??           00068         CLRF    r0x01
+                      00069 ;       .line   17; event.c     key = kpRead();
+000026 EC?? F0??      00070         CALL    _kpRead
+00002A 6E??           00071         MOVWF   r0x02
+00002C 6A??           00072         CLRF    r0x03
+                      00073 ;       .line   18; event.c     serial = serialProtocol();
+00002E EC?? F0??      00074         CALL    _serialProtocol
+000032 6E??           00075         MOVWF   r0x04
+000034 6A??           00076         CLRF    r0x05
+                      00077 ;       .line   19; event.c     if ((key != 0) || (serial !=0)) {
+000036 50??           00078         MOVF    r0x02, W
+000038 10??           00079         IORWF   r0x03, W
+00003A E1??           00080         BNZ     _00122_DS_
+00003C 50??           00081         MOVF    r0x04, W
+00003E 10??           00082         IORWF   r0x05, W
+000040 E0??           00083         BZ      _00123_DS_
+000042                00084 _00122_DS_:
+                      00085 ;       .line   20; event.c     if ((key == 1)|| (serial == 'A')) {
+000042 50??           00086         MOVF    r0x02, W
+000044 0A01           00087         XORLW   0x01
+000046 E1??           00088         BNZ     _00143_DS_
+000048 50??           00089         MOVF    r0x03, W
+00004A E0??           00090         BZ      _00110_DS_
+00004C                00091 _00143_DS_:
+00004C 50??           00092         MOVF    r0x04, W
+00004E 0A41           00093         XORLW   0x41
+000050 E1??           00094         BNZ     _00111_DS_
+000052 50??           00095         MOVF    r0x05, W
+000054 E0??           00096         BZ      _00110_DS_
+000056                00097 _00144_DS_:
+000056 D???           00098         BRA     _00111_DS_
+000058                00099 _00110_DS_:
+                      00100 ;       .line   21; event.c     ev = EV_LEFT;
+000058 0E02           00101         MOVLW   0x02
+00005A 6E??           00102         MOVWF   r0x00
+00005C 6A??           00103         CLRF    r0x01
+00005E                00104 _00111_DS_:
+                      00105 ;       .line   24; event.c     if ((key == 2)||(serial== 'S')) {
+00005E 50??           00106         MOVF    r0x02, W
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:27:50        PAGE  3
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000060 0A02           00107         XORLW   0x02
+000062 E1??           00108         BNZ     _00147_DS_
+000064 50??           00109         MOVF    r0x03, W
+000066 E0??           00110         BZ      _00113_DS_
+000068                00111 _00147_DS_:
+000068 50??           00112         MOVF    r0x04, W
+00006A 0A53           00113         XORLW   0x53
+00006C E1??           00114         BNZ     _00114_DS_
+00006E 50??           00115         MOVF    r0x05, W
+000070 E0??           00116         BZ      _00113_DS_
+000072                00117 _00148_DS_:
+000072 D???           00118         BRA     _00114_DS_
+000074                00119 _00113_DS_:
+                      00120 ;       .line   25; event.c     ev = EV_ENTER;
+000074 0E04           00121         MOVLW   0x04
+000076 6E??           00122         MOVWF   r0x00
+000078 6A??           00123         CLRF    r0x01
+00007A                00124 _00114_DS_:
+                      00125 ;       .line   28; event.c     if ((key == 3)||(serial=='D')) {
+00007A 50??           00126         MOVF    r0x02, W
+00007C 0A03           00127         XORLW   0x03
+00007E E1??           00128         BNZ     _00151_DS_
+000080 50??           00129         MOVF    r0x03, W
+000082 E0??           00130         BZ      _00116_DS_
+000084                00131 _00151_DS_:
+000084 50??           00132         MOVF    r0x04, W
+000086 0A44           00133         XORLW   0x44
+000088 E1??           00134         BNZ     _00117_DS_
+00008A 50??           00135         MOVF    r0x05, W
+00008C E0??           00136         BZ      _00116_DS_
+00008E                00137 _00152_DS_:
+00008E D???           00138         BRA     _00117_DS_
+000090                00139 _00116_DS_:
+                      00140 ;       .line   29; event.c     ev = EV_RIGHT;
+000090 0E03           00141         MOVLW   0x03
+000092 6E??           00142         MOVWF   r0x00
+000094 6A??           00143         CLRF    r0x01
+000096                00144 _00117_DS_:
+                      00145 ;       .line   32; event.c     if ((key == 4)||(serial=='@')) {
+000096 50??           00146         MOVF    r0x02, W
+000098 0A04           00147         XORLW   0x04
+00009A E1??           00148         BNZ     _00155_DS_
+00009C 50??           00149         MOVF    r0x03, W
+00009E E0??           00150         BZ      _00119_DS_
+0000A0                00151 _00155_DS_:
+0000A0 50??           00152         MOVF    r0x04, W
+0000A2 0A40           00153         XORLW   0x40
+0000A4 E1??           00154         BNZ     _00123_DS_
+0000A6 50??           00155         MOVF    r0x05, W
+0000A8 E0??           00156         BZ      _00119_DS_
+0000AA                00157 _00156_DS_:
+0000AA D???           00158         BRA     _00123_DS_
+0000AC                00159 _00119_DS_:
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:27:50        PAGE  4
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00160 ;       .line   33; event.c     ev = EV_RESET;
+0000AC 0E05           00161         MOVLW   0x05
+0000AE 6E??           00162         MOVWF   r0x00
+0000B0 6A??           00163         CLRF    r0x01
+0000B2                00164 _00123_DS_:
+                      00165 ;       .line   37; event.c     key_ant = key; 
+0000B2 50??           00166         MOVF    r0x02, W
+0000B4 010?           00167         BANKSEL _key_ant
+0000B6 6F??           00168         MOVWF   _key_ant, B
+                      00169 ;       .line   38; event.c     return ev;
+0000B8 C??? F???      00170         MOVFF   r0x01, PRODL
+0000BC 50??           00171         MOVF    r0x00, W
+0000BE CFE4 F000      00172         MOVFF   PREINC1, r0x05
+0000C2 CFE4 F000      00173         MOVFF   PREINC1, r0x04
+0000C6 CFE4 F000      00174         MOVFF   PREINC1, r0x03
+0000CA CFE4 F000      00175         MOVFF   PREINC1, r0x02
+0000CE CFE4 F000      00176         MOVFF   PREINC1, r0x01
+0000D2 CFE4 F000      00177         MOVFF   PREINC1, r0x00
+0000D6 CFE4 FFD9      00178         MOVFF   PREINC1, FSR2L
+0000DA 0012           00179         RETURN  
+                      00180 
+                      00181 ; ; Starting pCode block
+                      00182 S_event__eventInit      code
+000000                00183 _eventInit:
+                      00184 ;       .line   8; event.c      void eventInit(void) {
+000000 CFD9 FFE5      00185         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00186         MOVFF   FSR1L, FSR2L
+                      00187 ;       .line   9; event.c      kpInit();
+000008 EC?? F0??      00188         CALL    _kpInit
+                      00189 ;       .line   10; event.c     serialInit();
+00000C EC?? F0??      00190         CALL    _serialInit
+000010 010?           00191         BANKSEL _key_ant
+                      00192 ;       .line   11; event.c     key_ant = 0;    
+000012 6B??           00193         CLRF    _key_ant, B
+000014 CFE4 FFD9      00194         MOVFF   PREINC1, FSR2L
+000018 0012           00195         RETURN  
+                      00196 
+                      00197 
+                      00198 
+                      00199 ; Statistics:
+                      00200 ; code size:      246 (0x00f6) bytes ( 0.19%)
+                      00201 ;                 123 (0x007b) words
+                      00202 ; udata size:       1 (0x0001) bytes ( 0.06%)
+                      00203 ; access size:      6 (0x0006) bytes
+                      00204 
+                      00205 
+                      00206         end
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:27:50        PAGE  5
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+FSR1L                             CONSTANT      00000FE1           4065
+FSR2L                             CONSTANT      00000FD9           4057
+POSTDEC1                          CONSTANT      00000FE5           4069
+PREINC1                           CONSTANT      00000FE4           4068
+PRODL                             CONSTANT      00000FF3           4083
+STATUS                            CONSTANT      00000FD8           4056
+WREG                              CONSTANT      00000FE8           4072
+_00110_DS_                        ADDRESS       00000058             88
+_00111_DS_                        ADDRESS       0000005E             94
+_00113_DS_                        ADDRESS       00000074            116
+_00114_DS_                        ADDRESS       0000007A            122
+_00116_DS_                        ADDRESS       00000090            144
+_00117_DS_                        ADDRESS       00000096            150
+_00119_DS_                        ADDRESS       000000AC            172
+_00122_DS_                        ADDRESS       00000042             66
+_00123_DS_                        ADDRESS       000000B2            178
+_00143_DS_                        ADDRESS       0000004C             76
+_00144_DS_                        ADDRESS       00000056             86
+_00147_DS_                        ADDRESS       00000068            104
+_00148_DS_                        ADDRESS       00000072            114
+_00151_DS_                        ADDRESS       00000084            132
+_00152_DS_                        ADDRESS       0000008E            142
+_00155_DS_                        ADDRESS       000000A0            160
+_00156_DS_                        ADDRESS       000000AA            170
+__16_BIT                          CONSTANT      00000001              1
+__18F4550                         CONSTANT      00000001              1
+__ACC_RAM_LOW_END                 CONSTANT      0000005F             95
+__ACC_RAM_LOW_START               CONSTANT      00000000              0
+__ACTIVE_BANK_ADDR                VARIABLE      FFFFFFFF             -1
+__ASSUMED_BANK_ADDR               VARIABLE      FFFFFFFF             -1
+__BANK_0                          CONSTANT      00000000              0
+__BANK_1                          CONSTANT      00000100            256
+__BANK_2                          CONSTANT      00000200            512
+__BANK_3                          CONSTANT      00000300            768
+__BANK_4                          CONSTANT      00000400           1024
+__BANK_5                          CONSTANT      00000500           1280
+__BANK_6                          CONSTANT      00000600           1536
+__BANK_7                          CONSTANT      00000700           1792
+__BANK_8                          CONSTANT      00000800           2048
+__BANK_9                          CONSTANT      00000900           2304
+__BANK_10                         CONSTANT      00000A00           2560
+__BANK_11                         CONSTANT      00000B00           2816
+__BANK_12                         CONSTANT      00000C00           3072
+__BANK_13                         CONSTANT      00000D00           3328
+__BANK_14                         CONSTANT      00000E00           3584
+__BANK_15                         CONSTANT      00000F00           3840
+__BANK_BITS                       CONSTANT      00000F00           3840
+__BANK_FIRST                      CONSTANT      00000000              0
+__BANK_INV                        CONSTANT      FFFFFFFF             -1
+__BANK_LAST                       CONSTANT      00000F00           3840
+__BANK_MASK                       CONSTANT      000000FF            255
+__BANK_SHIFT                      CONSTANT      00000008              8
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  09:27:50        PAGE  6
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+__BANK_SIZE                       CONSTANT      00000100            256
+__CODE_END                        CONSTANT      00007FFF          32767
+__CODE_START                      CONSTANT      00000000              0
+__COMMON_RAM_END                  CONSTANT      0000005F             95
+__COMMON_RAM_START                CONSTANT      00000000              0
+__CONFIG_END                      CONSTANT      0030000D        3145741
+__CONFIG_START                    CONSTANT      00300000        3145728
+__EEPROM_END                      CONSTANT      00F000FF       15728895
+__EEPROM_START                    CONSTANT      00F00000       15728640
+__EXTENDED                        CONSTANT      00000001              1
+__GPUTILS_SVN_VERSION             CONSTANT      00000505           1285
+__GPUTILS_VERSION_MAJOR           CONSTANT      00000001              1
+__GPUTILS_VERSION_MICRO           CONSTANT      00000000              0
+__GPUTILS_VERSION_MINOR           CONSTANT      00000005              5
+__IDLOCS_END                      CONSTANT      00200007        2097159
+__IDLOCS_START                    CONSTANT      00200000        2097152
+__NUM_BANKS                       CONSTANT      00000010             16
+__VECTOR_INT_HIGH                 CONSTANT      00000008              8
+__VECTOR_INT_LOW                  CONSTANT      00000018             24
+__VECTOR_RESET                    CONSTANT      00000000              0
+__WHILE_LOOP_COUNT_MAX            CONSTANT      000000FF            255
+_eventInit                        GLOBAL        00000000              0
+_eventRead                        GLOBAL        00000000              0
+_key_ant                          STATIC        00000000              0
+_kpInit                           EXTERNAL      00000000              0
+_kpRead                           EXTERNAL      00000000              0
+_serialInit                       EXTERNAL      00000000              0
+_serialProtocol                   EXTERNAL      00000000              0
+r0x00                             STATIC        00000000              0
+r0x01                             STATIC        00000001              1
+r0x02                             STATIC        00000002              2
+r0x03                             STATIC        00000003              3
+r0x04                             STATIC        00000004              4
+r0x05                             STATIC        00000005              5
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     0 reported,     0 suppressed
+
+

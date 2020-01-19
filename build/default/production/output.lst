@@ -1,0 +1,3119 @@
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE  1
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00001 ;--------------------------------------------------------
+                      00002 ; File Created by SDCC : free open source ANSI-C Compiler
+                      00003 ; Version 3.6.0 #9615 (MINGW64)
+                      00004 ;--------------------------------------------------------
+                      00005 ; PIC16 port for the Microchip 16-bit core micros
+                      00006 ;--------------------------------------------------------
+                      00007         list    p=18f4550
+                      00008         radix   dec
+                      00009 
+                      00010 
+                      00011 ;--------------------------------------------------------
+                      00012 ; public variables in this module
+                      00013 ;--------------------------------------------------------
+  0000                00014         global  _outputInit
+  0000                00015         global  _outputPrint
+  0000                00016         global  _outputSerial
+                      00017 
+                      00018 ;--------------------------------------------------------
+                      00019 ; extern variables in this module
+                      00020 ;--------------------------------------------------------
+  0000                00021         extern  _lcdCommand
+  0000                00022         extern  _lcdData
+  0000                00023         extern  _lcdInt
+  0000                00024         extern  _lcdString
+  0000                00025         extern  _lcdInit
+  0000                00026         extern  _getState
+  0000                00027         extern  _getTime
+  0000                00028         extern  _getAlarmLow
+  0000                00029         extern  _getAlarmHigh
+  0000                00030         extern  _getIdiom
+  0000                00031         extern  _adcInit
+  0000                00032         extern  _adcScale
+  0000                00033         extern  _serialSend
+  0000                00034         extern  _serialInt
+  0000                00035         extern  _serialString
+  0000                00036         extern  _serialInit
+  0000                00037         extern  _testAlarmHigh
+  0000                00038         extern  _testAlarmLow
+  0000                00039         extern  _BCD2UpperCh
+  0000                00040         extern  _BCD2LowerCh
+  0000                00041         extern  _rtcRead
+  0000                00042         extern  __mulint
+                      00043 
+                      00044 ;--------------------------------------------------------
+                      00045 ;       Equates to used internal registers
+                      00046 ;--------------------------------------------------------
+  00000FD8            00047 STATUS  equ     0xfd8
+  00000FE8            00048 WREG    equ     0xfe8
+  00000FE9            00049 FSR0L   equ     0xfe9
+  00000FEA            00050 FSR0H   equ     0xfea
+  00000FE1            00051 FSR1L   equ     0xfe1
+  00000FD9            00052 FSR2L   equ     0xfd9
+  00000FEF            00053 INDF0   equ     0xfef
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE  2
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+  00000FEE            00054 POSTINC0        equ     0xfee
+  00000FE6            00055 POSTINC1        equ     0xfe6
+  00000FE5            00056 POSTDEC1        equ     0xfe5
+  00000FE4            00057 PREINC1 equ     0xfe4
+  00000FDB            00058 PLUSW2  equ     0xfdb
+  00000FF3            00059 PRODL   equ     0xff3
+                      00060 
+                      00061 
+                      00062         idata
+000000 00 00 00 00 00 00063 _msgs   db      LOW(___str_15), HIGH(___str_15), UPPER(___str_15), LOW(___str_16), HIGH(___str_16), UPPE
+                            R(___str_16), LOW(___str_17), HIGH(___str_17), UPPER(___str_17), LOW(___str_18), HIGH(___str_18), UPPER(
+                            ___str_18)
+       00 00 00 00 00 
+       00 00          
+00000C 00 00 00 00 00 00064         db      LOW(___str_19), HIGH(___str_19), UPPER(___str_19), LOW(___str_20), HIGH(___str_20), UPPE
+                            R(___str_20), LOW(___str_21), HIGH(___str_21), UPPER(___str_21), LOW(___str_22), HIGH(___str_22), UPPER(
+                            ___str_22)
+       00 00 00 00 00 
+       00 00          
+000018 00 00 00 00 00 00065         db      LOW(___str_23), HIGH(___str_23), UPPER(___str_23), LOW(___str_24), HIGH(___str_24), UPPE
+                            R(___str_24), LOW(___str_25), HIGH(___str_25), UPPER(___str_25), LOW(___str_26), HIGH(___str_26), UPPER(
+                            ___str_26)
+       00 00 00 00 00 
+       00 00          
+000024 00 00 00 00 00 00066         db      LOW(___str_27), HIGH(___str_27), UPPER(___str_27), LOW(___str_28), HIGH(___str_28), UPPE
+                            R(___str_28), LOW(___str_29), HIGH(___str_29), UPPER(___str_29), LOW(___str_30), HIGH(___str_30), UPPER(
+                            ___str_30)
+       00 00 00 00 00 
+       00 00          
+000030 00 00 00 00 00 00067         db      LOW(___str_31), HIGH(___str_31), UPPER(___str_31), LOW(___str_32), HIGH(___str_32), UPPE
+                            R(___str_32), LOW(___str_33), HIGH(___str_33), UPPER(___str_33), LOW(___str_34), HIGH(___str_34), UPPER(
+                            ___str_34)
+       00 00 00 00 00 
+       00 00          
+00003C 00 00 00 00 00 00068         db      LOW(___str_35), HIGH(___str_35), UPPER(___str_35), LOW(___str_36), HIGH(___str_36), UPPE
+                            R(___str_36), LOW(___str_37), HIGH(___str_37), UPPER(___str_37), LOW(___str_38), HIGH(___str_38), UPPER(
+                            ___str_38)
+       00 00 00 00 00 
+       00 00          
+000048 00 00 00 00 00 00069         db      LOW(___str_39), HIGH(___str_39), UPPER(___str_39), LOW(___str_40), HIGH(___str_40), UPPE
+                            R(___str_40)
+       00             
+00004E 00 00 00 00 00 00070 _serial db      LOW(___str_41), HIGH(___str_41), UPPER(___str_41), LOW(___str_42), HIGH(___str_42), UPPE
+                            R(___str_42), LOW(___str_43), HIGH(___str_43), UPPER(___str_43), LOW(___str_44), HIGH(___str_44), UPPER(
+                            ___str_44)
+       00 00 00 00 00 
+       00 00          
+00005A 00 00 00 00 00 00071         db      LOW(___str_45), HIGH(___str_45), UPPER(___str_45), LOW(___str_46), HIGH(___str_46), UPPE
+                            R(___str_46), LOW(___str_47), HIGH(___str_47), UPPER(___str_47), LOW(___str_48), HIGH(___str_48), UPPER(
+                            ___str_48)
+       00 00 00 00 00 
+       00 00          
+000066 00 00 00 00 00 00072         db      LOW(___str_49), HIGH(___str_49), UPPER(___str_49), LOW(___str_50), HIGH(___str_50), UPPE
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE  3
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                            R(___str_50)
+       00             
+                      00073 
+                      00074 
+                      00075 ; Internal registers
+                      00076 .registers      udata_ovr       0x0000
+000000                00077 r0x00   res     1
+000001                00078 r0x01   res     1
+000002                00079 r0x02   res     1
+000003                00080 r0x03   res     1
+000004                00081 r0x04   res     1
+000005                00082 r0x05   res     1
+000006                00083 r0x06   res     1
+000007                00084 r0x07   res     1
+000008                00085 r0x08   res     1
+000009                00086 r0x09   res     1
+00000A                00087 r0x0a   res     1
+00000B                00088 r0x0b   res     1
+00000C                00089 r0x0c   res     1
+00000D                00090 r0x0d   res     1
+00000E                00091 r0x0e   res     1
+                      00092 
+                      00093 udata_output_0  udata
+000000                00094 _state_ant      res     1
+                      00095 
+                      00096 udata_output_1  udata
+000000                00097 _language_ant   res     1
+                      00098 
+                      00099 udata_output_2  udata
+000000                00100 _time_ant       res     2
+                      00101 
+                      00102 udata_output_3  udata
+000000                00103 _alarmLow_ant   res     2
+                      00104 
+                      00105 udata_output_4  udata
+000000                00106 _alarmHigh_ant  res     2
+                      00107 
+                      00108 ;--------------------------------------------------------
+                      00109 ; global & static initialisations
+                      00110 ;--------------------------------------------------------
+                      00111 ; I code from now on!
+                      00112 ; ; Starting pCode block
+                      00113 S_output__outputSerial  code
+000000                00114 _outputSerial:
+                      00115 ;       .line   233; output.c   void outputSerial(int numTela, char idiom) {    
+000000 CFD9 FFE5      00116         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00117         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00118         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      00119         MOVFF   r0x01, POSTDEC1
+000010 C??? F???      00120         MOVFF   r0x02, POSTDEC1
+000014 C??? F???      00121         MOVFF   r0x03, POSTDEC1
+000018 C??? F???      00122         MOVFF   r0x04, POSTDEC1
+00001C C??? F???      00123         MOVFF   r0x05, POSTDEC1
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE  4
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000020 C??? F???      00124         MOVFF   r0x06, POSTDEC1
+000024 C??? F???      00125         MOVFF   r0x07, POSTDEC1
+000028 C??? F???      00126         MOVFF   r0x08, POSTDEC1
+00002C C??? F???      00127         MOVFF   r0x09, POSTDEC1
+000030 C??? F???      00128         MOVFF   r0x0a, POSTDEC1
+000034 C??? F???      00129         MOVFF   r0x0b, POSTDEC1
+000038 C??? F???      00130         MOVFF   r0x0c, POSTDEC1
+00003C C??? F???      00131         MOVFF   r0x0d, POSTDEC1
+000040 C??? F???      00132         MOVFF   r0x0e, POSTDEC1
+000044 0E02           00133         MOVLW   0x02
+000046 CFDB F000      00134         MOVFF   PLUSW2, r0x00
+00004A 0E03           00135         MOVLW   0x03
+00004C CFDB F000      00136         MOVFF   PLUSW2, r0x01
+000050 0E04           00137         MOVLW   0x04
+000052 CFDB F000      00138         MOVFF   PLUSW2, r0x02
+                      00139 ;       .line   236; output.c   state = getState();
+000056 EC?? F0??      00140         CALL    _getState
+00005A 6E??           00141         MOVWF   r0x03
+                      00142 ;       .line   237; output.c   language = getIdiom();
+00005C EC?? F0??      00143         CALL    _getIdiom
+000060 6E??           00144         MOVWF   r0x04
+                      00145 ;       .line   238; output.c   time = getTime();
+000062 EC?? F0??      00146         CALL    _getTime
+000066 6E??           00147         MOVWF   r0x05
+000068 CFF3 F000      00148         MOVFF   PRODL, r0x06
+                      00149 ;       .line   239; output.c   alarmLow = getAlarmLow(0);
+00006C 0E00           00150         MOVLW   0x00
+00006E 6EE5           00151         MOVWF   POSTDEC1
+000070 EC?? F0??      00152         CALL    _getAlarmLow
+000074 6E??           00153         MOVWF   r0x07
+000076 CFF3 F000      00154         MOVFF   PRODL, r0x08
+00007A 52E6           00155         MOVF    POSTINC1, F
+                      00156 ;       .line   240; output.c   alarmHigh = getAlarmHigh(0);
+00007C 0E00           00157         MOVLW   0x00
+00007E 6EE5           00158         MOVWF   POSTDEC1
+000080 EC?? F0??      00159         CALL    _getAlarmHigh
+000084 6E??           00160         MOVWF   r0x09
+000086 CFF3 F000      00161         MOVFF   PRODL, r0x0a
+00008A 52E6           00162         MOVF    POSTINC1, F
+                      00163 ;       .line   242; output.c   if (state != state_ant) {
+00008C 50??           00164         MOVF    r0x03, W
+00008E 010?           00165         BANKSEL _state_ant
+000090 19??           00166         XORWF   _state_ant, W, B
+000092 E1??           00167         BNZ     _00316_DS_
+000094 D???           00168         BRA     _00294_DS_
+                      00169 ; ;multiply lit val:0x03 by variable r0x02 and store in r0x0b
+000096                00170 _00316_DS_:
+                      00171 ;       .line   243; output.c   serialString(serial[SERIAL_S][idiom]);
+000096 50??           00172         MOVF    r0x02, W
+000098 0D03           00173         MULLW   0x03
+00009A CFF3 F000      00174         MOVFF   PRODL, r0x0b
+00009E 0E??           00175         MOVLW   LOW(_serial)
+0000A0 24??           00176         ADDWF   r0x0b, W
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE  5
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0000A2 6E??           00177         MOVWF   r0x0c
+0000A4 6A??           00178         CLRF    r0x0d
+0000A6 0E??           00179         MOVLW   HIGH(_serial)
+0000A8 22??           00180         ADDWFC  r0x0d, F
+0000AA C??? F???      00181         MOVFF   r0x0c, FSR0L
+0000AE C??? F???      00182         MOVFF   r0x0d, FSR0H
+0000B2 CFEE F000      00183         MOVFF   POSTINC0, r0x0c
+0000B6 CFEE F000      00184         MOVFF   POSTINC0, r0x0d
+0000BA CFEF F000      00185         MOVFF   INDF0, r0x0e
+0000BE 50??           00186         MOVF    r0x0e, W
+0000C0 6EE5           00187         MOVWF   POSTDEC1
+0000C2 50??           00188         MOVF    r0x0d, W
+0000C4 6EE5           00189         MOVWF   POSTDEC1
+0000C6 50??           00190         MOVF    r0x0c, W
+0000C8 6EE5           00191         MOVWF   POSTDEC1
+0000CA EC?? F0??      00192         CALL    _serialString
+0000CE 0E03           00193         MOVLW   0x03
+0000D0 26E1           00194         ADDWF   FSR1L, F
+                      00195 ;       .line   244; output.c   serialString(msgs[numTela][idiom]);
+0000D2 50??           00196         MOVF    r0x01, W
+0000D4 6EE5           00197         MOVWF   POSTDEC1
+0000D6 50??           00198         MOVF    r0x00, W
+0000D8 6EE5           00199         MOVWF   POSTDEC1
+0000DA 0E00           00200         MOVLW   0x00
+0000DC 6EE5           00201         MOVWF   POSTDEC1
+0000DE 0E06           00202         MOVLW   0x06
+0000E0 6EE5           00203         MOVWF   POSTDEC1
+0000E2 EC?? F0??      00204         CALL    __mulint
+0000E6 6E??           00205         MOVWF   r0x00
+0000E8 CFF3 F000      00206         MOVFF   PRODL, r0x01
+0000EC 0E04           00207         MOVLW   0x04
+0000EE 26E1           00208         ADDWF   FSR1L, F
+0000F0 0E??           00209         MOVLW   LOW(_msgs)
+0000F2 26??           00210         ADDWF   r0x00, F
+0000F4 0E??           00211         MOVLW   HIGH(_msgs)
+0000F6 22??           00212         ADDWFC  r0x01, F
+0000F8 6A??           00213         CLRF    r0x0c
+0000FA 50??           00214         MOVF    r0x00, W
+0000FC 26??           00215         ADDWF   r0x0b, F
+0000FE 50??           00216         MOVF    r0x01, W
+000100 22??           00217         ADDWFC  r0x0c, F
+000102 C??? F???      00218         MOVFF   r0x0b, FSR0L
+000106 C??? F???      00219         MOVFF   r0x0c, FSR0H
+00010A CFEE F000      00220         MOVFF   POSTINC0, r0x0b
+00010E CFEE F000      00221         MOVFF   POSTINC0, r0x0c
+000112 CFEF F000      00222         MOVFF   INDF0, r0x00
+000116 50??           00223         MOVF    r0x00, W
+000118 6EE5           00224         MOVWF   POSTDEC1
+00011A 50??           00225         MOVF    r0x0c, W
+00011C 6EE5           00226         MOVWF   POSTDEC1
+00011E 50??           00227         MOVF    r0x0b, W
+000120 6EE5           00228         MOVWF   POSTDEC1
+000122 EC?? F0??      00229         CALL    _serialString
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE  6
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000126 0E03           00230         MOVLW   0x03
+000128 26E1           00231         ADDWF   FSR1L, F
+                      00232 ;       .line   245; output.c   serialSend(13);
+00012A 0E0D           00233         MOVLW   0x0d
+00012C 6EE5           00234         MOVWF   POSTDEC1
+00012E EC?? F0??      00235         CALL    _serialSend
+000132 52E6           00236         MOVF    POSTINC1, F
+000134                00237 _00294_DS_:
+                      00238 ;       .line   247; output.c   if (alarmHigh != alarmHigh_ant) {
+000134 50??           00239         MOVF    r0x09, W
+000136 6E??           00240         MOVWF   r0x00
+000138 50??           00241         MOVF    r0x0a, W
+00013A 6E??           00242         MOVWF   r0x01
+00013C 50??           00243         MOVF    r0x00, W
+00013E 010?           00244         BANKSEL _alarmHigh_ant
+000140 19??           00245         XORWF   _alarmHigh_ant, W, B
+000142 E1??           00246         BNZ     _00318_DS_
+000144 50??           00247         MOVF    r0x01, W
+000146 010?           00248         BANKSEL (_alarmHigh_ant + 1)
+000148 19??           00249         XORWF   (_alarmHigh_ant + 1), W, B
+00014A E0??           00250         BZ      _00296_DS_
+                      00251 ; ;multiply lit val:0x03 by variable r0x02 and store in r0x00
+00014C                00252 _00318_DS_:
+                      00253 ;       .line   248; output.c   serialString(serial[SERIAL_AH][idiom]);
+00014C 50??           00254         MOVF    r0x02, W
+00014E 0D03           00255         MULLW   0x03
+000150 CFF3 F000      00256         MOVFF   PRODL, r0x00
+000154 6A??           00257         CLRF    r0x01
+000156 0E??           00258         MOVLW   LOW(_serial + 6)
+000158 26??           00259         ADDWF   r0x00, F
+00015A 0E??           00260         MOVLW   HIGH(_serial + 6)
+00015C 22??           00261         ADDWFC  r0x01, F
+00015E C??? F???      00262         MOVFF   r0x00, FSR0L
+000162 C??? F???      00263         MOVFF   r0x01, FSR0H
+000166 CFEE F000      00264         MOVFF   POSTINC0, r0x00
+00016A CFEE F000      00265         MOVFF   POSTINC0, r0x01
+00016E CFEF F000      00266         MOVFF   INDF0, r0x0b
+000172 50??           00267         MOVF    r0x0b, W
+000174 6EE5           00268         MOVWF   POSTDEC1
+000176 50??           00269         MOVF    r0x01, W
+000178 6EE5           00270         MOVWF   POSTDEC1
+00017A 50??           00271         MOVF    r0x00, W
+00017C 6EE5           00272         MOVWF   POSTDEC1
+00017E EC?? F0??      00273         CALL    _serialString
+000182 0E03           00274         MOVLW   0x03
+000184 26E1           00275         ADDWF   FSR1L, F
+                      00276 ;       .line   249; output.c   serialInt(alarmHigh);
+000186 50??           00277         MOVF    r0x0a, W
+000188 6EE5           00278         MOVWF   POSTDEC1
+00018A 50??           00279         MOVF    r0x09, W
+00018C 6EE5           00280         MOVWF   POSTDEC1
+00018E EC?? F0??      00281         CALL    _serialInt
+000192 52E6           00282         MOVF    POSTINC1, F
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE  7
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000194 52E6           00283         MOVF    POSTINC1, F
+                      00284 ;       .line   250; output.c   serialSend(13);
+000196 0E0D           00285         MOVLW   0x0d
+000198 6EE5           00286         MOVWF   POSTDEC1
+00019A EC?? F0??      00287         CALL    _serialSend
+00019E 52E6           00288         MOVF    POSTINC1, F
+0001A0                00289 _00296_DS_:
+                      00290 ;       .line   252; output.c   if (alarmLow != alarmLow_ant) {
+0001A0 50??           00291         MOVF    r0x07, W
+0001A2 6E??           00292         MOVWF   r0x00
+0001A4 50??           00293         MOVF    r0x08, W
+0001A6 6E??           00294         MOVWF   r0x01
+0001A8 50??           00295         MOVF    r0x00, W
+0001AA 010?           00296         BANKSEL _alarmLow_ant
+0001AC 19??           00297         XORWF   _alarmLow_ant, W, B
+0001AE E1??           00298         BNZ     _00320_DS_
+0001B0 50??           00299         MOVF    r0x01, W
+0001B2 010?           00300         BANKSEL (_alarmLow_ant + 1)
+0001B4 19??           00301         XORWF   (_alarmLow_ant + 1), W, B
+0001B6 E0??           00302         BZ      _00298_DS_
+                      00303 ; ;multiply lit val:0x03 by variable r0x02 and store in r0x00
+0001B8                00304 _00320_DS_:
+                      00305 ;       .line   253; output.c   serialString(serial[SERIAL_AL][idiom]);
+0001B8 50??           00306         MOVF    r0x02, W
+0001BA 0D03           00307         MULLW   0x03
+0001BC CFF3 F000      00308         MOVFF   PRODL, r0x00
+0001C0 6A??           00309         CLRF    r0x01
+0001C2 0E??           00310         MOVLW   LOW(_serial + 12)
+0001C4 26??           00311         ADDWF   r0x00, F
+0001C6 0E??           00312         MOVLW   HIGH(_serial + 12)
+0001C8 22??           00313         ADDWFC  r0x01, F
+0001CA C??? F???      00314         MOVFF   r0x00, FSR0L
+0001CE C??? F???      00315         MOVFF   r0x01, FSR0H
+0001D2 CFEE F000      00316         MOVFF   POSTINC0, r0x00
+0001D6 CFEE F000      00317         MOVFF   POSTINC0, r0x01
+0001DA CFEF F000      00318         MOVFF   INDF0, r0x0b
+0001DE 50??           00319         MOVF    r0x0b, W
+0001E0 6EE5           00320         MOVWF   POSTDEC1
+0001E2 50??           00321         MOVF    r0x01, W
+0001E4 6EE5           00322         MOVWF   POSTDEC1
+0001E6 50??           00323         MOVF    r0x00, W
+0001E8 6EE5           00324         MOVWF   POSTDEC1
+0001EA EC?? F0??      00325         CALL    _serialString
+0001EE 0E03           00326         MOVLW   0x03
+0001F0 26E1           00327         ADDWF   FSR1L, F
+                      00328 ;       .line   254; output.c   serialInt(alarmLow);
+0001F2 50??           00329         MOVF    r0x08, W
+0001F4 6EE5           00330         MOVWF   POSTDEC1
+0001F6 50??           00331         MOVF    r0x07, W
+0001F8 6EE5           00332         MOVWF   POSTDEC1
+0001FA EC?? F0??      00333         CALL    _serialInt
+0001FE 52E6           00334         MOVF    POSTINC1, F
+000200 52E6           00335         MOVF    POSTINC1, F
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE  8
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00336 ;       .line   255; output.c   serialSend(13);
+000202 0E0D           00337         MOVLW   0x0d
+000204 6EE5           00338         MOVWF   POSTDEC1
+000206 EC?? F0??      00339         CALL    _serialSend
+00020A 52E6           00340         MOVF    POSTINC1, F
+00020C                00341 _00298_DS_:
+                      00342 ;       .line   257; output.c   if (time != time_ant) {
+00020C 50??           00343         MOVF    r0x05, W
+00020E 6E??           00344         MOVWF   r0x00
+000210 50??           00345         MOVF    r0x06, W
+000212 6E??           00346         MOVWF   r0x01
+000214 50??           00347         MOVF    r0x00, W
+000216 010?           00348         BANKSEL _time_ant
+000218 19??           00349         XORWF   _time_ant, W, B
+00021A E1??           00350         BNZ     _00322_DS_
+00021C 50??           00351         MOVF    r0x01, W
+00021E 010?           00352         BANKSEL (_time_ant + 1)
+000220 19??           00353         XORWF   (_time_ant + 1), W, B
+000222 E0??           00354         BZ      _00300_DS_
+                      00355 ; ;multiply lit val:0x03 by variable r0x02 and store in r0x02
+000224                00356 _00322_DS_:
+                      00357 ;       .line   258; output.c   serialString(serial[SERIAL_T][idiom]);
+000224 50??           00358         MOVF    r0x02, W
+000226 0D03           00359         MULLW   0x03
+000228 CFF3 F000      00360         MOVFF   PRODL, r0x02
+00022C 6A??           00361         CLRF    r0x00
+00022E 0E??           00362         MOVLW   LOW(_serial + 18)
+000230 26??           00363         ADDWF   r0x02, F
+000232 0E??           00364         MOVLW   HIGH(_serial + 18)
+000234 22??           00365         ADDWFC  r0x00, F
+000236 C??? F???      00366         MOVFF   r0x02, FSR0L
+00023A C??? F???      00367         MOVFF   r0x00, FSR0H
+00023E CFEE F000      00368         MOVFF   POSTINC0, r0x02
+000242 CFEE F000      00369         MOVFF   POSTINC0, r0x00
+000246 CFEF F000      00370         MOVFF   INDF0, r0x01
+00024A 50??           00371         MOVF    r0x01, W
+00024C 6EE5           00372         MOVWF   POSTDEC1
+00024E 50??           00373         MOVF    r0x00, W
+000250 6EE5           00374         MOVWF   POSTDEC1
+000252 50??           00375         MOVF    r0x02, W
+000254 6EE5           00376         MOVWF   POSTDEC1
+000256 EC?? F0??      00377         CALL    _serialString
+00025A 0E03           00378         MOVLW   0x03
+00025C 26E1           00379         ADDWF   FSR1L, F
+                      00380 ;       .line   259; output.c   serialInt(time);
+00025E 50??           00381         MOVF    r0x06, W
+000260 6EE5           00382         MOVWF   POSTDEC1
+000262 50??           00383         MOVF    r0x05, W
+000264 6EE5           00384         MOVWF   POSTDEC1
+000266 EC?? F0??      00385         CALL    _serialInt
+00026A 52E6           00386         MOVF    POSTINC1, F
+00026C 52E6           00387         MOVF    POSTINC1, F
+                      00388 ;       .line   260; output.c   serialSend(13);
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE  9
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00026E 0E0D           00389         MOVLW   0x0d
+000270 6EE5           00390         MOVWF   POSTDEC1
+000272 EC?? F0??      00391         CALL    _serialSend
+000276 52E6           00392         MOVF    POSTINC1, F
+000278                00393 _00300_DS_:
+                      00394 ;       .line   264; output.c   state_ant = state;
+000278 C??? F???      00395         MOVFF   r0x03, _state_ant
+                      00396 ;       .line   265; output.c   language_ant = language;
+00027C C??? F???      00397         MOVFF   r0x04, _language_ant
+                      00398 ;       .line   266; output.c   time_ant = time;
+000280 C??? F???      00399         MOVFF   r0x05, _time_ant
+000284 C??? F???      00400         MOVFF   r0x06, (_time_ant + 1)
+                      00401 ;       .line   267; output.c   alarmLow_ant = alarmLow;
+000288 C??? F???      00402         MOVFF   r0x07, _alarmLow_ant
+00028C C??? F???      00403         MOVFF   r0x08, (_alarmLow_ant + 1)
+                      00404 ;       .line   268; output.c   alarmHigh_ant = alarmHigh;
+000290 C??? F???      00405         MOVFF   r0x09, _alarmHigh_ant
+000294 C??? F???      00406         MOVFF   r0x0a, (_alarmHigh_ant + 1)
+000298 CFE4 F000      00407         MOVFF   PREINC1, r0x0e
+00029C CFE4 F000      00408         MOVFF   PREINC1, r0x0d
+0002A0 CFE4 F000      00409         MOVFF   PREINC1, r0x0c
+0002A4 CFE4 F000      00410         MOVFF   PREINC1, r0x0b
+0002A8 CFE4 F000      00411         MOVFF   PREINC1, r0x0a
+0002AC CFE4 F000      00412         MOVFF   PREINC1, r0x09
+0002B0 CFE4 F000      00413         MOVFF   PREINC1, r0x08
+0002B4 CFE4 F000      00414         MOVFF   PREINC1, r0x07
+0002B8 CFE4 F000      00415         MOVFF   PREINC1, r0x06
+0002BC CFE4 F000      00416         MOVFF   PREINC1, r0x05
+0002C0 CFE4 F000      00417         MOVFF   PREINC1, r0x04
+0002C4 CFE4 F000      00418         MOVFF   PREINC1, r0x03
+0002C8 CFE4 F000      00419         MOVFF   PREINC1, r0x02
+0002CC CFE4 F000      00420         MOVFF   PREINC1, r0x01
+0002D0 CFE4 F000      00421         MOVFF   PREINC1, r0x00
+0002D4 CFE4 FFD9      00422         MOVFF   PREINC1, FSR2L
+0002D8 0012           00423         RETURN  
+                      00424 
+                      00425 ; ; Starting pCode block
+                      00426 S_output__outputPrint   code
+000000                00427 _outputPrint:
+                      00428 ;       .line   59; output.c    void outputPrint(int numTela, char idiom) {
+000000 CFD9 FFE5      00429         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00430         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00431         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      00432         MOVFF   r0x01, POSTDEC1
+000010 C??? F???      00433         MOVFF   r0x02, POSTDEC1
+000014 C??? F???      00434         MOVFF   r0x03, POSTDEC1
+000018 C??? F???      00435         MOVFF   r0x04, POSTDEC1
+00001C C??? F???      00436         MOVFF   r0x05, POSTDEC1
+000020 C??? F???      00437         MOVFF   r0x06, POSTDEC1
+000024 C??? F???      00438         MOVFF   r0x07, POSTDEC1
+000028 C??? F???      00439         MOVFF   r0x08, POSTDEC1
+00002C C??? F???      00440         MOVFF   r0x09, POSTDEC1
+000030 C??? F???      00441         MOVFF   r0x0a, POSTDEC1
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 10
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000034 C??? F???      00442         MOVFF   r0x0b, POSTDEC1
+000038 C??? F???      00443         MOVFF   r0x0c, POSTDEC1
+00003C 0E02           00444         MOVLW   0x02
+00003E CFDB F000      00445         MOVFF   PLUSW2, r0x00
+000042 0E03           00446         MOVLW   0x03
+000044 CFDB F000      00447         MOVFF   PLUSW2, r0x01
+000048 0E04           00448         MOVLW   0x04
+00004A CFDB F000      00449         MOVFF   PLUSW2, r0x02
+                      00450 ;       .line   62; output.c    adcInit();
+00004E EC?? F0??      00451         CALL    _adcInit
+                      00452 ;       .line   63; output.c    testHigh0 = testAlarmHigh(0);
+000052 0E00           00453         MOVLW   0x00
+000054 6EE5           00454         MOVWF   POSTDEC1
+000056 EC?? F0??      00455         CALL    _testAlarmHigh
+00005A 6E??           00456         MOVWF   r0x03
+00005C 52E6           00457         MOVF    POSTINC1, F
+                      00458 ;       .line   64; output.c    testLow0 = testAlarmLow(0);
+00005E 0E00           00459         MOVLW   0x00
+000060 6EE5           00460         MOVWF   POSTDEC1
+000062 EC?? F0??      00461         CALL    _testAlarmLow
+000066 6E??           00462         MOVWF   r0x04
+000068 52E6           00463         MOVF    POSTINC1, F
+                      00464 ;       .line   65; output.c    testHigh1 = testAlarmHigh(1);
+00006A 0E01           00465         MOVLW   0x01
+00006C 6EE5           00466         MOVWF   POSTDEC1
+00006E EC?? F0??      00467         CALL    _testAlarmHigh
+000072 6E??           00468         MOVWF   r0x05
+000074 52E6           00469         MOVF    POSTINC1, F
+                      00470 ;       .line   66; output.c    testLow1 = testAlarmLow(1);
+000076 0E01           00471         MOVLW   0x01
+000078 6EE5           00472         MOVWF   POSTDEC1
+00007A EC?? F0??      00473         CALL    _testAlarmLow
+00007E 6E??           00474         MOVWF   r0x06
+000080 52E6           00475         MOVF    POSTINC1, F
+                      00476 ;       .line   68; output.c    if (numTela == STATE_ALARM_HIGH_0) {
+000082 50??           00477         MOVF    r0x00, W
+000084 10??           00478         IORWF   r0x01, W
+000086 A4D8           00479         BTFSS   STATUS, 2
+000088 D???           00480         BRA     _00114_DS_
+                      00481 ;       .line   69; output.c    lcdCommand(0x80);
+00008A 0E80           00482         MOVLW   0x80
+00008C 6EE5           00483         MOVWF   POSTDEC1
+00008E EC?? F0??      00484         CALL    _lcdCommand
+000092 52E6           00485         MOVF    POSTINC1, F
+                      00486 ;       .line   70; output.c    lcdString(msgs[numTela][idiom]);
+000094 50??           00487         MOVF    r0x01, W
+000096 6EE5           00488         MOVWF   POSTDEC1
+000098 50??           00489         MOVF    r0x00, W
+00009A 6EE5           00490         MOVWF   POSTDEC1
+00009C 0E00           00491         MOVLW   0x00
+00009E 6EE5           00492         MOVWF   POSTDEC1
+0000A0 0E06           00493         MOVLW   0x06
+0000A2 6EE5           00494         MOVWF   POSTDEC1
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 11
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0000A4 EC?? F0??      00495         CALL    __mulint
+0000A8 6E??           00496         MOVWF   r0x07
+0000AA CFF3 F000      00497         MOVFF   PRODL, r0x08
+0000AE 0E04           00498         MOVLW   0x04
+0000B0 26E1           00499         ADDWF   FSR1L, F
+0000B2 0E??           00500         MOVLW   LOW(_msgs)
+0000B4 26??           00501         ADDWF   r0x07, F
+0000B6 0E??           00502         MOVLW   HIGH(_msgs)
+0000B8 22??           00503         ADDWFC  r0x08, F
+                      00504 ; ;multiply lit val:0x03 by variable r0x02 and store in r0x09
+0000BA 50??           00505         MOVF    r0x02, W
+0000BC 0D03           00506         MULLW   0x03
+0000BE CFF3 F000      00507         MOVFF   PRODL, r0x09
+0000C2 50??           00508         MOVF    r0x09, W
+0000C4 26??           00509         ADDWF   r0x07, F
+0000C6 6AE8           00510         CLRF    WREG
+0000C8 22??           00511         ADDWFC  r0x08, F
+0000CA C??? F???      00512         MOVFF   r0x07, FSR0L
+0000CE C??? F???      00513         MOVFF   r0x08, FSR0H
+0000D2 CFEE F000      00514         MOVFF   POSTINC0, r0x07
+0000D6 CFEE F000      00515         MOVFF   POSTINC0, r0x08
+0000DA CFEF F000      00516         MOVFF   INDF0, r0x09
+0000DE 50??           00517         MOVF    r0x09, W
+0000E0 6EE5           00518         MOVWF   POSTDEC1
+0000E2 50??           00519         MOVF    r0x08, W
+0000E4 6EE5           00520         MOVWF   POSTDEC1
+0000E6 50??           00521         MOVF    r0x07, W
+0000E8 6EE5           00522         MOVWF   POSTDEC1
+0000EA EC?? F0??      00523         CALL    _lcdString
+0000EE 0E03           00524         MOVLW   0x03
+0000F0 26E1           00525         ADDWF   FSR1L, F
+                      00526 ;       .line   71; output.c    lcdCommand(0xC0);         
+0000F2 0EC0           00527         MOVLW   0xc0
+0000F4 6EE5           00528         MOVWF   POSTDEC1
+0000F6 EC?? F0??      00529         CALL    _lcdCommand
+0000FA 52E6           00530         MOVF    POSTINC1, F
+                      00531 ;       .line   72; output.c    lcdInt(getAlarmHigh(0));
+0000FC 0E00           00532         MOVLW   0x00
+0000FE 6EE5           00533         MOVWF   POSTDEC1
+000100 EC?? F0??      00534         CALL    _getAlarmHigh
+000104 6E??           00535         MOVWF   r0x07
+000106 CFF3 F000      00536         MOVFF   PRODL, r0x08
+00010A 52E6           00537         MOVF    POSTINC1, F
+00010C 50??           00538         MOVF    r0x08, W
+00010E 6EE5           00539         MOVWF   POSTDEC1
+000110 50??           00540         MOVF    r0x07, W
+000112 6EE5           00541         MOVWF   POSTDEC1
+000114 EC?? F0??      00542         CALL    _lcdInt
+000118 52E6           00543         MOVF    POSTINC1, F
+00011A 52E6           00544         MOVF    POSTINC1, F
+                      00545 ;       .line   73; output.c    lcdString("         ");
+00011C 0E??           00546         MOVLW   UPPER(___str_0)
+00011E 6E??           00547         MOVWF   r0x09
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 12
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000120 0E??           00548         MOVLW   HIGH(___str_0)
+000122 6E??           00549         MOVWF   r0x08
+000124 0E??           00550         MOVLW   LOW(___str_0)
+000126 6E??           00551         MOVWF   r0x07
+000128 50??           00552         MOVF    r0x09, W
+00012A 6EE5           00553         MOVWF   POSTDEC1
+00012C 50??           00554         MOVF    r0x08, W
+00012E 6EE5           00555         MOVWF   POSTDEC1
+000130 50??           00556         MOVF    r0x07, W
+000132 6EE5           00557         MOVWF   POSTDEC1
+000134 EC?? F0??      00558         CALL    _lcdString
+000138 0E03           00559         MOVLW   0x03
+00013A 26E1           00560         ADDWF   FSR1L, F
+                      00561 ;       .line   74; output.c    if(testHigh0 == 1)
+00013C 50??           00562         MOVF    r0x03, W
+00013E 0A01           00563         XORLW   0x01
+000140 E1??           00564         BNZ     _00111_DS_
+                      00565 ;       .line   75; output.c    lcdString(" ON ");
+000142 0E??           00566         MOVLW   UPPER(___str_1)
+000144 6E??           00567         MOVWF   r0x09
+000146 0E??           00568         MOVLW   HIGH(___str_1)
+000148 6E??           00569         MOVWF   r0x08
+00014A 0E??           00570         MOVLW   LOW(___str_1)
+00014C 6E??           00571         MOVWF   r0x07
+00014E 50??           00572         MOVF    r0x09, W
+000150 6EE5           00573         MOVWF   POSTDEC1
+000152 50??           00574         MOVF    r0x08, W
+000154 6EE5           00575         MOVWF   POSTDEC1
+000156 50??           00576         MOVF    r0x07, W
+000158 6EE5           00577         MOVWF   POSTDEC1
+00015A EC?? F0??      00578         CALL    _lcdString
+00015E 0E03           00579         MOVLW   0x03
+000160 26E1           00580         ADDWF   FSR1L, F
+000162 D???           00581         BRA     _00114_DS_
+000164                00582 _00111_DS_:
+                      00583 ;       .line   77; output.c    lcdString("OFF ");       
+000164 0E??           00584         MOVLW   UPPER(___str_2)
+000166 6E??           00585         MOVWF   r0x09
+000168 0E??           00586         MOVLW   HIGH(___str_2)
+00016A 6E??           00587         MOVWF   r0x08
+00016C 0E??           00588         MOVLW   LOW(___str_2)
+00016E 6E??           00589         MOVWF   r0x07
+000170 50??           00590         MOVF    r0x09, W
+000172 6EE5           00591         MOVWF   POSTDEC1
+000174 50??           00592         MOVF    r0x08, W
+000176 6EE5           00593         MOVWF   POSTDEC1
+000178 50??           00594         MOVF    r0x07, W
+00017A 6EE5           00595         MOVWF   POSTDEC1
+00017C EC?? F0??      00596         CALL    _lcdString
+000180 0E03           00597         MOVLW   0x03
+000182 26E1           00598         ADDWF   FSR1L, F
+000184                00599 _00114_DS_:
+                      00600 ;       .line   79; output.c    if (numTela == STATE_SET_AH_0) {
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 13
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000184 50??           00601         MOVF    r0x00, W
+000186 0A01           00602         XORLW   0x01
+000188 E1??           00603         BNZ     _00247_DS_
+00018A 50??           00604         MOVF    r0x01, W
+00018C E0??           00605         BZ      _00248_DS_
+00018E                00606 _00247_DS_:
+00018E D???           00607         BRA     _00119_DS_
+000190                00608 _00248_DS_:
+                      00609 ;       .line   80; output.c    lcdCommand(0x80);
+000190 0E80           00610         MOVLW   0x80
+000192 6EE5           00611         MOVWF   POSTDEC1
+000194 EC?? F0??      00612         CALL    _lcdCommand
+000198 52E6           00613         MOVF    POSTINC1, F
+                      00614 ;       .line   81; output.c    lcdString(msgs[numTela][idiom]);
+00019A 50??           00615         MOVF    r0x01, W
+00019C 6EE5           00616         MOVWF   POSTDEC1
+00019E 50??           00617         MOVF    r0x00, W
+0001A0 6EE5           00618         MOVWF   POSTDEC1
+0001A2 0E00           00619         MOVLW   0x00
+0001A4 6EE5           00620         MOVWF   POSTDEC1
+0001A6 0E06           00621         MOVLW   0x06
+0001A8 6EE5           00622         MOVWF   POSTDEC1
+0001AA EC?? F0??      00623         CALL    __mulint
+0001AE 6E??           00624         MOVWF   r0x07
+0001B0 CFF3 F000      00625         MOVFF   PRODL, r0x08
+0001B4 0E04           00626         MOVLW   0x04
+0001B6 26E1           00627         ADDWF   FSR1L, F
+0001B8 0E??           00628         MOVLW   LOW(_msgs)
+0001BA 26??           00629         ADDWF   r0x07, F
+0001BC 0E??           00630         MOVLW   HIGH(_msgs)
+0001BE 22??           00631         ADDWFC  r0x08, F
+                      00632 ; ;multiply lit val:0x03 by variable r0x02 and store in r0x09
+0001C0 50??           00633         MOVF    r0x02, W
+0001C2 0D03           00634         MULLW   0x03
+0001C4 CFF3 F000      00635         MOVFF   PRODL, r0x09
+0001C8 50??           00636         MOVF    r0x09, W
+0001CA 26??           00637         ADDWF   r0x07, F
+0001CC 6AE8           00638         CLRF    WREG
+0001CE 22??           00639         ADDWFC  r0x08, F
+0001D0 C??? F???      00640         MOVFF   r0x07, FSR0L
+0001D4 C??? F???      00641         MOVFF   r0x08, FSR0H
+0001D8 CFEE F000      00642         MOVFF   POSTINC0, r0x07
+0001DC CFEE F000      00643         MOVFF   POSTINC0, r0x08
+0001E0 CFEF F000      00644         MOVFF   INDF0, r0x09
+0001E4 50??           00645         MOVF    r0x09, W
+0001E6 6EE5           00646         MOVWF   POSTDEC1
+0001E8 50??           00647         MOVF    r0x08, W
+0001EA 6EE5           00648         MOVWF   POSTDEC1
+0001EC 50??           00649         MOVF    r0x07, W
+0001EE 6EE5           00650         MOVWF   POSTDEC1
+0001F0 EC?? F0??      00651         CALL    _lcdString
+0001F4 0E03           00652         MOVLW   0x03
+0001F6 26E1           00653         ADDWF   FSR1L, F
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 14
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00654 ;       .line   82; output.c    lcdCommand(0xC0);        
+0001F8 0EC0           00655         MOVLW   0xc0
+0001FA 6EE5           00656         MOVWF   POSTDEC1
+0001FC EC?? F0??      00657         CALL    _lcdCommand
+000200 52E6           00658         MOVF    POSTINC1, F
+                      00659 ;       .line   83; output.c    lcdInt(getAlarmHigh(0));        
+000202 0E00           00660         MOVLW   0x00
+000204 6EE5           00661         MOVWF   POSTDEC1
+000206 EC?? F0??      00662         CALL    _getAlarmHigh
+00020A 6E??           00663         MOVWF   r0x07
+00020C CFF3 F000      00664         MOVFF   PRODL, r0x08
+000210 52E6           00665         MOVF    POSTINC1, F
+000212 50??           00666         MOVF    r0x08, W
+000214 6EE5           00667         MOVWF   POSTDEC1
+000216 50??           00668         MOVF    r0x07, W
+000218 6EE5           00669         MOVWF   POSTDEC1
+00021A EC?? F0??      00670         CALL    _lcdInt
+00021E 52E6           00671         MOVF    POSTINC1, F
+000220 52E6           00672         MOVF    POSTINC1, F
+                      00673 ;       .line   84; output.c    if(testHigh0 == 1)
+000222 50??           00674         MOVF    r0x03, W
+000224 0A01           00675         XORLW   0x01
+000226 E1??           00676         BNZ     _00116_DS_
+                      00677 ;       .line   85; output.c    lcdString(" ON  ");
+000228 0E??           00678         MOVLW   UPPER(___str_3)
+00022A 6E??           00679         MOVWF   r0x08
+00022C 0E??           00680         MOVLW   HIGH(___str_3)
+00022E 6E??           00681         MOVWF   r0x07
+000230 0E??           00682         MOVLW   LOW(___str_3)
+000232 6E??           00683         MOVWF   r0x03
+000234 50??           00684         MOVF    r0x08, W
+000236 6EE5           00685         MOVWF   POSTDEC1
+000238 50??           00686         MOVF    r0x07, W
+00023A 6EE5           00687         MOVWF   POSTDEC1
+00023C 50??           00688         MOVF    r0x03, W
+00023E 6EE5           00689         MOVWF   POSTDEC1
+000240 EC?? F0??      00690         CALL    _lcdString
+000244 0E03           00691         MOVLW   0x03
+000246 26E1           00692         ADDWF   FSR1L, F
+000248 D???           00693         BRA     _00117_DS_
+00024A                00694 _00116_DS_:
+                      00695 ;       .line   87; output.c    lcdString(" OFF ");
+00024A 0E??           00696         MOVLW   UPPER(___str_4)
+00024C 6E??           00697         MOVWF   r0x08
+00024E 0E??           00698         MOVLW   HIGH(___str_4)
+000250 6E??           00699         MOVWF   r0x07
+000252 0E??           00700         MOVLW   LOW(___str_4)
+000254 6E??           00701         MOVWF   r0x03
+000256 50??           00702         MOVF    r0x08, W
+000258 6EE5           00703         MOVWF   POSTDEC1
+00025A 50??           00704         MOVF    r0x07, W
+00025C 6EE5           00705         MOVWF   POSTDEC1
+00025E 50??           00706         MOVF    r0x03, W
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 15
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000260 6EE5           00707         MOVWF   POSTDEC1
+000262 EC?? F0??      00708         CALL    _lcdString
+000266 0E03           00709         MOVLW   0x03
+000268 26E1           00710         ADDWF   FSR1L, F
+00026A                00711 _00117_DS_:
+                      00712 ;       .line   88; output.c    lcdString("A0:");
+00026A 0E??           00713         MOVLW   UPPER(___str_5)
+00026C 6E??           00714         MOVWF   r0x08
+00026E 0E??           00715         MOVLW   HIGH(___str_5)
+000270 6E??           00716         MOVWF   r0x07
+000272 0E??           00717         MOVLW   LOW(___str_5)
+000274 6E??           00718         MOVWF   r0x03
+000276 50??           00719         MOVF    r0x08, W
+000278 6EE5           00720         MOVWF   POSTDEC1
+00027A 50??           00721         MOVF    r0x07, W
+00027C 6EE5           00722         MOVWF   POSTDEC1
+00027E 50??           00723         MOVF    r0x03, W
+000280 6EE5           00724         MOVWF   POSTDEC1
+000282 EC?? F0??      00725         CALL    _lcdString
+000286 0E03           00726         MOVLW   0x03
+000288 26E1           00727         ADDWF   FSR1L, F
+                      00728 ;       .line   89; output.c    lcdInt(adcScale(POT, 1000));
+00028A 0E44           00729         MOVLW   0x44
+00028C 6EE5           00730         MOVWF   POSTDEC1
+00028E 0E7A           00731         MOVLW   0x7a
+000290 6EE5           00732         MOVWF   POSTDEC1
+000292 0E00           00733         MOVLW   0x00
+000294 6EE5           00734         MOVWF   POSTDEC1
+000296 0E00           00735         MOVLW   0x00
+000298 6EE5           00736         MOVWF   POSTDEC1
+00029A 0E02           00737         MOVLW   0x02
+00029C 6EE5           00738         MOVWF   POSTDEC1
+00029E EC?? F0??      00739         CALL    _adcScale
+0002A2 6E??           00740         MOVWF   r0x03
+0002A4 CFF3 F000      00741         MOVFF   PRODL, r0x07
+0002A8 0E05           00742         MOVLW   0x05
+0002AA 26E1           00743         ADDWF   FSR1L, F
+0002AC 50??           00744         MOVF    r0x07, W
+0002AE 6EE5           00745         MOVWF   POSTDEC1
+0002B0 50??           00746         MOVF    r0x03, W
+0002B2 6EE5           00747         MOVWF   POSTDEC1
+0002B4 EC?? F0??      00748         CALL    _lcdInt
+0002B8 52E6           00749         MOVF    POSTINC1, F
+0002BA 52E6           00750         MOVF    POSTINC1, F
+0002BC                00751 _00119_DS_:
+                      00752 ;       .line   91; output.c    if (numTela == STATE_ALARM_LOW_0) {
+0002BC 50??           00753         MOVF    r0x00, W
+0002BE 0A02           00754         XORLW   0x02
+0002C0 E1??           00755         BNZ     _00251_DS_
+0002C2 50??           00756         MOVF    r0x01, W
+0002C4 E0??           00757         BZ      _00252_DS_
+0002C6                00758 _00251_DS_:
+0002C6 D???           00759         BRA     _00124_DS_
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 16
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0002C8                00760 _00252_DS_:
+                      00761 ;       .line   92; output.c    lcdCommand(0x80);
+0002C8 0E80           00762         MOVLW   0x80
+0002CA 6EE5           00763         MOVWF   POSTDEC1
+0002CC EC?? F0??      00764         CALL    _lcdCommand
+0002D0 52E6           00765         MOVF    POSTINC1, F
+                      00766 ;       .line   93; output.c    lcdString(msgs[numTela][idiom]);
+0002D2 50??           00767         MOVF    r0x01, W
+0002D4 6EE5           00768         MOVWF   POSTDEC1
+0002D6 50??           00769         MOVF    r0x00, W
+0002D8 6EE5           00770         MOVWF   POSTDEC1
+0002DA 0E00           00771         MOVLW   0x00
+0002DC 6EE5           00772         MOVWF   POSTDEC1
+0002DE 0E06           00773         MOVLW   0x06
+0002E0 6EE5           00774         MOVWF   POSTDEC1
+0002E2 EC?? F0??      00775         CALL    __mulint
+0002E6 6E??           00776         MOVWF   r0x03
+0002E8 CFF3 F000      00777         MOVFF   PRODL, r0x07
+0002EC 0E04           00778         MOVLW   0x04
+0002EE 26E1           00779         ADDWF   FSR1L, F
+0002F0 0E??           00780         MOVLW   LOW(_msgs)
+0002F2 26??           00781         ADDWF   r0x03, F
+0002F4 0E??           00782         MOVLW   HIGH(_msgs)
+0002F6 22??           00783         ADDWFC  r0x07, F
+                      00784 ; ;multiply lit val:0x03 by variable r0x02 and store in r0x08
+0002F8 50??           00785         MOVF    r0x02, W
+0002FA 0D03           00786         MULLW   0x03
+0002FC CFF3 F000      00787         MOVFF   PRODL, r0x08
+000300 50??           00788         MOVF    r0x08, W
+000302 26??           00789         ADDWF   r0x03, F
+000304 6AE8           00790         CLRF    WREG
+000306 22??           00791         ADDWFC  r0x07, F
+000308 C??? F???      00792         MOVFF   r0x03, FSR0L
+00030C C??? F???      00793         MOVFF   r0x07, FSR0H
+000310 CFEE F000      00794         MOVFF   POSTINC0, r0x03
+000314 CFEE F000      00795         MOVFF   POSTINC0, r0x07
+000318 CFEF F000      00796         MOVFF   INDF0, r0x08
+00031C 50??           00797         MOVF    r0x08, W
+00031E 6EE5           00798         MOVWF   POSTDEC1
+000320 50??           00799         MOVF    r0x07, W
+000322 6EE5           00800         MOVWF   POSTDEC1
+000324 50??           00801         MOVF    r0x03, W
+000326 6EE5           00802         MOVWF   POSTDEC1
+000328 EC?? F0??      00803         CALL    _lcdString
+00032C 0E03           00804         MOVLW   0x03
+00032E 26E1           00805         ADDWF   FSR1L, F
+                      00806 ;       .line   94; output.c    lcdCommand(0xC0);
+000330 0EC0           00807         MOVLW   0xc0
+000332 6EE5           00808         MOVWF   POSTDEC1
+000334 EC?? F0??      00809         CALL    _lcdCommand
+000338 52E6           00810         MOVF    POSTINC1, F
+                      00811 ;       .line   95; output.c    lcdInt(getAlarmLow(0));
+00033A 0E00           00812         MOVLW   0x00
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 17
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00033C 6EE5           00813         MOVWF   POSTDEC1
+00033E EC?? F0??      00814         CALL    _getAlarmLow
+000342 6E??           00815         MOVWF   r0x03
+000344 CFF3 F000      00816         MOVFF   PRODL, r0x07
+000348 52E6           00817         MOVF    POSTINC1, F
+00034A 50??           00818         MOVF    r0x07, W
+00034C 6EE5           00819         MOVWF   POSTDEC1
+00034E 50??           00820         MOVF    r0x03, W
+000350 6EE5           00821         MOVWF   POSTDEC1
+000352 EC?? F0??      00822         CALL    _lcdInt
+000356 52E6           00823         MOVF    POSTINC1, F
+000358 52E6           00824         MOVF    POSTINC1, F
+                      00825 ;       .line   96; output.c    lcdString("         ");
+00035A 0E??           00826         MOVLW   UPPER(___str_0)
+00035C 6E??           00827         MOVWF   r0x08
+00035E 0E??           00828         MOVLW   HIGH(___str_0)
+000360 6E??           00829         MOVWF   r0x07
+000362 0E??           00830         MOVLW   LOW(___str_0)
+000364 6E??           00831         MOVWF   r0x03
+000366 50??           00832         MOVF    r0x08, W
+000368 6EE5           00833         MOVWF   POSTDEC1
+00036A 50??           00834         MOVF    r0x07, W
+00036C 6EE5           00835         MOVWF   POSTDEC1
+00036E 50??           00836         MOVF    r0x03, W
+000370 6EE5           00837         MOVWF   POSTDEC1
+000372 EC?? F0??      00838         CALL    _lcdString
+000376 0E03           00839         MOVLW   0x03
+000378 26E1           00840         ADDWF   FSR1L, F
+                      00841 ;       .line   97; output.c    if(testLow0 == 1)
+00037A 50??           00842         MOVF    r0x04, W
+00037C 0A01           00843         XORLW   0x01
+00037E E1??           00844         BNZ     _00121_DS_
+                      00845 ;       .line   98; output.c    lcdString(" ON ");
+000380 0E??           00846         MOVLW   UPPER(___str_1)
+000382 6E??           00847         MOVWF   r0x08
+000384 0E??           00848         MOVLW   HIGH(___str_1)
+000386 6E??           00849         MOVWF   r0x07
+000388 0E??           00850         MOVLW   LOW(___str_1)
+00038A 6E??           00851         MOVWF   r0x03
+00038C 50??           00852         MOVF    r0x08, W
+00038E 6EE5           00853         MOVWF   POSTDEC1
+000390 50??           00854         MOVF    r0x07, W
+000392 6EE5           00855         MOVWF   POSTDEC1
+000394 50??           00856         MOVF    r0x03, W
+000396 6EE5           00857         MOVWF   POSTDEC1
+000398 EC?? F0??      00858         CALL    _lcdString
+00039C 0E03           00859         MOVLW   0x03
+00039E 26E1           00860         ADDWF   FSR1L, F
+0003A0 D???           00861         BRA     _00124_DS_
+0003A2                00862 _00121_DS_:
+                      00863 ;       .line   100; output.c   lcdString("OFF "); 
+0003A2 0E??           00864         MOVLW   UPPER(___str_2)
+0003A4 6E??           00865         MOVWF   r0x08
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 18
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0003A6 0E??           00866         MOVLW   HIGH(___str_2)
+0003A8 6E??           00867         MOVWF   r0x07
+0003AA 0E??           00868         MOVLW   LOW(___str_2)
+0003AC 6E??           00869         MOVWF   r0x03
+0003AE 50??           00870         MOVF    r0x08, W
+0003B0 6EE5           00871         MOVWF   POSTDEC1
+0003B2 50??           00872         MOVF    r0x07, W
+0003B4 6EE5           00873         MOVWF   POSTDEC1
+0003B6 50??           00874         MOVF    r0x03, W
+0003B8 6EE5           00875         MOVWF   POSTDEC1
+0003BA EC?? F0??      00876         CALL    _lcdString
+0003BE 0E03           00877         MOVLW   0x03
+0003C0 26E1           00878         ADDWF   FSR1L, F
+0003C2                00879 _00124_DS_:
+                      00880 ;       .line   102; output.c   if (numTela == STATE_SET_AL_0) {
+0003C2 50??           00881         MOVF    r0x00, W
+0003C4 0A03           00882         XORLW   0x03
+0003C6 E1??           00883         BNZ     _00255_DS_
+0003C8 50??           00884         MOVF    r0x01, W
+0003CA E0??           00885         BZ      _00256_DS_
+0003CC                00886 _00255_DS_:
+0003CC D???           00887         BRA     _00129_DS_
+0003CE                00888 _00256_DS_:
+                      00889 ;       .line   103; output.c   lcdCommand(0x80);
+0003CE 0E80           00890         MOVLW   0x80
+0003D0 6EE5           00891         MOVWF   POSTDEC1
+0003D2 EC?? F0??      00892         CALL    _lcdCommand
+0003D6 52E6           00893         MOVF    POSTINC1, F
+                      00894 ;       .line   104; output.c   lcdString(msgs[numTela][idiom]);
+0003D8 50??           00895         MOVF    r0x01, W
+0003DA 6EE5           00896         MOVWF   POSTDEC1
+0003DC 50??           00897         MOVF    r0x00, W
+0003DE 6EE5           00898         MOVWF   POSTDEC1
+0003E0 0E00           00899         MOVLW   0x00
+0003E2 6EE5           00900         MOVWF   POSTDEC1
+0003E4 0E06           00901         MOVLW   0x06
+0003E6 6EE5           00902         MOVWF   POSTDEC1
+0003E8 EC?? F0??      00903         CALL    __mulint
+0003EC 6E??           00904         MOVWF   r0x03
+0003EE CFF3 F000      00905         MOVFF   PRODL, r0x07
+0003F2 0E04           00906         MOVLW   0x04
+0003F4 26E1           00907         ADDWF   FSR1L, F
+0003F6 0E??           00908         MOVLW   LOW(_msgs)
+0003F8 26??           00909         ADDWF   r0x03, F
+0003FA 0E??           00910         MOVLW   HIGH(_msgs)
+0003FC 22??           00911         ADDWFC  r0x07, F
+                      00912 ; ;multiply lit val:0x03 by variable r0x02 and store in r0x08
+0003FE 50??           00913         MOVF    r0x02, W
+000400 0D03           00914         MULLW   0x03
+000402 CFF3 F000      00915         MOVFF   PRODL, r0x08
+000406 50??           00916         MOVF    r0x08, W
+000408 26??           00917         ADDWF   r0x03, F
+00040A 6AE8           00918         CLRF    WREG
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 19
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00040C 22??           00919         ADDWFC  r0x07, F
+00040E C??? F???      00920         MOVFF   r0x03, FSR0L
+000412 C??? F???      00921         MOVFF   r0x07, FSR0H
+000416 CFEE F000      00922         MOVFF   POSTINC0, r0x03
+00041A CFEE F000      00923         MOVFF   POSTINC0, r0x07
+00041E CFEF F000      00924         MOVFF   INDF0, r0x08
+000422 50??           00925         MOVF    r0x08, W
+000424 6EE5           00926         MOVWF   POSTDEC1
+000426 50??           00927         MOVF    r0x07, W
+000428 6EE5           00928         MOVWF   POSTDEC1
+00042A 50??           00929         MOVF    r0x03, W
+00042C 6EE5           00930         MOVWF   POSTDEC1
+00042E EC?? F0??      00931         CALL    _lcdString
+000432 0E03           00932         MOVLW   0x03
+000434 26E1           00933         ADDWF   FSR1L, F
+                      00934 ;       .line   105; output.c   lcdCommand(0xC0);
+000436 0EC0           00935         MOVLW   0xc0
+000438 6EE5           00936         MOVWF   POSTDEC1
+00043A EC?? F0??      00937         CALL    _lcdCommand
+00043E 52E6           00938         MOVF    POSTINC1, F
+                      00939 ;       .line   106; output.c   lcdInt(getAlarmLow(0));        
+000440 0E00           00940         MOVLW   0x00
+000442 6EE5           00941         MOVWF   POSTDEC1
+000444 EC?? F0??      00942         CALL    _getAlarmLow
+000448 6E??           00943         MOVWF   r0x03
+00044A CFF3 F000      00944         MOVFF   PRODL, r0x07
+00044E 52E6           00945         MOVF    POSTINC1, F
+000450 50??           00946         MOVF    r0x07, W
+000452 6EE5           00947         MOVWF   POSTDEC1
+000454 50??           00948         MOVF    r0x03, W
+000456 6EE5           00949         MOVWF   POSTDEC1
+000458 EC?? F0??      00950         CALL    _lcdInt
+00045C 52E6           00951         MOVF    POSTINC1, F
+00045E 52E6           00952         MOVF    POSTINC1, F
+                      00953 ;       .line   107; output.c   if(testLow0 == 1)
+000460 50??           00954         MOVF    r0x04, W
+000462 0A01           00955         XORLW   0x01
+000464 E1??           00956         BNZ     _00126_DS_
+                      00957 ;       .line   108; output.c   lcdString(" ON  ");
+000466 0E??           00958         MOVLW   UPPER(___str_3)
+000468 6E??           00959         MOVWF   r0x07
+00046A 0E??           00960         MOVLW   HIGH(___str_3)
+00046C 6E??           00961         MOVWF   r0x04
+00046E 0E??           00962         MOVLW   LOW(___str_3)
+000470 6E??           00963         MOVWF   r0x03
+000472 50??           00964         MOVF    r0x07, W
+000474 6EE5           00965         MOVWF   POSTDEC1
+000476 50??           00966         MOVF    r0x04, W
+000478 6EE5           00967         MOVWF   POSTDEC1
+00047A 50??           00968         MOVF    r0x03, W
+00047C 6EE5           00969         MOVWF   POSTDEC1
+00047E EC?? F0??      00970         CALL    _lcdString
+000482 0E03           00971         MOVLW   0x03
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 20
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000484 26E1           00972         ADDWF   FSR1L, F
+000486 D???           00973         BRA     _00127_DS_
+000488                00974 _00126_DS_:
+                      00975 ;       .line   110; output.c   lcdString(" OFF ");
+000488 0E??           00976         MOVLW   UPPER(___str_4)
+00048A 6E??           00977         MOVWF   r0x07
+00048C 0E??           00978         MOVLW   HIGH(___str_4)
+00048E 6E??           00979         MOVWF   r0x04
+000490 0E??           00980         MOVLW   LOW(___str_4)
+000492 6E??           00981         MOVWF   r0x03
+000494 50??           00982         MOVF    r0x07, W
+000496 6EE5           00983         MOVWF   POSTDEC1
+000498 50??           00984         MOVF    r0x04, W
+00049A 6EE5           00985         MOVWF   POSTDEC1
+00049C 50??           00986         MOVF    r0x03, W
+00049E 6EE5           00987         MOVWF   POSTDEC1
+0004A0 EC?? F0??      00988         CALL    _lcdString
+0004A4 0E03           00989         MOVLW   0x03
+0004A6 26E1           00990         ADDWF   FSR1L, F
+0004A8                00991 _00127_DS_:
+                      00992 ;       .line   111; output.c   lcdString("A0:");
+0004A8 0E??           00993         MOVLW   UPPER(___str_5)
+0004AA 6E??           00994         MOVWF   r0x07
+0004AC 0E??           00995         MOVLW   HIGH(___str_5)
+0004AE 6E??           00996         MOVWF   r0x04
+0004B0 0E??           00997         MOVLW   LOW(___str_5)
+0004B2 6E??           00998         MOVWF   r0x03
+0004B4 50??           00999         MOVF    r0x07, W
+0004B6 6EE5           01000         MOVWF   POSTDEC1
+0004B8 50??           01001         MOVF    r0x04, W
+0004BA 6EE5           01002         MOVWF   POSTDEC1
+0004BC 50??           01003         MOVF    r0x03, W
+0004BE 6EE5           01004         MOVWF   POSTDEC1
+0004C0 EC?? F0??      01005         CALL    _lcdString
+0004C4 0E03           01006         MOVLW   0x03
+0004C6 26E1           01007         ADDWF   FSR1L, F
+                      01008 ;       .line   112; output.c   lcdInt(adcScale(POT, 1020));
+0004C8 0E44           01009         MOVLW   0x44
+0004CA 6EE5           01010         MOVWF   POSTDEC1
+0004CC 0E7F           01011         MOVLW   0x7f
+0004CE 6EE5           01012         MOVWF   POSTDEC1
+0004D0 0E00           01013         MOVLW   0x00
+0004D2 6EE5           01014         MOVWF   POSTDEC1
+0004D4 0E00           01015         MOVLW   0x00
+0004D6 6EE5           01016         MOVWF   POSTDEC1
+0004D8 0E02           01017         MOVLW   0x02
+0004DA 6EE5           01018         MOVWF   POSTDEC1
+0004DC EC?? F0??      01019         CALL    _adcScale
+0004E0 6E??           01020         MOVWF   r0x03
+0004E2 CFF3 F000      01021         MOVFF   PRODL, r0x04
+0004E6 0E05           01022         MOVLW   0x05
+0004E8 26E1           01023         ADDWF   FSR1L, F
+0004EA 50??           01024         MOVF    r0x04, W
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 21
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0004EC 6EE5           01025         MOVWF   POSTDEC1
+0004EE 50??           01026         MOVF    r0x03, W
+0004F0 6EE5           01027         MOVWF   POSTDEC1
+0004F2 EC?? F0??      01028         CALL    _lcdInt
+0004F6 52E6           01029         MOVF    POSTINC1, F
+0004F8 52E6           01030         MOVF    POSTINC1, F
+0004FA                01031 _00129_DS_:
+                      01032 ;       .line   114; output.c   if (numTela == STATE_ALARM_HIGH_1) {
+0004FA 50??           01033         MOVF    r0x00, W
+0004FC 0A04           01034         XORLW   0x04
+0004FE E1??           01035         BNZ     _00259_DS_
+000500 50??           01036         MOVF    r0x01, W
+000502 E0??           01037         BZ      _00260_DS_
+000504                01038 _00259_DS_:
+000504 D???           01039         BRA     _00134_DS_
+000506                01040 _00260_DS_:
+                      01041 ;       .line   115; output.c   lcdCommand(0x80);
+000506 0E80           01042         MOVLW   0x80
+000508 6EE5           01043         MOVWF   POSTDEC1
+00050A EC?? F0??      01044         CALL    _lcdCommand
+00050E 52E6           01045         MOVF    POSTINC1, F
+                      01046 ;       .line   116; output.c   lcdString(msgs[numTela][idiom]);
+000510 50??           01047         MOVF    r0x01, W
+000512 6EE5           01048         MOVWF   POSTDEC1
+000514 50??           01049         MOVF    r0x00, W
+000516 6EE5           01050         MOVWF   POSTDEC1
+000518 0E00           01051         MOVLW   0x00
+00051A 6EE5           01052         MOVWF   POSTDEC1
+00051C 0E06           01053         MOVLW   0x06
+00051E 6EE5           01054         MOVWF   POSTDEC1
+000520 EC?? F0??      01055         CALL    __mulint
+000524 6E??           01056         MOVWF   r0x03
+000526 CFF3 F000      01057         MOVFF   PRODL, r0x04
+00052A 0E04           01058         MOVLW   0x04
+00052C 26E1           01059         ADDWF   FSR1L, F
+00052E 0E??           01060         MOVLW   LOW(_msgs)
+000530 26??           01061         ADDWF   r0x03, F
+000532 0E??           01062         MOVLW   HIGH(_msgs)
+000534 22??           01063         ADDWFC  r0x04, F
+                      01064 ; ;multiply lit val:0x03 by variable r0x02 and store in r0x07
+000536 50??           01065         MOVF    r0x02, W
+000538 0D03           01066         MULLW   0x03
+00053A CFF3 F000      01067         MOVFF   PRODL, r0x07
+00053E 50??           01068         MOVF    r0x07, W
+000540 26??           01069         ADDWF   r0x03, F
+000542 6AE8           01070         CLRF    WREG
+000544 22??           01071         ADDWFC  r0x04, F
+000546 C??? F???      01072         MOVFF   r0x03, FSR0L
+00054A C??? F???      01073         MOVFF   r0x04, FSR0H
+00054E CFEE F000      01074         MOVFF   POSTINC0, r0x03
+000552 CFEE F000      01075         MOVFF   POSTINC0, r0x04
+000556 CFEF F000      01076         MOVFF   INDF0, r0x07
+00055A 50??           01077         MOVF    r0x07, W
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 22
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00055C 6EE5           01078         MOVWF   POSTDEC1
+00055E 50??           01079         MOVF    r0x04, W
+000560 6EE5           01080         MOVWF   POSTDEC1
+000562 50??           01081         MOVF    r0x03, W
+000564 6EE5           01082         MOVWF   POSTDEC1
+000566 EC?? F0??      01083         CALL    _lcdString
+00056A 0E03           01084         MOVLW   0x03
+00056C 26E1           01085         ADDWF   FSR1L, F
+                      01086 ;       .line   117; output.c   lcdCommand(0xC0);
+00056E 0EC0           01087         MOVLW   0xc0
+000570 6EE5           01088         MOVWF   POSTDEC1
+000572 EC?? F0??      01089         CALL    _lcdCommand
+000576 52E6           01090         MOVF    POSTINC1, F
+                      01091 ;       .line   118; output.c   lcdInt(getAlarmHigh(1));
+000578 0E01           01092         MOVLW   0x01
+00057A 6EE5           01093         MOVWF   POSTDEC1
+00057C EC?? F0??      01094         CALL    _getAlarmHigh
+000580 6E??           01095         MOVWF   r0x03
+000582 CFF3 F000      01096         MOVFF   PRODL, r0x04
+000586 52E6           01097         MOVF    POSTINC1, F
+000588 50??           01098         MOVF    r0x04, W
+00058A 6EE5           01099         MOVWF   POSTDEC1
+00058C 50??           01100         MOVF    r0x03, W
+00058E 6EE5           01101         MOVWF   POSTDEC1
+000590 EC?? F0??      01102         CALL    _lcdInt
+000594 52E6           01103         MOVF    POSTINC1, F
+000596 52E6           01104         MOVF    POSTINC1, F
+                      01105 ;       .line   119; output.c   lcdString("         ");
+000598 0E??           01106         MOVLW   UPPER(___str_0)
+00059A 6E??           01107         MOVWF   r0x07
+00059C 0E??           01108         MOVLW   HIGH(___str_0)
+00059E 6E??           01109         MOVWF   r0x04
+0005A0 0E??           01110         MOVLW   LOW(___str_0)
+0005A2 6E??           01111         MOVWF   r0x03
+0005A4 50??           01112         MOVF    r0x07, W
+0005A6 6EE5           01113         MOVWF   POSTDEC1
+0005A8 50??           01114         MOVF    r0x04, W
+0005AA 6EE5           01115         MOVWF   POSTDEC1
+0005AC 50??           01116         MOVF    r0x03, W
+0005AE 6EE5           01117         MOVWF   POSTDEC1
+0005B0 EC?? F0??      01118         CALL    _lcdString
+0005B4 0E03           01119         MOVLW   0x03
+0005B6 26E1           01120         ADDWF   FSR1L, F
+                      01121 ;       .line   120; output.c   if(testHigh1 == 1)
+0005B8 50??           01122         MOVF    r0x05, W
+0005BA 0A01           01123         XORLW   0x01
+0005BC E1??           01124         BNZ     _00131_DS_
+                      01125 ;       .line   121; output.c   lcdString(" ON ");
+0005BE 0E??           01126         MOVLW   UPPER(___str_1)
+0005C0 6E??           01127         MOVWF   r0x07
+0005C2 0E??           01128         MOVLW   HIGH(___str_1)
+0005C4 6E??           01129         MOVWF   r0x04
+0005C6 0E??           01130         MOVLW   LOW(___str_1)
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 23
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0005C8 6E??           01131         MOVWF   r0x03
+0005CA 50??           01132         MOVF    r0x07, W
+0005CC 6EE5           01133         MOVWF   POSTDEC1
+0005CE 50??           01134         MOVF    r0x04, W
+0005D0 6EE5           01135         MOVWF   POSTDEC1
+0005D2 50??           01136         MOVF    r0x03, W
+0005D4 6EE5           01137         MOVWF   POSTDEC1
+0005D6 EC?? F0??      01138         CALL    _lcdString
+0005DA 0E03           01139         MOVLW   0x03
+0005DC 26E1           01140         ADDWF   FSR1L, F
+0005DE D???           01141         BRA     _00134_DS_
+0005E0                01142 _00131_DS_:
+                      01143 ;       .line   123; output.c   lcdString("OFF "); 
+0005E0 0E??           01144         MOVLW   UPPER(___str_2)
+0005E2 6E??           01145         MOVWF   r0x07
+0005E4 0E??           01146         MOVLW   HIGH(___str_2)
+0005E6 6E??           01147         MOVWF   r0x04
+0005E8 0E??           01148         MOVLW   LOW(___str_2)
+0005EA 6E??           01149         MOVWF   r0x03
+0005EC 50??           01150         MOVF    r0x07, W
+0005EE 6EE5           01151         MOVWF   POSTDEC1
+0005F0 50??           01152         MOVF    r0x04, W
+0005F2 6EE5           01153         MOVWF   POSTDEC1
+0005F4 50??           01154         MOVF    r0x03, W
+0005F6 6EE5           01155         MOVWF   POSTDEC1
+0005F8 EC?? F0??      01156         CALL    _lcdString
+0005FC 0E03           01157         MOVLW   0x03
+0005FE 26E1           01158         ADDWF   FSR1L, F
+000600                01159 _00134_DS_:
+                      01160 ;       .line   125; output.c   if (numTela == STATE_SET_AH_1) {
+000600 50??           01161         MOVF    r0x00, W
+000602 0A05           01162         XORLW   0x05
+000604 E1??           01163         BNZ     _00263_DS_
+000606 50??           01164         MOVF    r0x01, W
+000608 E0??           01165         BZ      _00264_DS_
+00060A                01166 _00263_DS_:
+00060A D???           01167         BRA     _00139_DS_
+00060C                01168 _00264_DS_:
+                      01169 ;       .line   126; output.c   lcdCommand(0x80);
+00060C 0E80           01170         MOVLW   0x80
+00060E 6EE5           01171         MOVWF   POSTDEC1
+000610 EC?? F0??      01172         CALL    _lcdCommand
+000614 52E6           01173         MOVF    POSTINC1, F
+                      01174 ;       .line   127; output.c   lcdString(msgs[numTela][idiom]);
+000616 50??           01175         MOVF    r0x01, W
+000618 6EE5           01176         MOVWF   POSTDEC1
+00061A 50??           01177         MOVF    r0x00, W
+00061C 6EE5           01178         MOVWF   POSTDEC1
+00061E 0E00           01179         MOVLW   0x00
+000620 6EE5           01180         MOVWF   POSTDEC1
+000622 0E06           01181         MOVLW   0x06
+000624 6EE5           01182         MOVWF   POSTDEC1
+000626 EC?? F0??      01183         CALL    __mulint
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 24
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00062A 6E??           01184         MOVWF   r0x03
+00062C CFF3 F000      01185         MOVFF   PRODL, r0x04
+000630 0E04           01186         MOVLW   0x04
+000632 26E1           01187         ADDWF   FSR1L, F
+000634 0E??           01188         MOVLW   LOW(_msgs)
+000636 26??           01189         ADDWF   r0x03, F
+000638 0E??           01190         MOVLW   HIGH(_msgs)
+00063A 22??           01191         ADDWFC  r0x04, F
+                      01192 ; ;multiply lit val:0x03 by variable r0x02 and store in r0x07
+00063C 50??           01193         MOVF    r0x02, W
+00063E 0D03           01194         MULLW   0x03
+000640 CFF3 F000      01195         MOVFF   PRODL, r0x07
+000644 50??           01196         MOVF    r0x07, W
+000646 26??           01197         ADDWF   r0x03, F
+000648 6AE8           01198         CLRF    WREG
+00064A 22??           01199         ADDWFC  r0x04, F
+00064C C??? F???      01200         MOVFF   r0x03, FSR0L
+000650 C??? F???      01201         MOVFF   r0x04, FSR0H
+000654 CFEE F000      01202         MOVFF   POSTINC0, r0x03
+000658 CFEE F000      01203         MOVFF   POSTINC0, r0x04
+00065C CFEF F000      01204         MOVFF   INDF0, r0x07
+000660 50??           01205         MOVF    r0x07, W
+000662 6EE5           01206         MOVWF   POSTDEC1
+000664 50??           01207         MOVF    r0x04, W
+000666 6EE5           01208         MOVWF   POSTDEC1
+000668 50??           01209         MOVF    r0x03, W
+00066A 6EE5           01210         MOVWF   POSTDEC1
+00066C EC?? F0??      01211         CALL    _lcdString
+000670 0E03           01212         MOVLW   0x03
+000672 26E1           01213         ADDWF   FSR1L, F
+                      01214 ;       .line   128; output.c   lcdCommand(0xC0);
+000674 0EC0           01215         MOVLW   0xc0
+000676 6EE5           01216         MOVWF   POSTDEC1
+000678 EC?? F0??      01217         CALL    _lcdCommand
+00067C 52E6           01218         MOVF    POSTINC1, F
+                      01219 ;       .line   129; output.c   lcdInt(getAlarmHigh(1));
+00067E 0E01           01220         MOVLW   0x01
+000680 6EE5           01221         MOVWF   POSTDEC1
+000682 EC?? F0??      01222         CALL    _getAlarmHigh
+000686 6E??           01223         MOVWF   r0x03
+000688 CFF3 F000      01224         MOVFF   PRODL, r0x04
+00068C 52E6           01225         MOVF    POSTINC1, F
+00068E 50??           01226         MOVF    r0x04, W
+000690 6EE5           01227         MOVWF   POSTDEC1
+000692 50??           01228         MOVF    r0x03, W
+000694 6EE5           01229         MOVWF   POSTDEC1
+000696 EC?? F0??      01230         CALL    _lcdInt
+00069A 52E6           01231         MOVF    POSTINC1, F
+00069C 52E6           01232         MOVF    POSTINC1, F
+                      01233 ;       .line   130; output.c   if(testHigh1 == 1)
+00069E 50??           01234         MOVF    r0x05, W
+0006A0 0A01           01235         XORLW   0x01
+0006A2 E1??           01236         BNZ     _00136_DS_
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 25
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      01237 ;       .line   131; output.c   lcdString(" ON  ");
+0006A4 0E??           01238         MOVLW   UPPER(___str_3)
+0006A6 6E??           01239         MOVWF   r0x05
+0006A8 0E??           01240         MOVLW   HIGH(___str_3)
+0006AA 6E??           01241         MOVWF   r0x04
+0006AC 0E??           01242         MOVLW   LOW(___str_3)
+0006AE 6E??           01243         MOVWF   r0x03
+0006B0 50??           01244         MOVF    r0x05, W
+0006B2 6EE5           01245         MOVWF   POSTDEC1
+0006B4 50??           01246         MOVF    r0x04, W
+0006B6 6EE5           01247         MOVWF   POSTDEC1
+0006B8 50??           01248         MOVF    r0x03, W
+0006BA 6EE5           01249         MOVWF   POSTDEC1
+0006BC EC?? F0??      01250         CALL    _lcdString
+0006C0 0E03           01251         MOVLW   0x03
+0006C2 26E1           01252         ADDWF   FSR1L, F
+0006C4 D???           01253         BRA     _00137_DS_
+0006C6                01254 _00136_DS_:
+                      01255 ;       .line   133; output.c   lcdString(" OFF ");
+0006C6 0E??           01256         MOVLW   UPPER(___str_4)
+0006C8 6E??           01257         MOVWF   r0x05
+0006CA 0E??           01258         MOVLW   HIGH(___str_4)
+0006CC 6E??           01259         MOVWF   r0x04
+0006CE 0E??           01260         MOVLW   LOW(___str_4)
+0006D0 6E??           01261         MOVWF   r0x03
+0006D2 50??           01262         MOVF    r0x05, W
+0006D4 6EE5           01263         MOVWF   POSTDEC1
+0006D6 50??           01264         MOVF    r0x04, W
+0006D8 6EE5           01265         MOVWF   POSTDEC1
+0006DA 50??           01266         MOVF    r0x03, W
+0006DC 6EE5           01267         MOVWF   POSTDEC1
+0006DE EC?? F0??      01268         CALL    _lcdString
+0006E2 0E03           01269         MOVLW   0x03
+0006E4 26E1           01270         ADDWF   FSR1L, F
+0006E6                01271 _00137_DS_:
+                      01272 ;       .line   134; output.c   lcdString("A1:");
+0006E6 0E??           01273         MOVLW   UPPER(___str_6)
+0006E8 6E??           01274         MOVWF   r0x05
+0006EA 0E??           01275         MOVLW   HIGH(___str_6)
+0006EC 6E??           01276         MOVWF   r0x04
+0006EE 0E??           01277         MOVLW   LOW(___str_6)
+0006F0 6E??           01278         MOVWF   r0x03
+0006F2 50??           01279         MOVF    r0x05, W
+0006F4 6EE5           01280         MOVWF   POSTDEC1
+0006F6 50??           01281         MOVF    r0x04, W
+0006F8 6EE5           01282         MOVWF   POSTDEC1
+0006FA 50??           01283         MOVF    r0x03, W
+0006FC 6EE5           01284         MOVWF   POSTDEC1
+0006FE EC?? F0??      01285         CALL    _lcdString
+000702 0E03           01286         MOVLW   0x03
+000704 26E1           01287         ADDWF   FSR1L, F
+                      01288 ;       .line   135; output.c   lcdInt(adcScale(POT, 1020));         
+000706 0E44           01289         MOVLW   0x44
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 26
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000708 6EE5           01290         MOVWF   POSTDEC1
+00070A 0E7F           01291         MOVLW   0x7f
+00070C 6EE5           01292         MOVWF   POSTDEC1
+00070E 0E00           01293         MOVLW   0x00
+000710 6EE5           01294         MOVWF   POSTDEC1
+000712 0E00           01295         MOVLW   0x00
+000714 6EE5           01296         MOVWF   POSTDEC1
+000716 0E02           01297         MOVLW   0x02
+000718 6EE5           01298         MOVWF   POSTDEC1
+00071A EC?? F0??      01299         CALL    _adcScale
+00071E 6E??           01300         MOVWF   r0x03
+000720 CFF3 F000      01301         MOVFF   PRODL, r0x04
+000724 0E05           01302         MOVLW   0x05
+000726 26E1           01303         ADDWF   FSR1L, F
+000728 50??           01304         MOVF    r0x04, W
+00072A 6EE5           01305         MOVWF   POSTDEC1
+00072C 50??           01306         MOVF    r0x03, W
+00072E 6EE5           01307         MOVWF   POSTDEC1
+000730 EC?? F0??      01308         CALL    _lcdInt
+000734 52E6           01309         MOVF    POSTINC1, F
+000736 52E6           01310         MOVF    POSTINC1, F
+000738                01311 _00139_DS_:
+                      01312 ;       .line   137; output.c   if (numTela == STATE_ALARM_LOW_1) {
+000738 50??           01313         MOVF    r0x00, W
+00073A 0A06           01314         XORLW   0x06
+00073C E1??           01315         BNZ     _00267_DS_
+00073E 50??           01316         MOVF    r0x01, W
+000740 E0??           01317         BZ      _00268_DS_
+000742                01318 _00267_DS_:
+000742 D???           01319         BRA     _00144_DS_
+000744                01320 _00268_DS_:
+                      01321 ;       .line   138; output.c   lcdCommand(0x80);
+000744 0E80           01322         MOVLW   0x80
+000746 6EE5           01323         MOVWF   POSTDEC1
+000748 EC?? F0??      01324         CALL    _lcdCommand
+00074C 52E6           01325         MOVF    POSTINC1, F
+                      01326 ;       .line   139; output.c   lcdString(msgs[numTela][idiom]);
+00074E 50??           01327         MOVF    r0x01, W
+000750 6EE5           01328         MOVWF   POSTDEC1
+000752 50??           01329         MOVF    r0x00, W
+000754 6EE5           01330         MOVWF   POSTDEC1
+000756 0E00           01331         MOVLW   0x00
+000758 6EE5           01332         MOVWF   POSTDEC1
+00075A 0E06           01333         MOVLW   0x06
+00075C 6EE5           01334         MOVWF   POSTDEC1
+00075E EC?? F0??      01335         CALL    __mulint
+000762 6E??           01336         MOVWF   r0x03
+000764 CFF3 F000      01337         MOVFF   PRODL, r0x04
+000768 0E04           01338         MOVLW   0x04
+00076A 26E1           01339         ADDWF   FSR1L, F
+00076C 0E??           01340         MOVLW   LOW(_msgs)
+00076E 26??           01341         ADDWF   r0x03, F
+000770 0E??           01342         MOVLW   HIGH(_msgs)
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 27
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000772 22??           01343         ADDWFC  r0x04, F
+                      01344 ; ;multiply lit val:0x03 by variable r0x02 and store in r0x05
+000774 50??           01345         MOVF    r0x02, W
+000776 0D03           01346         MULLW   0x03
+000778 CFF3 F000      01347         MOVFF   PRODL, r0x05
+00077C 50??           01348         MOVF    r0x05, W
+00077E 26??           01349         ADDWF   r0x03, F
+000780 6AE8           01350         CLRF    WREG
+000782 22??           01351         ADDWFC  r0x04, F
+000784 C??? F???      01352         MOVFF   r0x03, FSR0L
+000788 C??? F???      01353         MOVFF   r0x04, FSR0H
+00078C CFEE F000      01354         MOVFF   POSTINC0, r0x03
+000790 CFEE F000      01355         MOVFF   POSTINC0, r0x04
+000794 CFEF F000      01356         MOVFF   INDF0, r0x05
+000798 50??           01357         MOVF    r0x05, W
+00079A 6EE5           01358         MOVWF   POSTDEC1
+00079C 50??           01359         MOVF    r0x04, W
+00079E 6EE5           01360         MOVWF   POSTDEC1
+0007A0 50??           01361         MOVF    r0x03, W
+0007A2 6EE5           01362         MOVWF   POSTDEC1
+0007A4 EC?? F0??      01363         CALL    _lcdString
+0007A8 0E03           01364         MOVLW   0x03
+0007AA 26E1           01365         ADDWF   FSR1L, F
+                      01366 ;       .line   140; output.c   lcdCommand(0xC0);
+0007AC 0EC0           01367         MOVLW   0xc0
+0007AE 6EE5           01368         MOVWF   POSTDEC1
+0007B0 EC?? F0??      01369         CALL    _lcdCommand
+0007B4 52E6           01370         MOVF    POSTINC1, F
+                      01371 ;       .line   142; output.c   lcdInt(getAlarmLow(1));
+0007B6 0E01           01372         MOVLW   0x01
+0007B8 6EE5           01373         MOVWF   POSTDEC1
+0007BA EC?? F0??      01374         CALL    _getAlarmLow
+0007BE 6E??           01375         MOVWF   r0x03
+0007C0 CFF3 F000      01376         MOVFF   PRODL, r0x04
+0007C4 52E6           01377         MOVF    POSTINC1, F
+0007C6 50??           01378         MOVF    r0x04, W
+0007C8 6EE5           01379         MOVWF   POSTDEC1
+0007CA 50??           01380         MOVF    r0x03, W
+0007CC 6EE5           01381         MOVWF   POSTDEC1
+0007CE EC?? F0??      01382         CALL    _lcdInt
+0007D2 52E6           01383         MOVF    POSTINC1, F
+0007D4 52E6           01384         MOVF    POSTINC1, F
+                      01385 ;       .line   143; output.c   lcdString("         ");
+0007D6 0E??           01386         MOVLW   UPPER(___str_0)
+0007D8 6E??           01387         MOVWF   r0x05
+0007DA 0E??           01388         MOVLW   HIGH(___str_0)
+0007DC 6E??           01389         MOVWF   r0x04
+0007DE 0E??           01390         MOVLW   LOW(___str_0)
+0007E0 6E??           01391         MOVWF   r0x03
+0007E2 50??           01392         MOVF    r0x05, W
+0007E4 6EE5           01393         MOVWF   POSTDEC1
+0007E6 50??           01394         MOVF    r0x04, W
+0007E8 6EE5           01395         MOVWF   POSTDEC1
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 28
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0007EA 50??           01396         MOVF    r0x03, W
+0007EC 6EE5           01397         MOVWF   POSTDEC1
+0007EE EC?? F0??      01398         CALL    _lcdString
+0007F2 0E03           01399         MOVLW   0x03
+0007F4 26E1           01400         ADDWF   FSR1L, F
+                      01401 ;       .line   144; output.c   if(testLow1 == 1)
+0007F6 50??           01402         MOVF    r0x06, W
+0007F8 0A01           01403         XORLW   0x01
+0007FA E1??           01404         BNZ     _00141_DS_
+                      01405 ;       .line   145; output.c   lcdString(" ON ");
+0007FC 0E??           01406         MOVLW   UPPER(___str_1)
+0007FE 6E??           01407         MOVWF   r0x05
+000800 0E??           01408         MOVLW   HIGH(___str_1)
+000802 6E??           01409         MOVWF   r0x04
+000804 0E??           01410         MOVLW   LOW(___str_1)
+000806 6E??           01411         MOVWF   r0x03
+000808 50??           01412         MOVF    r0x05, W
+00080A 6EE5           01413         MOVWF   POSTDEC1
+00080C 50??           01414         MOVF    r0x04, W
+00080E 6EE5           01415         MOVWF   POSTDEC1
+000810 50??           01416         MOVF    r0x03, W
+000812 6EE5           01417         MOVWF   POSTDEC1
+000814 EC?? F0??      01418         CALL    _lcdString
+000818 0E03           01419         MOVLW   0x03
+00081A 26E1           01420         ADDWF   FSR1L, F
+00081C D???           01421         BRA     _00144_DS_
+00081E                01422 _00141_DS_:
+                      01423 ;       .line   147; output.c   lcdString("OFF "); 
+00081E 0E??           01424         MOVLW   UPPER(___str_2)
+000820 6E??           01425         MOVWF   r0x05
+000822 0E??           01426         MOVLW   HIGH(___str_2)
+000824 6E??           01427         MOVWF   r0x04
+000826 0E??           01428         MOVLW   LOW(___str_2)
+000828 6E??           01429         MOVWF   r0x03
+00082A 50??           01430         MOVF    r0x05, W
+00082C 6EE5           01431         MOVWF   POSTDEC1
+00082E 50??           01432         MOVF    r0x04, W
+000830 6EE5           01433         MOVWF   POSTDEC1
+000832 50??           01434         MOVF    r0x03, W
+000834 6EE5           01435         MOVWF   POSTDEC1
+000836 EC?? F0??      01436         CALL    _lcdString
+00083A 0E03           01437         MOVLW   0x03
+00083C 26E1           01438         ADDWF   FSR1L, F
+00083E                01439 _00144_DS_:
+                      01440 ;       .line   149; output.c   if (numTela == STATE_SET_AL_1) {
+00083E 50??           01441         MOVF    r0x00, W
+000840 0A07           01442         XORLW   0x07
+000842 E1??           01443         BNZ     _00271_DS_
+000844 50??           01444         MOVF    r0x01, W
+000846 E0??           01445         BZ      _00272_DS_
+000848                01446 _00271_DS_:
+000848 D???           01447         BRA     _00149_DS_
+00084A                01448 _00272_DS_:
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 29
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      01449 ;       .line   150; output.c   lcdCommand(0x80);
+00084A 0E80           01450         MOVLW   0x80
+00084C 6EE5           01451         MOVWF   POSTDEC1
+00084E EC?? F0??      01452         CALL    _lcdCommand
+000852 52E6           01453         MOVF    POSTINC1, F
+                      01454 ;       .line   151; output.c   lcdString(msgs[numTela][idiom]);
+000854 50??           01455         MOVF    r0x01, W
+000856 6EE5           01456         MOVWF   POSTDEC1
+000858 50??           01457         MOVF    r0x00, W
+00085A 6EE5           01458         MOVWF   POSTDEC1
+00085C 0E00           01459         MOVLW   0x00
+00085E 6EE5           01460         MOVWF   POSTDEC1
+000860 0E06           01461         MOVLW   0x06
+000862 6EE5           01462         MOVWF   POSTDEC1
+000864 EC?? F0??      01463         CALL    __mulint
+000868 6E??           01464         MOVWF   r0x03
+00086A CFF3 F000      01465         MOVFF   PRODL, r0x04
+00086E 0E04           01466         MOVLW   0x04
+000870 26E1           01467         ADDWF   FSR1L, F
+000872 0E??           01468         MOVLW   LOW(_msgs)
+000874 26??           01469         ADDWF   r0x03, F
+000876 0E??           01470         MOVLW   HIGH(_msgs)
+000878 22??           01471         ADDWFC  r0x04, F
+                      01472 ; ;multiply lit val:0x03 by variable r0x02 and store in r0x05
+00087A 50??           01473         MOVF    r0x02, W
+00087C 0D03           01474         MULLW   0x03
+00087E CFF3 F000      01475         MOVFF   PRODL, r0x05
+000882 50??           01476         MOVF    r0x05, W
+000884 26??           01477         ADDWF   r0x03, F
+000886 6AE8           01478         CLRF    WREG
+000888 22??           01479         ADDWFC  r0x04, F
+00088A C??? F???      01480         MOVFF   r0x03, FSR0L
+00088E C??? F???      01481         MOVFF   r0x04, FSR0H
+000892 CFEE F000      01482         MOVFF   POSTINC0, r0x03
+000896 CFEE F000      01483         MOVFF   POSTINC0, r0x04
+00089A CFEF F000      01484         MOVFF   INDF0, r0x05
+00089E 50??           01485         MOVF    r0x05, W
+0008A0 6EE5           01486         MOVWF   POSTDEC1
+0008A2 50??           01487         MOVF    r0x04, W
+0008A4 6EE5           01488         MOVWF   POSTDEC1
+0008A6 50??           01489         MOVF    r0x03, W
+0008A8 6EE5           01490         MOVWF   POSTDEC1
+0008AA EC?? F0??      01491         CALL    _lcdString
+0008AE 0E03           01492         MOVLW   0x03
+0008B0 26E1           01493         ADDWF   FSR1L, F
+                      01494 ;       .line   152; output.c   lcdCommand(0xC0);
+0008B2 0EC0           01495         MOVLW   0xc0
+0008B4 6EE5           01496         MOVWF   POSTDEC1
+0008B6 EC?? F0??      01497         CALL    _lcdCommand
+0008BA 52E6           01498         MOVF    POSTINC1, F
+                      01499 ;       .line   153; output.c   lcdInt(getAlarmLow(1));
+0008BC 0E01           01500         MOVLW   0x01
+0008BE 6EE5           01501         MOVWF   POSTDEC1
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 30
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0008C0 EC?? F0??      01502         CALL    _getAlarmLow
+0008C4 6E??           01503         MOVWF   r0x03
+0008C6 CFF3 F000      01504         MOVFF   PRODL, r0x04
+0008CA 52E6           01505         MOVF    POSTINC1, F
+0008CC 50??           01506         MOVF    r0x04, W
+0008CE 6EE5           01507         MOVWF   POSTDEC1
+0008D0 50??           01508         MOVF    r0x03, W
+0008D2 6EE5           01509         MOVWF   POSTDEC1
+0008D4 EC?? F0??      01510         CALL    _lcdInt
+0008D8 52E6           01511         MOVF    POSTINC1, F
+0008DA 52E6           01512         MOVF    POSTINC1, F
+                      01513 ;       .line   154; output.c   if(testLow1 == 1)
+0008DC 50??           01514         MOVF    r0x06, W
+0008DE 0A01           01515         XORLW   0x01
+0008E0 E1??           01516         BNZ     _00146_DS_
+                      01517 ;       .line   155; output.c   lcdString(" ON  ");
+0008E2 0E??           01518         MOVLW   UPPER(___str_3)
+0008E4 6E??           01519         MOVWF   r0x05
+0008E6 0E??           01520         MOVLW   HIGH(___str_3)
+0008E8 6E??           01521         MOVWF   r0x04
+0008EA 0E??           01522         MOVLW   LOW(___str_3)
+0008EC 6E??           01523         MOVWF   r0x03
+0008EE 50??           01524         MOVF    r0x05, W
+0008F0 6EE5           01525         MOVWF   POSTDEC1
+0008F2 50??           01526         MOVF    r0x04, W
+0008F4 6EE5           01527         MOVWF   POSTDEC1
+0008F6 50??           01528         MOVF    r0x03, W
+0008F8 6EE5           01529         MOVWF   POSTDEC1
+0008FA EC?? F0??      01530         CALL    _lcdString
+0008FE 0E03           01531         MOVLW   0x03
+000900 26E1           01532         ADDWF   FSR1L, F
+000902 D???           01533         BRA     _00147_DS_
+000904                01534 _00146_DS_:
+                      01535 ;       .line   157; output.c   lcdString(" OFF ");
+000904 0E??           01536         MOVLW   UPPER(___str_4)
+000906 6E??           01537         MOVWF   r0x05
+000908 0E??           01538         MOVLW   HIGH(___str_4)
+00090A 6E??           01539         MOVWF   r0x04
+00090C 0E??           01540         MOVLW   LOW(___str_4)
+00090E 6E??           01541         MOVWF   r0x03
+000910 50??           01542         MOVF    r0x05, W
+000912 6EE5           01543         MOVWF   POSTDEC1
+000914 50??           01544         MOVF    r0x04, W
+000916 6EE5           01545         MOVWF   POSTDEC1
+000918 50??           01546         MOVF    r0x03, W
+00091A 6EE5           01547         MOVWF   POSTDEC1
+00091C EC?? F0??      01548         CALL    _lcdString
+000920 0E03           01549         MOVLW   0x03
+000922 26E1           01550         ADDWF   FSR1L, F
+000924                01551 _00147_DS_:
+                      01552 ;       .line   158; output.c   lcdString("A1:");
+000924 0E??           01553         MOVLW   UPPER(___str_6)
+000926 6E??           01554         MOVWF   r0x05
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 31
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000928 0E??           01555         MOVLW   HIGH(___str_6)
+00092A 6E??           01556         MOVWF   r0x04
+00092C 0E??           01557         MOVLW   LOW(___str_6)
+00092E 6E??           01558         MOVWF   r0x03
+000930 50??           01559         MOVF    r0x05, W
+000932 6EE5           01560         MOVWF   POSTDEC1
+000934 50??           01561         MOVF    r0x04, W
+000936 6EE5           01562         MOVWF   POSTDEC1
+000938 50??           01563         MOVF    r0x03, W
+00093A 6EE5           01564         MOVWF   POSTDEC1
+00093C EC?? F0??      01565         CALL    _lcdString
+000940 0E03           01566         MOVLW   0x03
+000942 26E1           01567         ADDWF   FSR1L, F
+                      01568 ;       .line   159; output.c   lcdInt(adcScale(POT, 1020));         
+000944 0E44           01569         MOVLW   0x44
+000946 6EE5           01570         MOVWF   POSTDEC1
+000948 0E7F           01571         MOVLW   0x7f
+00094A 6EE5           01572         MOVWF   POSTDEC1
+00094C 0E00           01573         MOVLW   0x00
+00094E 6EE5           01574         MOVWF   POSTDEC1
+000950 0E00           01575         MOVLW   0x00
+000952 6EE5           01576         MOVWF   POSTDEC1
+000954 0E02           01577         MOVLW   0x02
+000956 6EE5           01578         MOVWF   POSTDEC1
+000958 EC?? F0??      01579         CALL    _adcScale
+00095C 6E??           01580         MOVWF   r0x03
+00095E CFF3 F000      01581         MOVFF   PRODL, r0x04
+000962 0E05           01582         MOVLW   0x05
+000964 26E1           01583         ADDWF   FSR1L, F
+000966 50??           01584         MOVF    r0x04, W
+000968 6EE5           01585         MOVWF   POSTDEC1
+00096A 50??           01586         MOVF    r0x03, W
+00096C 6EE5           01587         MOVWF   POSTDEC1
+00096E EC?? F0??      01588         CALL    _lcdInt
+000972 52E6           01589         MOVF    POSTINC1, F
+000974 52E6           01590         MOVF    POSTINC1, F
+000976                01591 _00149_DS_:
+                      01592 ;       .line   161; output.c   if (numTela == STATE_TIME) {
+000976 50??           01593         MOVF    r0x00, W
+000978 0A08           01594         XORLW   0x08
+00097A E1??           01595         BNZ     _00275_DS_
+00097C 50??           01596         MOVF    r0x01, W
+00097E E0??           01597         BZ      _00276_DS_
+000980                01598 _00275_DS_:
+000980 D???           01599         BRA     _00151_DS_
+000982                01600 _00276_DS_:
+                      01601 ;       .line   162; output.c   lcdCommand(0x80);
+000982 0E80           01602         MOVLW   0x80
+000984 6EE5           01603         MOVWF   POSTDEC1
+000986 EC?? F0??      01604         CALL    _lcdCommand
+00098A 52E6           01605         MOVF    POSTINC1, F
+                      01606 ;       .line   163; output.c   lcdString(msgs[numTela][idiom]);
+00098C 50??           01607         MOVF    r0x01, W
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 32
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00098E 6EE5           01608         MOVWF   POSTDEC1
+000990 50??           01609         MOVF    r0x00, W
+000992 6EE5           01610         MOVWF   POSTDEC1
+000994 0E00           01611         MOVLW   0x00
+000996 6EE5           01612         MOVWF   POSTDEC1
+000998 0E06           01613         MOVLW   0x06
+00099A 6EE5           01614         MOVWF   POSTDEC1
+00099C EC?? F0??      01615         CALL    __mulint
+0009A0 6E??           01616         MOVWF   r0x03
+0009A2 CFF3 F000      01617         MOVFF   PRODL, r0x04
+0009A6 0E04           01618         MOVLW   0x04
+0009A8 26E1           01619         ADDWF   FSR1L, F
+0009AA 0E??           01620         MOVLW   LOW(_msgs)
+0009AC 26??           01621         ADDWF   r0x03, F
+0009AE 0E??           01622         MOVLW   HIGH(_msgs)
+0009B0 22??           01623         ADDWFC  r0x04, F
+                      01624 ; ;multiply lit val:0x03 by variable r0x02 and store in r0x05
+0009B2 50??           01625         MOVF    r0x02, W
+0009B4 0D03           01626         MULLW   0x03
+0009B6 CFF3 F000      01627         MOVFF   PRODL, r0x05
+0009BA 50??           01628         MOVF    r0x05, W
+0009BC 26??           01629         ADDWF   r0x03, F
+0009BE 6AE8           01630         CLRF    WREG
+0009C0 22??           01631         ADDWFC  r0x04, F
+0009C2 C??? F???      01632         MOVFF   r0x03, FSR0L
+0009C6 C??? F???      01633         MOVFF   r0x04, FSR0H
+0009CA CFEE F000      01634         MOVFF   POSTINC0, r0x03
+0009CE CFEE F000      01635         MOVFF   POSTINC0, r0x04
+0009D2 CFEF F000      01636         MOVFF   INDF0, r0x05
+0009D6 50??           01637         MOVF    r0x05, W
+0009D8 6EE5           01638         MOVWF   POSTDEC1
+0009DA 50??           01639         MOVF    r0x04, W
+0009DC 6EE5           01640         MOVWF   POSTDEC1
+0009DE 50??           01641         MOVF    r0x03, W
+0009E0 6EE5           01642         MOVWF   POSTDEC1
+0009E2 EC?? F0??      01643         CALL    _lcdString
+0009E6 0E03           01644         MOVLW   0x03
+0009E8 26E1           01645         ADDWF   FSR1L, F
+                      01646 ;       .line   164; output.c   lcdCommand(0xC0);
+0009EA 0EC0           01647         MOVLW   0xc0
+0009EC 6EE5           01648         MOVWF   POSTDEC1
+0009EE EC?? F0??      01649         CALL    _lcdCommand
+0009F2 52E6           01650         MOVF    POSTINC1, F
+                      01651 ;       .line   165; output.c   lcdInt(getTime());
+0009F4 EC?? F0??      01652         CALL    _getTime
+0009F8 6E??           01653         MOVWF   r0x03
+0009FA CFF3 F000      01654         MOVFF   PRODL, r0x04
+0009FE 50??           01655         MOVF    r0x04, W
+000A00 6EE5           01656         MOVWF   POSTDEC1
+000A02 50??           01657         MOVF    r0x03, W
+000A04 6EE5           01658         MOVWF   POSTDEC1
+000A06 EC?? F0??      01659         CALL    _lcdInt
+000A0A 52E6           01660         MOVF    POSTINC1, F
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 33
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000A0C 52E6           01661         MOVF    POSTINC1, F
+                      01662 ;       .line   166; output.c   lcdString(" ms");
+000A0E 0E??           01663         MOVLW   UPPER(___str_7)
+000A10 6E??           01664         MOVWF   r0x05
+000A12 0E??           01665         MOVLW   HIGH(___str_7)
+000A14 6E??           01666         MOVWF   r0x04
+000A16 0E??           01667         MOVLW   LOW(___str_7)
+000A18 6E??           01668         MOVWF   r0x03
+000A1A 50??           01669         MOVF    r0x05, W
+000A1C 6EE5           01670         MOVWF   POSTDEC1
+000A1E 50??           01671         MOVF    r0x04, W
+000A20 6EE5           01672         MOVWF   POSTDEC1
+000A22 50??           01673         MOVF    r0x03, W
+000A24 6EE5           01674         MOVWF   POSTDEC1
+000A26 EC?? F0??      01675         CALL    _lcdString
+000A2A 0E03           01676         MOVLW   0x03
+000A2C 26E1           01677         ADDWF   FSR1L, F
+                      01678 ;       .line   167; output.c   lcdString("            ");//para apagar os textos depois do numero
+000A2E 0E??           01679         MOVLW   UPPER(___str_8)
+000A30 6E??           01680         MOVWF   r0x05
+000A32 0E??           01681         MOVLW   HIGH(___str_8)
+000A34 6E??           01682         MOVWF   r0x04
+000A36 0E??           01683         MOVLW   LOW(___str_8)
+000A38 6E??           01684         MOVWF   r0x03
+000A3A 50??           01685         MOVF    r0x05, W
+000A3C 6EE5           01686         MOVWF   POSTDEC1
+000A3E 50??           01687         MOVF    r0x04, W
+000A40 6EE5           01688         MOVWF   POSTDEC1
+000A42 50??           01689         MOVF    r0x03, W
+000A44 6EE5           01690         MOVWF   POSTDEC1
+000A46 EC?? F0??      01691         CALL    _lcdString
+000A4A 0E03           01692         MOVLW   0x03
+000A4C 26E1           01693         ADDWF   FSR1L, F
+000A4E                01694 _00151_DS_:
+                      01695 ;       .line   169; output.c   if (numTela == STATE_SET_T) {
+000A4E 50??           01696         MOVF    r0x00, W
+000A50 0A09           01697         XORLW   0x09
+000A52 E1??           01698         BNZ     _00277_DS_
+000A54 50??           01699         MOVF    r0x01, W
+000A56 E0??           01700         BZ      _00278_DS_
+000A58                01701 _00277_DS_:
+000A58 D???           01702         BRA     _00153_DS_
+000A5A                01703 _00278_DS_:
+                      01704 ;       .line   170; output.c   lcdCommand(0x80);
+000A5A 0E80           01705         MOVLW   0x80
+000A5C 6EE5           01706         MOVWF   POSTDEC1
+000A5E EC?? F0??      01707         CALL    _lcdCommand
+000A62 52E6           01708         MOVF    POSTINC1, F
+                      01709 ;       .line   171; output.c   lcdString(msgs[numTela][idiom]);
+000A64 50??           01710         MOVF    r0x01, W
+000A66 6EE5           01711         MOVWF   POSTDEC1
+000A68 50??           01712         MOVF    r0x00, W
+000A6A 6EE5           01713         MOVWF   POSTDEC1
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 34
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000A6C 0E00           01714         MOVLW   0x00
+000A6E 6EE5           01715         MOVWF   POSTDEC1
+000A70 0E06           01716         MOVLW   0x06
+000A72 6EE5           01717         MOVWF   POSTDEC1
+000A74 EC?? F0??      01718         CALL    __mulint
+000A78 6E??           01719         MOVWF   r0x03
+000A7A CFF3 F000      01720         MOVFF   PRODL, r0x04
+000A7E 0E04           01721         MOVLW   0x04
+000A80 26E1           01722         ADDWF   FSR1L, F
+000A82 0E??           01723         MOVLW   LOW(_msgs)
+000A84 26??           01724         ADDWF   r0x03, F
+000A86 0E??           01725         MOVLW   HIGH(_msgs)
+000A88 22??           01726         ADDWFC  r0x04, F
+                      01727 ; ;multiply lit val:0x03 by variable r0x02 and store in r0x05
+000A8A 50??           01728         MOVF    r0x02, W
+000A8C 0D03           01729         MULLW   0x03
+000A8E CFF3 F000      01730         MOVFF   PRODL, r0x05
+000A92 50??           01731         MOVF    r0x05, W
+000A94 26??           01732         ADDWF   r0x03, F
+000A96 6AE8           01733         CLRF    WREG
+000A98 22??           01734         ADDWFC  r0x04, F
+000A9A C??? F???      01735         MOVFF   r0x03, FSR0L
+000A9E C??? F???      01736         MOVFF   r0x04, FSR0H
+000AA2 CFEE F000      01737         MOVFF   POSTINC0, r0x03
+000AA6 CFEE F000      01738         MOVFF   POSTINC0, r0x04
+000AAA CFEF F000      01739         MOVFF   INDF0, r0x05
+000AAE 50??           01740         MOVF    r0x05, W
+000AB0 6EE5           01741         MOVWF   POSTDEC1
+000AB2 50??           01742         MOVF    r0x04, W
+000AB4 6EE5           01743         MOVWF   POSTDEC1
+000AB6 50??           01744         MOVF    r0x03, W
+000AB8 6EE5           01745         MOVWF   POSTDEC1
+000ABA EC?? F0??      01746         CALL    _lcdString
+000ABE 0E03           01747         MOVLW   0x03
+000AC0 26E1           01748         ADDWF   FSR1L, F
+                      01749 ;       .line   172; output.c   lcdCommand(0xC0);
+000AC2 0EC0           01750         MOVLW   0xc0
+000AC4 6EE5           01751         MOVWF   POSTDEC1
+000AC6 EC?? F0??      01752         CALL    _lcdCommand
+000ACA 52E6           01753         MOVF    POSTINC1, F
+                      01754 ;       .line   173; output.c   lcdInt(getTime());
+000ACC EC?? F0??      01755         CALL    _getTime
+000AD0 6E??           01756         MOVWF   r0x03
+000AD2 CFF3 F000      01757         MOVFF   PRODL, r0x04
+000AD6 50??           01758         MOVF    r0x04, W
+000AD8 6EE5           01759         MOVWF   POSTDEC1
+000ADA 50??           01760         MOVF    r0x03, W
+000ADC 6EE5           01761         MOVWF   POSTDEC1
+000ADE EC?? F0??      01762         CALL    _lcdInt
+000AE2 52E6           01763         MOVF    POSTINC1, F
+000AE4 52E6           01764         MOVF    POSTINC1, F
+                      01765 ;       .line   174; output.c   lcdString(" ms");
+000AE6 0E??           01766         MOVLW   UPPER(___str_7)
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 35
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000AE8 6E??           01767         MOVWF   r0x05
+000AEA 0E??           01768         MOVLW   HIGH(___str_7)
+000AEC 6E??           01769         MOVWF   r0x04
+000AEE 0E??           01770         MOVLW   LOW(___str_7)
+000AF0 6E??           01771         MOVWF   r0x03
+000AF2 50??           01772         MOVF    r0x05, W
+000AF4 6EE5           01773         MOVWF   POSTDEC1
+000AF6 50??           01774         MOVF    r0x04, W
+000AF8 6EE5           01775         MOVWF   POSTDEC1
+000AFA 50??           01776         MOVF    r0x03, W
+000AFC 6EE5           01777         MOVWF   POSTDEC1
+000AFE EC?? F0??      01778         CALL    _lcdString
+000B02 0E03           01779         MOVLW   0x03
+000B04 26E1           01780         ADDWF   FSR1L, F
+                      01781 ;       .line   175; output.c   lcdString("           ");//para apagar os textos depois do numero
+000B06 0E??           01782         MOVLW   UPPER(___str_9)
+000B08 6E??           01783         MOVWF   r0x05
+000B0A 0E??           01784         MOVLW   HIGH(___str_9)
+000B0C 6E??           01785         MOVWF   r0x04
+000B0E 0E??           01786         MOVLW   LOW(___str_9)
+000B10 6E??           01787         MOVWF   r0x03
+000B12 50??           01788         MOVF    r0x05, W
+000B14 6EE5           01789         MOVWF   POSTDEC1
+000B16 50??           01790         MOVF    r0x04, W
+000B18 6EE5           01791         MOVWF   POSTDEC1
+000B1A 50??           01792         MOVF    r0x03, W
+000B1C 6EE5           01793         MOVWF   POSTDEC1
+000B1E EC?? F0??      01794         CALL    _lcdString
+000B22 0E03           01795         MOVLW   0x03
+000B24 26E1           01796         ADDWF   FSR1L, F
+000B26                01797 _00153_DS_:
+                      01798 ;       .line   177; output.c   if (numTela == STATE_IDIOM) {
+000B26 50??           01799         MOVF    r0x00, W
+000B28 0A0A           01800         XORLW   0x0a
+000B2A E1??           01801         BNZ     _00279_DS_
+000B2C 50??           01802         MOVF    r0x01, W
+000B2E E0??           01803         BZ      _00280_DS_
+000B30                01804 _00279_DS_:
+000B30 D???           01805         BRA     _00159_DS_
+000B32                01806 _00280_DS_:
+                      01807 ;       .line   178; output.c   lcdCommand(0x80);
+000B32 0E80           01808         MOVLW   0x80
+000B34 6EE5           01809         MOVWF   POSTDEC1
+000B36 EC?? F0??      01810         CALL    _lcdCommand
+000B3A 52E6           01811         MOVF    POSTINC1, F
+                      01812 ;       .line   179; output.c   lcdString(msgs[numTela][idiom]);
+000B3C 50??           01813         MOVF    r0x01, W
+000B3E 6EE5           01814         MOVWF   POSTDEC1
+000B40 50??           01815         MOVF    r0x00, W
+000B42 6EE5           01816         MOVWF   POSTDEC1
+000B44 0E00           01817         MOVLW   0x00
+000B46 6EE5           01818         MOVWF   POSTDEC1
+000B48 0E06           01819         MOVLW   0x06
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 36
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000B4A 6EE5           01820         MOVWF   POSTDEC1
+000B4C EC?? F0??      01821         CALL    __mulint
+000B50 6E??           01822         MOVWF   r0x03
+000B52 CFF3 F000      01823         MOVFF   PRODL, r0x04
+000B56 0E04           01824         MOVLW   0x04
+000B58 26E1           01825         ADDWF   FSR1L, F
+000B5A 0E??           01826         MOVLW   LOW(_msgs)
+000B5C 26??           01827         ADDWF   r0x03, F
+000B5E 0E??           01828         MOVLW   HIGH(_msgs)
+000B60 22??           01829         ADDWFC  r0x04, F
+                      01830 ; ;multiply lit val:0x03 by variable r0x02 and store in r0x05
+000B62 50??           01831         MOVF    r0x02, W
+000B64 0D03           01832         MULLW   0x03
+000B66 CFF3 F000      01833         MOVFF   PRODL, r0x05
+000B6A 50??           01834         MOVF    r0x05, W
+000B6C 26??           01835         ADDWF   r0x03, F
+000B6E 6AE8           01836         CLRF    WREG
+000B70 22??           01837         ADDWFC  r0x04, F
+000B72 C??? F???      01838         MOVFF   r0x03, FSR0L
+000B76 C??? F???      01839         MOVFF   r0x04, FSR0H
+000B7A CFEE F000      01840         MOVFF   POSTINC0, r0x03
+000B7E CFEE F000      01841         MOVFF   POSTINC0, r0x04
+000B82 CFEF F000      01842         MOVFF   INDF0, r0x05
+000B86 50??           01843         MOVF    r0x05, W
+000B88 6EE5           01844         MOVWF   POSTDEC1
+000B8A 50??           01845         MOVF    r0x04, W
+000B8C 6EE5           01846         MOVWF   POSTDEC1
+000B8E 50??           01847         MOVF    r0x03, W
+000B90 6EE5           01848         MOVWF   POSTDEC1
+000B92 EC?? F0??      01849         CALL    _lcdString
+000B96 0E03           01850         MOVLW   0x03
+000B98 26E1           01851         ADDWF   FSR1L, F
+                      01852 ;       .line   180; output.c   lcdCommand(0xC0);
+000B9A 0EC0           01853         MOVLW   0xc0
+000B9C 6EE5           01854         MOVWF   POSTDEC1
+000B9E EC?? F0??      01855         CALL    _lcdCommand
+000BA2 52E6           01856         MOVF    POSTINC1, F
+                      01857 ;       .line   181; output.c   if (getIdiom() == 0) {
+000BA4 EC?? F0??      01858         CALL    _getIdiom
+000BA8 6E??           01859         MOVWF   r0x03
+000BAA 50??           01860         MOVF    r0x03, W
+000BAC E1??           01861         BNZ     _00155_DS_
+                      01862 ;       .line   182; output.c   lcdString("Portugues       ");
+000BAE 0E??           01863         MOVLW   UPPER(___str_10)
+000BB0 6E??           01864         MOVWF   r0x05
+000BB2 0E??           01865         MOVLW   HIGH(___str_10)
+000BB4 6E??           01866         MOVWF   r0x04
+000BB6 0E??           01867         MOVLW   LOW(___str_10)
+000BB8 6E??           01868         MOVWF   r0x03
+000BBA 50??           01869         MOVF    r0x05, W
+000BBC 6EE5           01870         MOVWF   POSTDEC1
+000BBE 50??           01871         MOVF    r0x04, W
+000BC0 6EE5           01872         MOVWF   POSTDEC1
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 37
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000BC2 50??           01873         MOVF    r0x03, W
+000BC4 6EE5           01874         MOVWF   POSTDEC1
+000BC6 EC?? F0??      01875         CALL    _lcdString
+000BCA 0E03           01876         MOVLW   0x03
+000BCC 26E1           01877         ADDWF   FSR1L, F
+000BCE                01878 _00155_DS_:
+                      01879 ;       .line   184; output.c   if (getIdiom() == 1) {
+000BCE EC?? F0??      01880         CALL    _getIdiom
+000BD2 6E??           01881         MOVWF   r0x03
+000BD4 50??           01882         MOVF    r0x03, W
+000BD6 0A01           01883         XORLW   0x01
+000BD8 E1??           01884         BNZ     _00159_DS_
+                      01885 ;       .line   185; output.c   lcdString("English         ");
+000BDA 0E??           01886         MOVLW   UPPER(___str_11)
+000BDC 6E??           01887         MOVWF   r0x05
+000BDE 0E??           01888         MOVLW   HIGH(___str_11)
+000BE0 6E??           01889         MOVWF   r0x04
+000BE2 0E??           01890         MOVLW   LOW(___str_11)
+000BE4 6E??           01891         MOVWF   r0x03
+000BE6 50??           01892         MOVF    r0x05, W
+000BE8 6EE5           01893         MOVWF   POSTDEC1
+000BEA 50??           01894         MOVF    r0x04, W
+000BEC 6EE5           01895         MOVWF   POSTDEC1
+000BEE 50??           01896         MOVF    r0x03, W
+000BF0 6EE5           01897         MOVWF   POSTDEC1
+000BF2 EC?? F0??      01898         CALL    _lcdString
+000BF6 0E03           01899         MOVLW   0x03
+000BF8 26E1           01900         ADDWF   FSR1L, F
+000BFA                01901 _00159_DS_:
+                      01902 ;       .line   189; output.c   if (numTela == STATE_DATE) {
+000BFA 50??           01903         MOVF    r0x00, W
+000BFC 0A0B           01904         XORLW   0x0b
+000BFE E1??           01905         BNZ     _00283_DS_
+000C00 50??           01906         MOVF    r0x01, W
+000C02 E0??           01907         BZ      _00284_DS_
+000C04                01908 _00283_DS_:
+000C04 D???           01909         BRA     _00161_DS_
+000C06                01910 _00284_DS_:
+                      01911 ;       .line   190; output.c   lcdCommand(0x80);
+000C06 0E80           01912         MOVLW   0x80
+000C08 6EE5           01913         MOVWF   POSTDEC1
+000C0A EC?? F0??      01914         CALL    _lcdCommand
+000C0E 52E6           01915         MOVF    POSTINC1, F
+                      01916 ;       .line   191; output.c   lcdString(msgs[numTela][idiom]);
+000C10 50??           01917         MOVF    r0x01, W
+000C12 6EE5           01918         MOVWF   POSTDEC1
+000C14 50??           01919         MOVF    r0x00, W
+000C16 6EE5           01920         MOVWF   POSTDEC1
+000C18 0E00           01921         MOVLW   0x00
+000C1A 6EE5           01922         MOVWF   POSTDEC1
+000C1C 0E06           01923         MOVLW   0x06
+000C1E 6EE5           01924         MOVWF   POSTDEC1
+000C20 EC?? F0??      01925         CALL    __mulint
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 38
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000C24 6E??           01926         MOVWF   r0x03
+000C26 CFF3 F000      01927         MOVFF   PRODL, r0x04
+000C2A 0E04           01928         MOVLW   0x04
+000C2C 26E1           01929         ADDWF   FSR1L, F
+000C2E 0E??           01930         MOVLW   LOW(_msgs)
+000C30 26??           01931         ADDWF   r0x03, F
+000C32 0E??           01932         MOVLW   HIGH(_msgs)
+000C34 22??           01933         ADDWFC  r0x04, F
+                      01934 ; ;multiply lit val:0x03 by variable r0x02 and store in r0x05
+000C36 50??           01935         MOVF    r0x02, W
+000C38 0D03           01936         MULLW   0x03
+000C3A CFF3 F000      01937         MOVFF   PRODL, r0x05
+000C3E 50??           01938         MOVF    r0x05, W
+000C40 26??           01939         ADDWF   r0x03, F
+000C42 6AE8           01940         CLRF    WREG
+000C44 22??           01941         ADDWFC  r0x04, F
+000C46 C??? F???      01942         MOVFF   r0x03, FSR0L
+000C4A C??? F???      01943         MOVFF   r0x04, FSR0H
+000C4E CFEE F000      01944         MOVFF   POSTINC0, r0x03
+000C52 CFEE F000      01945         MOVFF   POSTINC0, r0x04
+000C56 CFEF F000      01946         MOVFF   INDF0, r0x05
+000C5A 50??           01947         MOVF    r0x05, W
+000C5C 6EE5           01948         MOVWF   POSTDEC1
+000C5E 50??           01949         MOVF    r0x04, W
+000C60 6EE5           01950         MOVWF   POSTDEC1
+000C62 50??           01951         MOVF    r0x03, W
+000C64 6EE5           01952         MOVWF   POSTDEC1
+000C66 EC?? F0??      01953         CALL    _lcdString
+000C6A 0E03           01954         MOVLW   0x03
+000C6C 26E1           01955         ADDWF   FSR1L, F
+                      01956 ;       .line   192; output.c   lcdCommand(0xC0);
+000C6E 0EC0           01957         MOVLW   0xc0
+000C70 6EE5           01958         MOVWF   POSTDEC1
+000C72 EC?? F0??      01959         CALL    _lcdCommand
+000C76 52E6           01960         MOVF    POSTINC1, F
+                      01961 ;       .line   194; output.c   sec = rtcRead(0x00);
+000C78 0E00           01962         MOVLW   0x00
+000C7A 6EE5           01963         MOVWF   POSTDEC1
+000C7C EC?? F0??      01964         CALL    _rtcRead
+000C80 6E??           01965         MOVWF   r0x03
+000C82 52E6           01966         MOVF    POSTINC1, F
+000C84 6A??           01967         CLRF    r0x04
+                      01968 ;       .line   195; output.c   min = rtcRead(0x01);
+000C86 0E01           01969         MOVLW   0x01
+000C88 6EE5           01970         MOVWF   POSTDEC1
+000C8A EC?? F0??      01971         CALL    _rtcRead
+000C8E 6E??           01972         MOVWF   r0x05
+000C90 52E6           01973         MOVF    POSTINC1, F
+000C92 6A??           01974         CLRF    r0x06
+                      01975 ;       .line   196; output.c   hour = rtcRead(0x02);        
+000C94 0E02           01976         MOVLW   0x02
+000C96 6EE5           01977         MOVWF   POSTDEC1
+000C98 EC?? F0??      01978         CALL    _rtcRead
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 39
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000C9C 6E??           01979         MOVWF   r0x07
+000C9E 52E6           01980         MOVF    POSTINC1, F
+000CA0 6A??           01981         CLRF    r0x08
+                      01982 ;       .line   197; output.c   date = rtcRead(0x04);
+000CA2 0E04           01983         MOVLW   0x04
+000CA4 6EE5           01984         MOVWF   POSTDEC1
+000CA6 EC?? F0??      01985         CALL    _rtcRead
+000CAA 6E??           01986         MOVWF   r0x09
+000CAC 52E6           01987         MOVF    POSTINC1, F
+000CAE 6A??           01988         CLRF    r0x0a
+                      01989 ;       .line   198; output.c   month = rtcRead(0x05);
+000CB0 0E05           01990         MOVLW   0x05
+000CB2 6EE5           01991         MOVWF   POSTDEC1
+000CB4 EC?? F0??      01992         CALL    _rtcRead
+000CB8 6E??           01993         MOVWF   r0x0b
+000CBA 52E6           01994         MOVF    POSTINC1, F
+000CBC 6A??           01995         CLRF    r0x0c
+                      01996 ;       .line   199; output.c   year = rtcRead(0x06);
+000CBE 0E06           01997         MOVLW   0x06
+000CC0 6EE5           01998         MOVWF   POSTDEC1
+000CC2 EC?? F0??      01999         CALL    _rtcRead
+000CC6 52E6           02000         MOVF    POSTINC1, F
+                      02001 ;       .line   201; output.c   lcdData(BCD2UpperCh(hour));
+000CC8 50??           02002         MOVF    r0x07, W
+000CCA 6EE5           02003         MOVWF   POSTDEC1
+000CCC EC?? F0??      02004         CALL    _BCD2UpperCh
+000CD0 6E??           02005         MOVWF   r0x08
+000CD2 52E6           02006         MOVF    POSTINC1, F
+000CD4 50??           02007         MOVF    r0x08, W
+000CD6 6EE5           02008         MOVWF   POSTDEC1
+000CD8 EC?? F0??      02009         CALL    _lcdData
+000CDC 52E6           02010         MOVF    POSTINC1, F
+                      02011 ;       .line   202; output.c   lcdData(BCD2LowerCh(hour));
+000CDE 50??           02012         MOVF    r0x07, W
+000CE0 6EE5           02013         MOVWF   POSTDEC1
+000CE2 EC?? F0??      02014         CALL    _BCD2LowerCh
+000CE6 6E??           02015         MOVWF   r0x07
+000CE8 52E6           02016         MOVF    POSTINC1, F
+000CEA 50??           02017         MOVF    r0x07, W
+000CEC 6EE5           02018         MOVWF   POSTDEC1
+000CEE EC?? F0??      02019         CALL    _lcdData
+000CF2 52E6           02020         MOVF    POSTINC1, F
+                      02021 ;       .line   203; output.c   lcdData(':');
+000CF4 0E3A           02022         MOVLW   0x3a
+000CF6 6EE5           02023         MOVWF   POSTDEC1
+000CF8 EC?? F0??      02024         CALL    _lcdData
+000CFC 52E6           02025         MOVF    POSTINC1, F
+                      02026 ;       .line   204; output.c   lcdData(BCD2UpperCh(min));
+000CFE 50??           02027         MOVF    r0x05, W
+000D00 6EE5           02028         MOVWF   POSTDEC1
+000D02 EC?? F0??      02029         CALL    _BCD2UpperCh
+000D06 6E??           02030         MOVWF   r0x06
+000D08 52E6           02031         MOVF    POSTINC1, F
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 40
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000D0A 50??           02032         MOVF    r0x06, W
+000D0C 6EE5           02033         MOVWF   POSTDEC1
+000D0E EC?? F0??      02034         CALL    _lcdData
+000D12 52E6           02035         MOVF    POSTINC1, F
+                      02036 ;       .line   205; output.c   lcdData(BCD2LowerCh(min));
+000D14 50??           02037         MOVF    r0x05, W
+000D16 6EE5           02038         MOVWF   POSTDEC1
+000D18 EC?? F0??      02039         CALL    _BCD2LowerCh
+000D1C 6E??           02040         MOVWF   r0x05
+000D1E 52E6           02041         MOVF    POSTINC1, F
+000D20 50??           02042         MOVF    r0x05, W
+000D22 6EE5           02043         MOVWF   POSTDEC1
+000D24 EC?? F0??      02044         CALL    _lcdData
+000D28 52E6           02045         MOVF    POSTINC1, F
+                      02046 ;       .line   206; output.c   lcdData(':');
+000D2A 0E3A           02047         MOVLW   0x3a
+000D2C 6EE5           02048         MOVWF   POSTDEC1
+000D2E EC?? F0??      02049         CALL    _lcdData
+000D32 52E6           02050         MOVF    POSTINC1, F
+                      02051 ;       .line   207; output.c   lcdData(BCD2UpperCh(sec));
+000D34 50??           02052         MOVF    r0x03, W
+000D36 6EE5           02053         MOVWF   POSTDEC1
+000D38 EC?? F0??      02054         CALL    _BCD2UpperCh
+000D3C 6E??           02055         MOVWF   r0x04
+000D3E 52E6           02056         MOVF    POSTINC1, F
+000D40 50??           02057         MOVF    r0x04, W
+000D42 6EE5           02058         MOVWF   POSTDEC1
+000D44 EC?? F0??      02059         CALL    _lcdData
+000D48 52E6           02060         MOVF    POSTINC1, F
+                      02061 ;       .line   208; output.c   lcdData(BCD2LowerCh(sec));
+000D4A 50??           02062         MOVF    r0x03, W
+000D4C 6EE5           02063         MOVWF   POSTDEC1
+000D4E EC?? F0??      02064         CALL    _BCD2LowerCh
+000D52 6E??           02065         MOVWF   r0x03
+000D54 52E6           02066         MOVF    POSTINC1, F
+000D56 50??           02067         MOVF    r0x03, W
+000D58 6EE5           02068         MOVWF   POSTDEC1
+000D5A EC?? F0??      02069         CALL    _lcdData
+000D5E 52E6           02070         MOVF    POSTINC1, F
+                      02071 ;       .line   209; output.c   lcdString("   ");
+000D60 0E??           02072         MOVLW   UPPER(___str_12)
+000D62 6E??           02073         MOVWF   r0x05
+000D64 0E??           02074         MOVLW   HIGH(___str_12)
+000D66 6E??           02075         MOVWF   r0x04
+000D68 0E??           02076         MOVLW   LOW(___str_12)
+000D6A 6E??           02077         MOVWF   r0x03
+000D6C 50??           02078         MOVF    r0x05, W
+000D6E 6EE5           02079         MOVWF   POSTDEC1
+000D70 50??           02080         MOVF    r0x04, W
+000D72 6EE5           02081         MOVWF   POSTDEC1
+000D74 50??           02082         MOVF    r0x03, W
+000D76 6EE5           02083         MOVWF   POSTDEC1
+000D78 EC?? F0??      02084         CALL    _lcdString
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 41
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000D7C 0E03           02085         MOVLW   0x03
+000D7E 26E1           02086         ADDWF   FSR1L, F
+                      02087 ;       .line   210; output.c   lcdData(BCD2UpperCh(date));
+000D80 50??           02088         MOVF    r0x09, W
+000D82 6EE5           02089         MOVWF   POSTDEC1
+000D84 EC?? F0??      02090         CALL    _BCD2UpperCh
+000D88 6E??           02091         MOVWF   r0x03
+000D8A 52E6           02092         MOVF    POSTINC1, F
+000D8C 50??           02093         MOVF    r0x03, W
+000D8E 6EE5           02094         MOVWF   POSTDEC1
+000D90 EC?? F0??      02095         CALL    _lcdData
+000D94 52E6           02096         MOVF    POSTINC1, F
+                      02097 ;       .line   211; output.c   lcdData(BCD2LowerCh(date));
+000D96 50??           02098         MOVF    r0x09, W
+000D98 6EE5           02099         MOVWF   POSTDEC1
+000D9A EC?? F0??      02100         CALL    _BCD2LowerCh
+000D9E 6E??           02101         MOVWF   r0x03
+000DA0 52E6           02102         MOVF    POSTINC1, F
+000DA2 50??           02103         MOVF    r0x03, W
+000DA4 6EE5           02104         MOVWF   POSTDEC1
+000DA6 EC?? F0??      02105         CALL    _lcdData
+000DAA 52E6           02106         MOVF    POSTINC1, F
+                      02107 ;       .line   212; output.c   lcdData('/');
+000DAC 0E2F           02108         MOVLW   0x2f
+000DAE 6EE5           02109         MOVWF   POSTDEC1
+000DB0 EC?? F0??      02110         CALL    _lcdData
+000DB4 52E6           02111         MOVF    POSTINC1, F
+                      02112 ;       .line   213; output.c   lcdData(BCD2UpperCh(month));
+000DB6 50??           02113         MOVF    r0x0b, W
+000DB8 6EE5           02114         MOVWF   POSTDEC1
+000DBA EC?? F0??      02115         CALL    _BCD2UpperCh
+000DBE 6E??           02116         MOVWF   r0x03
+000DC0 52E6           02117         MOVF    POSTINC1, F
+000DC2 50??           02118         MOVF    r0x03, W
+000DC4 6EE5           02119         MOVWF   POSTDEC1
+000DC6 EC?? F0??      02120         CALL    _lcdData
+000DCA 52E6           02121         MOVF    POSTINC1, F
+                      02122 ;       .line   214; output.c   lcdData(BCD2LowerCh(month));
+000DCC 50??           02123         MOVF    r0x0b, W
+000DCE 6EE5           02124         MOVWF   POSTDEC1
+000DD0 EC?? F0??      02125         CALL    _BCD2LowerCh
+000DD4 6E??           02126         MOVWF   r0x03
+000DD6 52E6           02127         MOVF    POSTINC1, F
+000DD8 50??           02128         MOVF    r0x03, W
+000DDA 6EE5           02129         MOVWF   POSTDEC1
+000DDC EC?? F0??      02130         CALL    _lcdData
+000DE0 52E6           02131         MOVF    POSTINC1, F
+000DE2                02132 _00161_DS_:
+                      02133 ;       .line   219; output.c   if (numTela == STATE_RST) {
+000DE2 50??           02134         MOVF    r0x00, W
+000DE4 0A0C           02135         XORLW   0x0c
+000DE6 E1??           02136         BNZ     _00285_DS_
+000DE8 50??           02137         MOVF    r0x01, W
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 42
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000DEA E0??           02138         BZ      _00286_DS_
+000DEC                02139 _00285_DS_:
+000DEC D???           02140         BRA     _00168_DS_
+000DEE                02141 _00286_DS_:
+                      02142 ;       .line   220; output.c   lcdCommand(0x80);
+000DEE 0E80           02143         MOVLW   0x80
+000DF0 6EE5           02144         MOVWF   POSTDEC1
+000DF2 EC?? F0??      02145         CALL    _lcdCommand
+000DF6 52E6           02146         MOVF    POSTINC1, F
+                      02147 ;       .line   221; output.c   lcdString(msgs[numTela][idiom]);  
+000DF8 50??           02148         MOVF    r0x01, W
+000DFA 6EE5           02149         MOVWF   POSTDEC1
+000DFC 50??           02150         MOVF    r0x00, W
+000DFE 6EE5           02151         MOVWF   POSTDEC1
+000E00 0E00           02152         MOVLW   0x00
+000E02 6EE5           02153         MOVWF   POSTDEC1
+000E04 0E06           02154         MOVLW   0x06
+000E06 6EE5           02155         MOVWF   POSTDEC1
+000E08 EC?? F0??      02156         CALL    __mulint
+000E0C 6E??           02157         MOVWF   r0x00
+000E0E CFF3 F000      02158         MOVFF   PRODL, r0x01
+000E12 0E04           02159         MOVLW   0x04
+000E14 26E1           02160         ADDWF   FSR1L, F
+000E16 0E??           02161         MOVLW   LOW(_msgs)
+000E18 26??           02162         ADDWF   r0x00, F
+000E1A 0E??           02163         MOVLW   HIGH(_msgs)
+000E1C 22??           02164         ADDWFC  r0x01, F
+                      02165 ; ;multiply lit val:0x03 by variable r0x02 and store in r0x02
+000E1E 50??           02166         MOVF    r0x02, W
+000E20 0D03           02167         MULLW   0x03
+000E22 CFF3 F000      02168         MOVFF   PRODL, r0x02
+000E26 50??           02169         MOVF    r0x02, W
+000E28 26??           02170         ADDWF   r0x00, F
+000E2A 6AE8           02171         CLRF    WREG
+000E2C 22??           02172         ADDWFC  r0x01, F
+000E2E C??? F???      02173         MOVFF   r0x00, FSR0L
+000E32 C??? F???      02174         MOVFF   r0x01, FSR0H
+000E36 CFEE F000      02175         MOVFF   POSTINC0, r0x00
+000E3A CFEE F000      02176         MOVFF   POSTINC0, r0x01
+000E3E CFEF F000      02177         MOVFF   INDF0, r0x02
+000E42 50??           02178         MOVF    r0x02, W
+000E44 6EE5           02179         MOVWF   POSTDEC1
+000E46 50??           02180         MOVF    r0x01, W
+000E48 6EE5           02181         MOVWF   POSTDEC1
+000E4A 50??           02182         MOVF    r0x00, W
+000E4C 6EE5           02183         MOVWF   POSTDEC1
+000E4E EC?? F0??      02184         CALL    _lcdString
+000E52 0E03           02185         MOVLW   0x03
+000E54 26E1           02186         ADDWF   FSR1L, F
+                      02187 ;       .line   222; output.c   lcdCommand(0xC0);
+000E56 0EC0           02188         MOVLW   0xc0
+000E58 6EE5           02189         MOVWF   POSTDEC1
+000E5A EC?? F0??      02190         CALL    _lcdCommand
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 43
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000E5E 52E6           02191         MOVF    POSTINC1, F
+                      02192 ;       .line   223; output.c   if (getIdiom() == 0) {
+000E60 EC?? F0??      02193         CALL    _getIdiom
+000E64 6E??           02194         MOVWF   r0x00
+000E66 50??           02195         MOVF    r0x00, W
+000E68 E1??           02196         BNZ     _00163_DS_
+                      02197 ;       .line   224; output.c   lcdString(" (<-) S/N (->)  ");
+000E6A 0E??           02198         MOVLW   UPPER(___str_13)
+000E6C 6E??           02199         MOVWF   r0x02
+000E6E 0E??           02200         MOVLW   HIGH(___str_13)
+000E70 6E??           02201         MOVWF   r0x01
+000E72 0E??           02202         MOVLW   LOW(___str_13)
+000E74 6E??           02203         MOVWF   r0x00
+000E76 50??           02204         MOVF    r0x02, W
+000E78 6EE5           02205         MOVWF   POSTDEC1
+000E7A 50??           02206         MOVF    r0x01, W
+000E7C 6EE5           02207         MOVWF   POSTDEC1
+000E7E 50??           02208         MOVF    r0x00, W
+000E80 6EE5           02209         MOVWF   POSTDEC1
+000E82 EC?? F0??      02210         CALL    _lcdString
+000E86 0E03           02211         MOVLW   0x03
+000E88 26E1           02212         ADDWF   FSR1L, F
+000E8A                02213 _00163_DS_:
+                      02214 ;       .line   226; output.c   if (getIdiom() == 1) {
+000E8A EC?? F0??      02215         CALL    _getIdiom
+000E8E 6E??           02216         MOVWF   r0x00
+000E90 50??           02217         MOVF    r0x00, W
+000E92 0A01           02218         XORLW   0x01
+000E94 E1??           02219         BNZ     _00168_DS_
+                      02220 ;       .line   227; output.c   lcdString(" (<-) Y/N (->)  ");
+000E96 0E??           02221         MOVLW   UPPER(___str_14)
+000E98 6E??           02222         MOVWF   r0x02
+000E9A 0E??           02223         MOVLW   HIGH(___str_14)
+000E9C 6E??           02224         MOVWF   r0x01
+000E9E 0E??           02225         MOVLW   LOW(___str_14)
+000EA0 6E??           02226         MOVWF   r0x00
+000EA2 50??           02227         MOVF    r0x02, W
+000EA4 6EE5           02228         MOVWF   POSTDEC1
+000EA6 50??           02229         MOVF    r0x01, W
+000EA8 6EE5           02230         MOVWF   POSTDEC1
+000EAA 50??           02231         MOVF    r0x00, W
+000EAC 6EE5           02232         MOVWF   POSTDEC1
+000EAE EC?? F0??      02233         CALL    _lcdString
+000EB2 0E03           02234         MOVLW   0x03
+000EB4 26E1           02235         ADDWF   FSR1L, F
+000EB6                02236 _00168_DS_:
+000EB6 CFE4 F000      02237         MOVFF   PREINC1, r0x0c
+000EBA CFE4 F000      02238         MOVFF   PREINC1, r0x0b
+000EBE CFE4 F000      02239         MOVFF   PREINC1, r0x0a
+000EC2 CFE4 F000      02240         MOVFF   PREINC1, r0x09
+000EC6 CFE4 F000      02241         MOVFF   PREINC1, r0x08
+000ECA CFE4 F000      02242         MOVFF   PREINC1, r0x07
+000ECE CFE4 F000      02243         MOVFF   PREINC1, r0x06
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 44
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000ED2 CFE4 F000      02244         MOVFF   PREINC1, r0x05
+000ED6 CFE4 F000      02245         MOVFF   PREINC1, r0x04
+000EDA CFE4 F000      02246         MOVFF   PREINC1, r0x03
+000EDE CFE4 F000      02247         MOVFF   PREINC1, r0x02
+000EE2 CFE4 F000      02248         MOVFF   PREINC1, r0x01
+000EE6 CFE4 F000      02249         MOVFF   PREINC1, r0x00
+000EEA CFE4 FFD9      02250         MOVFF   PREINC1, FSR2L
+000EEE 0012           02251         RETURN  
+                      02252 
+                      02253 ; ; Starting pCode block
+                      02254 S_output__outputInit    code
+000000                02255 _outputInit:
+                      02256 ;       .line   46; output.c    void outputInit(void) {   
+000000 CFD9 FFE5      02257         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      02258         MOVFF   FSR1L, FSR2L
+                      02259 ;       .line   47; output.c    lcdInit();
+000008 EC?? F0??      02260         CALL    _lcdInit
+                      02261 ;       .line   48; output.c    adcInit();
+00000C EC?? F0??      02262         CALL    _adcInit
+                      02263 ;       .line   49; output.c    serialInit();
+000010 EC?? F0??      02264         CALL    _serialInit
+000014 010?           02265         BANKSEL _state_ant
+                      02266 ;       .line   50; output.c    state_ant = 0;
+000016 6B??           02267         CLRF    _state_ant, B
+000018 010?           02268         BANKSEL _language_ant
+                      02269 ;       .line   51; output.c    language_ant = 0;
+00001A 6B??           02270         CLRF    _language_ant, B
+00001C 010?           02271         BANKSEL _time_ant
+                      02272 ;       .line   52; output.c    time_ant = 0;
+00001E 6B??           02273         CLRF    _time_ant, B
+000020 010?           02274         BANKSEL (_time_ant + 1)
+000022 6B??           02275         CLRF    (_time_ant + 1), B
+000024 010?           02276         BANKSEL _alarmLow_ant
+                      02277 ;       .line   53; output.c    alarmLow_ant = 0;
+000026 6B??           02278         CLRF    _alarmLow_ant, B
+000028 010?           02279         BANKSEL (_alarmLow_ant + 1)
+00002A 6B??           02280         CLRF    (_alarmLow_ant + 1), B
+00002C 010?           02281         BANKSEL _alarmHigh_ant
+                      02282 ;       .line   54; output.c    alarmHigh_ant = 0;
+00002E 6B??           02283         CLRF    _alarmHigh_ant, B
+000030 010?           02284         BANKSEL (_alarmHigh_ant + 1)
+000032 6B??           02285         CLRF    (_alarmHigh_ant + 1), B
+000034 CFE4 FFD9      02286         MOVFF   PREINC1, FSR2L
+000038 0012           02287         RETURN  
+                      02288 
+                      02289 ; ; Starting pCode block
+00003A                02290 ___str_0:
+00003A 2020 2020 2020 02291         DB      0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x00
+       2020 0020      
+                      02292 ; ; Starting pCode block
+000044                02293 ___str_1:
+000044 4F20 204E 0000 02294         DB      0x20, 0x4f, 0x4e, 0x20, 0x00
+                      02295 ; ; Starting pCode block
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 45
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00004A                02296 ___str_2:
+00004A 464F 2046 0000 02297         DB      0x4f, 0x46, 0x46, 0x20, 0x00
+                      02298 ; ; Starting pCode block
+000050                02299 ___str_3:
+000050 4F20 204E 0020 02300         DB      0x20, 0x4f, 0x4e, 0x20, 0x20, 0x00
+                      02301 ; ; Starting pCode block
+000056                02302 ___str_4:
+000056 4F20 4646 0020 02303         DB      0x20, 0x4f, 0x46, 0x46, 0x20, 0x00
+                      02304 ; ; Starting pCode block
+00005C                02305 ___str_5:
+00005C 3041 003A      02306         DB      0x41, 0x30, 0x3a, 0x00
+                      02307 ; ; Starting pCode block
+000060                02308 ___str_6:
+000060 3141 003A      02309         DB      0x41, 0x31, 0x3a, 0x00
+                      02310 ; ; Starting pCode block
+000064                02311 ___str_7:
+000064 6D20 0073      02312         DB      0x20, 0x6d, 0x73, 0x00
+                      02313 ; ; Starting pCode block
+000068                02314 ___str_8:
+000068 2020 2020 2020 02315         DB      0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20
+       2020 2020 2020 
+000074 0000           02316         DB      0x00
+                      02317 ; ; Starting pCode block
+000076                02318 ___str_9:
+000076 2020 2020 2020 02319         DB      0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x00
+       2020 2020 0020 
+                      02320 ; ; Starting pCode block
+000082                02321 ___str_10:
+000082 6F50 7472 6775 02322         DB      0x50, 0x6f, 0x72, 0x74, 0x75, 0x67, 0x75, 0x65, 0x73, 0x20, 0x20, 0x20
+       6575 2073 2020 
+00008E 2020 2020 0000 02323         DB      0x20, 0x20, 0x20, 0x20, 0x00
+                      02324 ; ; Starting pCode block
+000094                02325 ___str_11:
+000094 6E45 6C67 7369 02326         DB      0x45, 0x6e, 0x67, 0x6c, 0x69, 0x73, 0x68, 0x20, 0x20, 0x20, 0x20, 0x20
+       2068 2020 2020 
+0000A0 2020 2020 0000 02327         DB      0x20, 0x20, 0x20, 0x20, 0x00
+                      02328 ; ; Starting pCode block
+0000A6                02329 ___str_12:
+0000A6 2020 0020      02330         DB      0x20, 0x20, 0x20, 0x00
+                      02331 ; ; Starting pCode block
+0000AA                02332 ___str_13:
+0000AA 2820 2D3C 2029 02333         DB      0x20, 0x28, 0x3c, 0x2d, 0x29, 0x20, 0x53, 0x2f, 0x4e, 0x20, 0x28, 0x2d
+       2F53 204E 2D28 
+0000B6 293E 2020 0000 02334         DB      0x3e, 0x29, 0x20, 0x20, 0x00
+                      02335 ; ; Starting pCode block
+0000BC                02336 ___str_14:
+0000BC 2820 2D3C 2029 02337         DB      0x20, 0x28, 0x3c, 0x2d, 0x29, 0x20, 0x59, 0x2f, 0x4e, 0x20, 0x28, 0x2d
+       2F59 204E 2D28 
+0000C8 293E 2020 0000 02338         DB      0x3e, 0x29, 0x20, 0x20, 0x00
+                      02339 ; ; Starting pCode block
+0000CE                02340 ___str_15:
+0000CE 493C 2020 4120 02341         DB      0x3c, 0x49, 0x20, 0x20, 0x20, 0x41, 0x4c, 0x5f, 0x41, 0x5f, 0x30, 0x20
+       5F4C 5F41 2030 
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 46
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0000DA 4241 3E30 0000 02342         DB      0x41, 0x42, 0x30, 0x3e, 0x00
+                      02343 ; ; Starting pCode block
+0000E0                02344 ___str_16:
+0000E0 493C 2020 4120 02345         DB      0x3c, 0x49, 0x20, 0x20, 0x20, 0x41, 0x4c, 0x5f, 0x48, 0x5f, 0x30, 0x20
+       5F4C 5F48 2030 
+0000EC 4C41 3E30 0000 02346         DB      0x41, 0x4c, 0x30, 0x3e, 0x00
+                      02347 ; ; Starting pCode block
+0000F2                02348 ___str_17:
+0000F2 4C41 5241 454D 02349         DB      0x41, 0x4c, 0x41, 0x52, 0x4d, 0x45, 0x20, 0x41, 0x4c, 0x54, 0x4f, 0x20
+       4120 544C 204F 
+0000FE 3A30 2020 0000 02350         DB      0x30, 0x3a, 0x20, 0x20, 0x00
+                      02351 ; ; Starting pCode block
+000104                02352 ___str_18:
+000104 4C41 5241 204D 02353         DB      0x41, 0x4c, 0x41, 0x52, 0x4d, 0x20, 0x48, 0x49, 0x47, 0x48, 0x20, 0x30
+       4948 4847 3020 
+000110 203A 2020 0000 02354         DB      0x3a, 0x20, 0x20, 0x20, 0x00
+                      02355 ; ; Starting pCode block
+000116                02356 ___str_19:
+000116 413C 3041 4120 02357         DB      0x3c, 0x41, 0x41, 0x30, 0x20, 0x41, 0x4c, 0x5f, 0x42, 0x5f, 0x30, 0x20
+       5F4C 5F42 2030 
+000122 4141 3E31 0000 02358         DB      0x41, 0x41, 0x31, 0x3e, 0x00
+                      02359 ; ; Starting pCode block
+000128                02360 ___str_20:
+000128 413C 3048 4120 02361         DB      0x3c, 0x41, 0x48, 0x30, 0x20, 0x41, 0x4c, 0x5f, 0x4c, 0x5f, 0x30, 0x20
+       5F4C 5F4C 2030 
+000134 4841 3E31 0000 02362         DB      0x41, 0x48, 0x31, 0x3e, 0x00
+                      02363 ; ; Starting pCode block
+00013A                02364 ___str_21:
+00013A 4C41 5241 454D 02365         DB      0x41, 0x4c, 0x41, 0x52, 0x4d, 0x45, 0x20, 0x42, 0x41, 0x49, 0x58, 0x4f
+       4220 4941 4F58 
+000146 3020 203A 0000 02366         DB      0x20, 0x30, 0x3a, 0x20, 0x00
+                      02367 ; ; Starting pCode block
+00014C                02368 ___str_22:
+00014C 4C41 5241 204D 02369         DB      0x41, 0x4c, 0x41, 0x52, 0x4d, 0x20, 0x4c, 0x4f, 0x57, 0x20, 0x30, 0x3a
+       4F4C 2057 3A30 
+000158 2020 2020 0000 02370         DB      0x20, 0x20, 0x20, 0x20, 0x00
+                      02371 ; ; Starting pCode block
+00015E                02372 ___str_23:
+00015E 413C 3042 4120 02373         DB      0x3c, 0x41, 0x42, 0x30, 0x20, 0x41, 0x4c, 0x5f, 0x41, 0x5f, 0x31, 0x20
+       5F4C 5F41 2031 
+00016A 4241 3E31 0000 02374         DB      0x41, 0x42, 0x31, 0x3e, 0x00
+                      02375 ; ; Starting pCode block
+000170                02376 ___str_24:
+000170 413C 304C 4120 02377         DB      0x3c, 0x41, 0x4c, 0x30, 0x20, 0x41, 0x4c, 0x5f, 0x48, 0x5f, 0x31, 0x20
+       5F4C 5F48 2031 
+00017C 4C41 3E31 0000 02378         DB      0x41, 0x4c, 0x31, 0x3e, 0x00
+                      02379 ; ; Starting pCode block
+000182                02380 ___str_25:
+000182 4C41 5241 454D 02381         DB      0x41, 0x4c, 0x41, 0x52, 0x4d, 0x45, 0x20, 0x41, 0x4c, 0x54, 0x4f, 0x20
+       4120 544C 204F 
+00018E 3A31 2020 0000 02382         DB      0x31, 0x3a, 0x20, 0x20, 0x00
+                      02383 ; ; Starting pCode block
+000194                02384 ___str_26:
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 47
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000194 4C41 5241 204D 02385         DB      0x41, 0x4c, 0x41, 0x52, 0x4d, 0x20, 0x48, 0x49, 0x47, 0x48, 0x20, 0x31
+       4948 4847 3120 
+0001A0 203A 2020 0000 02386         DB      0x3a, 0x20, 0x20, 0x20, 0x00
+                      02387 ; ; Starting pCode block
+0001A6                02388 ___str_27:
+0001A6 413C 3141 4120 02389         DB      0x3c, 0x41, 0x41, 0x31, 0x20, 0x41, 0x4c, 0x5f, 0x42, 0x5f, 0x31, 0x20
+       5F4C 5F42 2031 
+0001B2 2020 3E54 0000 02390         DB      0x20, 0x20, 0x54, 0x3e, 0x00
+                      02391 ; ; Starting pCode block
+0001B8                02392 ___str_28:
+0001B8 413C 3148 4120 02393         DB      0x3c, 0x41, 0x48, 0x31, 0x20, 0x41, 0x4c, 0x5f, 0x4c, 0x5f, 0x31, 0x20
+       5F4C 5F4C 2031 
+0001C4 2020 3E54 0000 02394         DB      0x20, 0x20, 0x54, 0x3e, 0x00
+                      02395 ; ; Starting pCode block
+0001CA                02396 ___str_29:
+0001CA 4C41 5241 454D 02397         DB      0x41, 0x4c, 0x41, 0x52, 0x4d, 0x45, 0x20, 0x42, 0x41, 0x49, 0x58, 0x4f
+       4220 4941 4F58 
+0001D6 3120 203A 0000 02398         DB      0x20, 0x31, 0x3a, 0x20, 0x00
+                      02399 ; ; Starting pCode block
+0001DC                02400 ___str_30:
+0001DC 4C41 5241 204D 02401         DB      0x41, 0x4c, 0x41, 0x52, 0x4d, 0x20, 0x4c, 0x4f, 0x57, 0x20, 0x31, 0x3a
+       4F4C 2057 3A31 
+0001E8 2020 2020 0000 02402         DB      0x20, 0x20, 0x20, 0x20, 0x00
+                      02403 ; ; Starting pCode block
+0001EE                02404 ___str_31:
+0001EE 413C 3142 5420 02405         DB      0x3c, 0x41, 0x42, 0x31, 0x20, 0x54, 0x45, 0x4d, 0x50, 0x4f, 0x20, 0x20
+       4D45 4F50 2020 
+0001FA 2020 3E49 0000 02406         DB      0x20, 0x20, 0x49, 0x3e, 0x00
+                      02407 ; ; Starting pCode block
+000200                02408 ___str_32:
+000200 413C 314C 2020 02409         DB      0x3c, 0x41, 0x4c, 0x31, 0x20, 0x20, 0x54, 0x49, 0x4d, 0x45, 0x20, 0x20
+       4954 454D 2020 
+00020C 2020 3E49 0000 02410         DB      0x20, 0x20, 0x49, 0x3e, 0x00
+                      02411 ; ; Starting pCode block
+000212                02412 ___str_33:
+000212 4C41 4554 4152 02413         DB      0x41, 0x4c, 0x54, 0x45, 0x52, 0x41, 0x52, 0x20, 0x54, 0x45, 0x4d, 0x50
+       2052 4554 504D 
+00021E 3A4F 2020 0000 02414         DB      0x4f, 0x3a, 0x20, 0x20, 0x00
+                      02415 ; ; Starting pCode block
+000224                02416 ___str_34:
+000224 4843 4E41 4547 02417         DB      0x43, 0x48, 0x41, 0x4e, 0x47, 0x45, 0x20, 0x54, 0x49, 0x4d, 0x45, 0x3a
+       5420 4D49 3A45 
+000230 2020 2020 0000 02418         DB      0x20, 0x20, 0x20, 0x20, 0x00
+                      02419 ; ; Starting pCode block
+000236                02420 ___str_35:
+000236 543C 2020 4920 02421         DB      0x3c, 0x54, 0x20, 0x20, 0x20, 0x49, 0x44, 0x49, 0x4f, 0x4d, 0x41, 0x20
+       4944 4D4F 2041 
+000242 2020 3E44 0000 02422         DB      0x20, 0x20, 0x44, 0x3e, 0x00
+                      02423 ; ; Starting pCode block
+000248                02424 ___str_36:
+000248 543C 2020 4920 02425         DB      0x3c, 0x54, 0x20, 0x20, 0x20, 0x49, 0x44, 0x49, 0x4f, 0x4d, 0x20, 0x20
+       4944 4D4F 2020 
+000254 2020 3E44 0000 02426         DB      0x20, 0x20, 0x44, 0x3e, 0x00
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 48
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      02427 ; ; Starting pCode block
+00025A                02428 ___str_37:
+00025A 493C 2020 4420 02429         DB      0x3c, 0x49, 0x20, 0x20, 0x20, 0x44, 0x41, 0x54, 0x41, 0x20, 0x20, 0x20
+       5441 2041 2020 
+000266 4141 3E30 0000 02430         DB      0x41, 0x41, 0x30, 0x3e, 0x00
+                      02431 ; ; Starting pCode block
+00026C                02432 ___str_38:
+00026C 543C 2020 4420 02433         DB      0x3c, 0x54, 0x20, 0x20, 0x20, 0x44, 0x41, 0x54, 0x45, 0x20, 0x20, 0x20
+       5441 2045 2020 
+000278 4841 3E30 0000 02434         DB      0x41, 0x48, 0x30, 0x3e, 0x00
+                      02435 ; ; Starting pCode block
+00027E                02436 ___str_39:
+00027E 6552 6573 6174 02437         DB      0x52, 0x65, 0x73, 0x65, 0x74, 0x61, 0x72, 0x3f, 0x20, 0x20, 0x20, 0x20
+       3F72 2020 2020 
+00028A 2020 2020 0000 02438         DB      0x20, 0x20, 0x20, 0x20, 0x00
+                      02439 ; ; Starting pCode block
+000290                02440 ___str_40:
+000290 6552 6573 3F74 02441         DB      0x52, 0x65, 0x73, 0x65, 0x74, 0x3f, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20
+       2020 2020 2020 
+00029C 2020 2020 0000 02442         DB      0x20, 0x20, 0x20, 0x20, 0x00
+                      02443 ; ; Starting pCode block
+0002A2                02444 ___str_41:
+0002A2 7345 6174 6F64 02445         DB      0x45, 0x73, 0x74, 0x61, 0x64, 0x6f, 0x20, 0x3d, 0x20, 0x00
+       3D20 0020      
+                      02446 ; ; Starting pCode block
+0002AC                02447 ___str_42:
+0002AC 7453 7461 2065 02448         DB      0x53, 0x74, 0x61, 0x74, 0x65, 0x20, 0x3d, 0x20, 0x00
+       203D 0000      
+                      02449 ; ; Starting pCode block
+0002B6                02450 ___str_43:
+0002B6 6C41 7261 656D 02451         DB      0x41, 0x6c, 0x61, 0x72, 0x6d, 0x65, 0x20, 0x41, 0x6c, 0x74, 0x6f, 0x20
+       4120 746C 206F 
+0002C2 203D 0000      02452         DB      0x3d, 0x20, 0x00
+                      02453 ; ; Starting pCode block
+0002C6                02454 ___str_44:
+0002C6 6C41 7261 206D 02455         DB      0x41, 0x6c, 0x61, 0x72, 0x6d, 0x20, 0x48, 0x69, 0x67, 0x68, 0x20, 0x3d
+       6948 6867 3D20 
+0002D2 0020           02456         DB      0x20, 0x00
+                      02457 ; ; Starting pCode block
+0002D4                02458 ___str_45:
+0002D4 6C41 7261 656D 02459         DB      0x41, 0x6c, 0x61, 0x72, 0x6d, 0x65, 0x20, 0x42, 0x61, 0x69, 0x78, 0x6f
+       4220 6961 6F78 
+0002E0 3D20 0020      02460         DB      0x20, 0x3d, 0x20, 0x00
+                      02461 ; ; Starting pCode block
+0002E4                02462 ___str_46:
+0002E4 6C41 7261 206D 02463         DB      0x41, 0x6c, 0x61, 0x72, 0x6d, 0x20, 0x4c, 0x6f, 0x77, 0x20, 0x3d, 0x20
+       6F4C 2077 203D 
+0002F0 0000           02464         DB      0x00
+                      02465 ; ; Starting pCode block
+0002F2                02466 ___str_47:
+0002F2 6554 706D 206F 02467         DB      0x54, 0x65, 0x6d, 0x70, 0x6f, 0x20, 0x3d, 0x20, 0x00
+       203D 0000      
+                      02468 ; ; Starting pCode block
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 49
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0002FC                02469 ___str_48:
+0002FC 6954 656D 3D20 02470         DB      0x54, 0x69, 0x6d, 0x65, 0x20, 0x3d, 0x20, 0x00
+       0020           
+                      02471 ; ; Starting pCode block
+000304                02472 ___str_49:
+000304 6449 6F69 616D 02473         DB      0x49, 0x64, 0x69, 0x6f, 0x6d, 0x61, 0x20, 0x3d, 0x20, 0x00
+       3D20 0020      
+                      02474 ; ; Starting pCode block
+00030E                02475 ___str_50:
+00030E 6449 6F69 206D 02476         DB      0x49, 0x64, 0x69, 0x6f, 0x6d, 0x20, 0x3d, 0x20, 0x00
+       203D 0000      
+                      02477 
+                      02478 
+                      02479 ; Statistics:
+                      02480 ; code size:     4784 (0x12b0) bytes ( 3.65%)
+                      02481 ;                2392 (0x0958) words
+                      02482 ; udata size:       8 (0x0008) bytes ( 0.45%)
+                      02483 ; access size:     15 (0x000f) bytes
+                      02484 
+                      02485 
+                      02486         end
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 50
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+FSR0H                             CONSTANT      00000FEA           4074
+FSR0L                             CONSTANT      00000FE9           4073
+FSR1L                             CONSTANT      00000FE1           4065
+FSR2L                             CONSTANT      00000FD9           4057
+INDF0                             CONSTANT      00000FEF           4079
+PLUSW2                            CONSTANT      00000FDB           4059
+POSTDEC1                          CONSTANT      00000FE5           4069
+POSTINC0                          CONSTANT      00000FEE           4078
+POSTINC1                          CONSTANT      00000FE6           4070
+PREINC1                           CONSTANT      00000FE4           4068
+PRODL                             CONSTANT      00000FF3           4083
+STATUS                            CONSTANT      00000FD8           4056
+WREG                              CONSTANT      00000FE8           4072
+_00111_DS_                        ADDRESS       00000164            356
+_00114_DS_                        ADDRESS       00000184            388
+_00116_DS_                        ADDRESS       0000024A            586
+_00117_DS_                        ADDRESS       0000026A            618
+_00119_DS_                        ADDRESS       000002BC            700
+_00121_DS_                        ADDRESS       000003A2            930
+_00124_DS_                        ADDRESS       000003C2            962
+_00126_DS_                        ADDRESS       00000488           1160
+_00127_DS_                        ADDRESS       000004A8           1192
+_00129_DS_                        ADDRESS       000004FA           1274
+_00131_DS_                        ADDRESS       000005E0           1504
+_00134_DS_                        ADDRESS       00000600           1536
+_00136_DS_                        ADDRESS       000006C6           1734
+_00137_DS_                        ADDRESS       000006E6           1766
+_00139_DS_                        ADDRESS       00000738           1848
+_00141_DS_                        ADDRESS       0000081E           2078
+_00144_DS_                        ADDRESS       0000083E           2110
+_00146_DS_                        ADDRESS       00000904           2308
+_00147_DS_                        ADDRESS       00000924           2340
+_00149_DS_                        ADDRESS       00000976           2422
+_00151_DS_                        ADDRESS       00000A4E           2638
+_00153_DS_                        ADDRESS       00000B26           2854
+_00155_DS_                        ADDRESS       00000BCE           3022
+_00159_DS_                        ADDRESS       00000BFA           3066
+_00161_DS_                        ADDRESS       00000DE2           3554
+_00163_DS_                        ADDRESS       00000E8A           3722
+_00168_DS_                        ADDRESS       00000EB6           3766
+_00247_DS_                        ADDRESS       0000018E            398
+_00248_DS_                        ADDRESS       00000190            400
+_00251_DS_                        ADDRESS       000002C6            710
+_00252_DS_                        ADDRESS       000002C8            712
+_00255_DS_                        ADDRESS       000003CC            972
+_00256_DS_                        ADDRESS       000003CE            974
+_00259_DS_                        ADDRESS       00000504           1284
+_00260_DS_                        ADDRESS       00000506           1286
+_00263_DS_                        ADDRESS       0000060A           1546
+_00264_DS_                        ADDRESS       0000060C           1548
+_00267_DS_                        ADDRESS       00000742           1858
+_00268_DS_                        ADDRESS       00000744           1860
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 51
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+_00271_DS_                        ADDRESS       00000848           2120
+_00272_DS_                        ADDRESS       0000084A           2122
+_00275_DS_                        ADDRESS       00000980           2432
+_00276_DS_                        ADDRESS       00000982           2434
+_00277_DS_                        ADDRESS       00000A58           2648
+_00278_DS_                        ADDRESS       00000A5A           2650
+_00279_DS_                        ADDRESS       00000B30           2864
+_00280_DS_                        ADDRESS       00000B32           2866
+_00283_DS_                        ADDRESS       00000C04           3076
+_00284_DS_                        ADDRESS       00000C06           3078
+_00285_DS_                        ADDRESS       00000DEC           3564
+_00286_DS_                        ADDRESS       00000DEE           3566
+_00294_DS_                        ADDRESS       00000134            308
+_00296_DS_                        ADDRESS       000001A0            416
+_00298_DS_                        ADDRESS       0000020C            524
+_00300_DS_                        ADDRESS       00000278            632
+_00316_DS_                        ADDRESS       00000096            150
+_00318_DS_                        ADDRESS       0000014C            332
+_00320_DS_                        ADDRESS       000001B8            440
+_00322_DS_                        ADDRESS       00000224            548
+_BCD2LowerCh                      EXTERNAL      00000000              0
+_BCD2UpperCh                      EXTERNAL      00000000              0
+__16_BIT                          CONSTANT      00000001              1
+__18F4550                         CONSTANT      00000001              1
+__ACC_RAM_LOW_END                 CONSTANT      0000005F             95
+__ACC_RAM_LOW_START               CONSTANT      00000000              0
+__ACTIVE_BANK_ADDR                VARIABLE      FFFFFFFF             -1
+__ASSUMED_BANK_ADDR               VARIABLE      FFFFFFFF             -1
+__BANK_0                          CONSTANT      00000000              0
+__BANK_1                          CONSTANT      00000100            256
+__BANK_2                          CONSTANT      00000200            512
+__BANK_3                          CONSTANT      00000300            768
+__BANK_4                          CONSTANT      00000400           1024
+__BANK_5                          CONSTANT      00000500           1280
+__BANK_6                          CONSTANT      00000600           1536
+__BANK_7                          CONSTANT      00000700           1792
+__BANK_8                          CONSTANT      00000800           2048
+__BANK_9                          CONSTANT      00000900           2304
+__BANK_10                         CONSTANT      00000A00           2560
+__BANK_11                         CONSTANT      00000B00           2816
+__BANK_12                         CONSTANT      00000C00           3072
+__BANK_13                         CONSTANT      00000D00           3328
+__BANK_14                         CONSTANT      00000E00           3584
+__BANK_15                         CONSTANT      00000F00           3840
+__BANK_BITS                       CONSTANT      00000F00           3840
+__BANK_FIRST                      CONSTANT      00000000              0
+__BANK_INV                        CONSTANT      FFFFFFFF             -1
+__BANK_LAST                       CONSTANT      00000F00           3840
+__BANK_MASK                       CONSTANT      000000FF            255
+__BANK_SHIFT                      CONSTANT      00000008              8
+__BANK_SIZE                       CONSTANT      00000100            256
+__CODE_END                        CONSTANT      00007FFF          32767
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 52
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+__CODE_START                      CONSTANT      00000000              0
+__COMMON_RAM_END                  CONSTANT      0000005F             95
+__COMMON_RAM_START                CONSTANT      00000000              0
+__CONFIG_END                      CONSTANT      0030000D        3145741
+__CONFIG_START                    CONSTANT      00300000        3145728
+__EEPROM_END                      CONSTANT      00F000FF       15728895
+__EEPROM_START                    CONSTANT      00F00000       15728640
+__EXTENDED                        CONSTANT      00000001              1
+__GPUTILS_SVN_VERSION             CONSTANT      00000505           1285
+__GPUTILS_VERSION_MAJOR           CONSTANT      00000001              1
+__GPUTILS_VERSION_MICRO           CONSTANT      00000000              0
+__GPUTILS_VERSION_MINOR           CONSTANT      00000005              5
+__IDLOCS_END                      CONSTANT      00200007        2097159
+__IDLOCS_START                    CONSTANT      00200000        2097152
+__NUM_BANKS                       CONSTANT      00000010             16
+__VECTOR_INT_HIGH                 CONSTANT      00000008              8
+__VECTOR_INT_LOW                  CONSTANT      00000018             24
+__VECTOR_RESET                    CONSTANT      00000000              0
+__WHILE_LOOP_COUNT_MAX            CONSTANT      000000FF            255
+___str_0                          ADDRESS       0000003A             58
+___str_1                          ADDRESS       00000044             68
+___str_2                          ADDRESS       0000004A             74
+___str_3                          ADDRESS       00000050             80
+___str_4                          ADDRESS       00000056             86
+___str_5                          ADDRESS       0000005C             92
+___str_6                          ADDRESS       00000060             96
+___str_7                          ADDRESS       00000064            100
+___str_8                          ADDRESS       00000068            104
+___str_9                          ADDRESS       00000076            118
+___str_10                         ADDRESS       00000082            130
+___str_11                         ADDRESS       00000094            148
+___str_12                         ADDRESS       000000A6            166
+___str_13                         ADDRESS       000000AA            170
+___str_14                         ADDRESS       000000BC            188
+___str_15                         ADDRESS       000000CE            206
+___str_16                         ADDRESS       000000E0            224
+___str_17                         ADDRESS       000000F2            242
+___str_18                         ADDRESS       00000104            260
+___str_19                         ADDRESS       00000116            278
+___str_20                         ADDRESS       00000128            296
+___str_21                         ADDRESS       0000013A            314
+___str_22                         ADDRESS       0000014C            332
+___str_23                         ADDRESS       0000015E            350
+___str_24                         ADDRESS       00000170            368
+___str_25                         ADDRESS       00000182            386
+___str_26                         ADDRESS       00000194            404
+___str_27                         ADDRESS       000001A6            422
+___str_28                         ADDRESS       000001B8            440
+___str_29                         ADDRESS       000001CA            458
+___str_30                         ADDRESS       000001DC            476
+___str_31                         ADDRESS       000001EE            494
+___str_32                         ADDRESS       00000200            512
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 53
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+___str_33                         ADDRESS       00000212            530
+___str_34                         ADDRESS       00000224            548
+___str_35                         ADDRESS       00000236            566
+___str_36                         ADDRESS       00000248            584
+___str_37                         ADDRESS       0000025A            602
+___str_38                         ADDRESS       0000026C            620
+___str_39                         ADDRESS       0000027E            638
+___str_40                         ADDRESS       00000290            656
+___str_41                         ADDRESS       000002A2            674
+___str_42                         ADDRESS       000002AC            684
+___str_43                         ADDRESS       000002B6            694
+___str_44                         ADDRESS       000002C6            710
+___str_45                         ADDRESS       000002D4            724
+___str_46                         ADDRESS       000002E4            740
+___str_47                         ADDRESS       000002F2            754
+___str_48                         ADDRESS       000002FC            764
+___str_49                         ADDRESS       00000304            772
+___str_50                         ADDRESS       0000030E            782
+__mulint                          EXTERNAL      00000000              0
+_adcInit                          EXTERNAL      00000000              0
+_adcScale                         EXTERNAL      00000000              0
+_alarmHigh_ant                    STATIC        00000000              0
+_alarmLow_ant                     STATIC        00000000              0
+_getAlarmHigh                     EXTERNAL      00000000              0
+_getAlarmLow                      EXTERNAL      00000000              0
+_getIdiom                         EXTERNAL      00000000              0
+_getState                         EXTERNAL      00000000              0
+_getTime                          EXTERNAL      00000000              0
+_language_ant                     STATIC        00000000              0
+_lcdCommand                       EXTERNAL      00000000              0
+_lcdData                          EXTERNAL      00000000              0
+_lcdInit                          EXTERNAL      00000000              0
+_lcdInt                           EXTERNAL      00000000              0
+_lcdString                        EXTERNAL      00000000              0
+_msgs                             STATIC        00000000              0
+_outputInit                       GLOBAL        00000000              0
+_outputPrint                      GLOBAL        00000000              0
+_outputSerial                     GLOBAL        00000000              0
+_rtcRead                          EXTERNAL      00000000              0
+_serial                           STATIC        0000004E             78
+_serialInit                       EXTERNAL      00000000              0
+_serialInt                        EXTERNAL      00000000              0
+_serialSend                       EXTERNAL      00000000              0
+_serialString                     EXTERNAL      00000000              0
+_state_ant                        STATIC        00000000              0
+_testAlarmHigh                    EXTERNAL      00000000              0
+_testAlarmLow                     EXTERNAL      00000000              0
+_time_ant                         STATIC        00000000              0
+r0x00                             STATIC        00000000              0
+r0x01                             STATIC        00000001              1
+r0x02                             STATIC        00000002              2
+r0x03                             STATIC        00000003              3
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:55:43        PAGE 54
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+r0x04                             STATIC        00000004              4
+r0x05                             STATIC        00000005              5
+r0x06                             STATIC        00000006              6
+r0x07                             STATIC        00000007              7
+r0x08                             STATIC        00000008              8
+r0x09                             STATIC        00000009              9
+r0x0a                             STATIC        0000000A             10
+r0x0b                             STATIC        0000000B             11
+r0x0c                             STATIC        0000000C             12
+r0x0d                             STATIC        0000000D             13
+r0x0e                             STATIC        0000000E             14
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     0 reported,     0 suppressed
+
+

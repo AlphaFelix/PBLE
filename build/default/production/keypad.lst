@@ -1,0 +1,432 @@
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:11:54        PAGE  1
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00001 ;--------------------------------------------------------
+                      00002 ; File Created by SDCC : free open source ANSI-C Compiler
+                      00003 ; Version 3.6.0 #9615 (MINGW64)
+                      00004 ;--------------------------------------------------------
+                      00005 ; PIC16 port for the Microchip 16-bit core micros
+                      00006 ;--------------------------------------------------------
+                      00007         list    p=18f4550
+                      00008         radix   dec
+                      00009 
+                      00010 
+                      00011 ;--------------------------------------------------------
+                      00012 ; public variables in this module
+                      00013 ;--------------------------------------------------------
+  0000                00014         global  _kpInit
+  0000                00015         global  _kpRead
+  0000                00016         global  _tecla_pressionada
+                      00017 
+                      00018 ;--------------------------------------------------------
+                      00019 ; extern variables in this module
+                      00020 ;--------------------------------------------------------
+  0000                00021         extern  _adcRead
+  0000                00022         extern  __divuint
+                      00023 
+                      00024 ;--------------------------------------------------------
+                      00025 ;       Equates to used internal registers
+                      00026 ;--------------------------------------------------------
+  00000FD8            00027 STATUS  equ     0xfd8
+  00000FE8            00028 WREG    equ     0xfe8
+  00000FE1            00029 FSR1L   equ     0xfe1
+  00000FD9            00030 FSR2L   equ     0xfd9
+  00000FEF            00031 INDF0   equ     0xfef
+  00000FE6            00032 POSTINC1        equ     0xfe6
+  00000FE5            00033 POSTDEC1        equ     0xfe5
+  00000FE4            00034 PREINC1 equ     0xfe4
+  00000FF3            00035 PRODL   equ     0xff3
+                      00036 
+                      00037 
+                      00038 ; Internal registers
+                      00039 .registers      udata_ovr       0x0000
+000000                00040 r0x00   res     1
+000001                00041 r0x01   res     1
+000002                00042 r0x02   res     1
+000003                00043 r0x03   res     1
+000004                00044 r0x04   res     1
+000005                00045 r0x05   res     1
+                      00046 
+                      00047 udata_keypad_0  udata
+000000                00048 _tecla_pressionada      res     1
+                      00049 
+                      00050 ;--------------------------------------------------------
+                      00051 ; global & static initialisations
+                      00052 ;--------------------------------------------------------
+                      00053 ; I code from now on!
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:11:54        PAGE  2
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00054 ; ; Starting pCode block
+                      00055 S_keypad__kpRead        code
+000000                00056 _kpRead:
+                      00057 ;       .line   16; keypad.c    unsigned char kpRead (void) {
+000000 CFD9 FFE5      00058         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00059         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00060         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      00061         MOVFF   r0x01, POSTDEC1
+000010 C??? F???      00062         MOVFF   r0x02, POSTDEC1
+000014 C??? F???      00063         MOVFF   r0x03, POSTDEC1
+000018 C??? F???      00064         MOVFF   r0x04, POSTDEC1
+00001C C??? F???      00065         MOVFF   r0x05, POSTDEC1
+                      00066 ;       .line   17; keypad.c    unsigned int Vteclado = 0, i; 
+000020 6A??           00067         CLRF    r0x00
+000022 6A??           00068         CLRF    r0x01
+                      00069 ;       .line   19; keypad.c    for(i=0; i<50; i++) {
+000024 6A??           00070         CLRF    r0x02
+000026 6A??           00071         CLRF    r0x03
+000028                00072 _00141_DS_:
+                      00073 ;       .line   20; keypad.c    Vteclado += adcRead(KP);
+000028 0E03           00074         MOVLW   0x03
+00002A 6EE5           00075         MOVWF   POSTDEC1
+00002C EC?? F0??      00076         CALL    _adcRead
+000030 6E??           00077         MOVWF   r0x04
+000032 CFF3 F000      00078         MOVFF   PRODL, r0x05
+000036 52E6           00079         MOVF    POSTINC1, F
+000038 50??           00080         MOVF    r0x04, W
+00003A 26??           00081         ADDWF   r0x00, F
+00003C 50??           00082         MOVF    r0x05, W
+00003E 22??           00083         ADDWFC  r0x01, F
+                      00084 ;       .line   19; keypad.c    for(i=0; i<50; i++) {
+000040 4A??           00085         INFSNZ  r0x02, F
+000042 2A??           00086         INCF    r0x03, F
+000044 0E00           00087         MOVLW   0x00
+000046 5C??           00088         SUBWF   r0x03, W
+000048 E1??           00089         BNZ     _00194_DS_
+00004A 0E32           00090         MOVLW   0x32
+00004C 5C??           00091         SUBWF   r0x02, W
+00004E                00092 _00194_DS_:
+00004E E3??           00093         BNC     _00141_DS_
+                      00094 ;       .line   23; keypad.c    Vteclado = Vteclado/50;
+000050 0E00           00095         MOVLW   0x00
+000052 6EE5           00096         MOVWF   POSTDEC1
+000054 0E32           00097         MOVLW   0x32
+000056 6EE5           00098         MOVWF   POSTDEC1
+000058 50??           00099         MOVF    r0x01, W
+00005A 6EE5           00100         MOVWF   POSTDEC1
+00005C 50??           00101         MOVF    r0x00, W
+00005E 6EE5           00102         MOVWF   POSTDEC1
+000060 EC?? F0??      00103         CALL    __divuint
+000064 6E??           00104         MOVWF   r0x00
+000066 CFF3 F000      00105         MOVFF   PRODL, r0x01
+00006A 0E04           00106         MOVLW   0x04
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:11:54        PAGE  3
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00006C 26E1           00107         ADDWF   FSR1L, F
+                      00108 ;       .line   25; keypad.c    if((Vteclado>=0)&&(Vteclado<170)) 
+00006E 0E00           00109         MOVLW   0x00
+000070 5C??           00110         SUBWF   r0x01, W
+000072 E1??           00111         BNZ     _00195_DS_
+000074 0EAA           00112         MOVLW   0xaa
+000076 5C??           00113         SUBWF   r0x00, W
+000078                00114 _00195_DS_:
+000078 E2??           00115         BC      _00138_DS_
+00007A 010?           00116         BANKSEL _tecla_pressionada
+                      00117 ;       .line   28; keypad.c    if(tecla_pressionada!=1) {
+00007C 51??           00118         MOVF    _tecla_pressionada, W, B
+00007E 0A01           00119         XORLW   0x01
+000080 E1??           00120         BNZ     _00197_DS_
+000082 D???           00121         BRA     _00139_DS_
+000084                00122 _00197_DS_:
+                      00123 ;       .line   29; keypad.c    tecla_pressionada = 1;            
+000084 0E01           00124         MOVLW   0x01
+000086 010?           00125         BANKSEL _tecla_pressionada
+000088 6F??           00126         MOVWF   _tecla_pressionada, B
+00008A D???           00127         BRA     _00139_DS_
+00008C                00128 _00138_DS_:
+                      00129 ;       .line   32; keypad.c    else if((Vteclado>200)&&(Vteclado<=370)) 
+00008C 0E00           00130         MOVLW   0x00
+00008E 5C??           00131         SUBWF   r0x01, W
+000090 E1??           00132         BNZ     _00198_DS_
+000092 0EC9           00133         MOVLW   0xc9
+000094 5C??           00134         SUBWF   r0x00, W
+000096                00135 _00198_DS_:
+000096 E3??           00136         BNC     _00134_DS_
+000098 0E01           00137         MOVLW   0x01
+00009A 5C??           00138         SUBWF   r0x01, W
+00009C E1??           00139         BNZ     _00199_DS_
+00009E 0E73           00140         MOVLW   0x73
+0000A0 5C??           00141         SUBWF   r0x00, W
+0000A2                00142 _00199_DS_:
+0000A2 E2??           00143         BC      _00134_DS_
+0000A4 010?           00144         BANKSEL _tecla_pressionada
+                      00145 ;       .line   35; keypad.c    if(tecla_pressionada!=2) {
+0000A6 51??           00146         MOVF    _tecla_pressionada, W, B
+0000A8 0A02           00147         XORLW   0x02
+0000AA E1??           00148         BNZ     _00201_DS_
+0000AC D???           00149         BRA     _00139_DS_
+0000AE                00150 _00201_DS_:
+                      00151 ;       .line   36; keypad.c    tecla_pressionada = 2;           
+0000AE 0E02           00152         MOVLW   0x02
+0000B0 010?           00153         BANKSEL _tecla_pressionada
+0000B2 6F??           00154         MOVWF   _tecla_pressionada, B
+0000B4 D???           00155         BRA     _00139_DS_
+0000B6                00156 _00134_DS_:
+                      00157 ;       .line   40; keypad.c    else if((Vteclado>450)&&(Vteclado<=500)) 
+0000B6 0E01           00158         MOVLW   0x01
+0000B8 5C??           00159         SUBWF   r0x01, W
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:11:54        PAGE  4
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0000BA E1??           00160         BNZ     _00202_DS_
+0000BC 0EC3           00161         MOVLW   0xc3
+0000BE 5C??           00162         SUBWF   r0x00, W
+0000C0                00163 _00202_DS_:
+0000C0 E3??           00164         BNC     _00130_DS_
+0000C2 0E01           00165         MOVLW   0x01
+0000C4 5C??           00166         SUBWF   r0x01, W
+0000C6 E1??           00167         BNZ     _00203_DS_
+0000C8 0EF5           00168         MOVLW   0xf5
+0000CA 5C??           00169         SUBWF   r0x00, W
+0000CC                00170 _00203_DS_:
+0000CC E2??           00171         BC      _00130_DS_
+0000CE 010?           00172         BANKSEL _tecla_pressionada
+                      00173 ;       .line   43; keypad.c    if(tecla_pressionada!=3) {
+0000D0 51??           00174         MOVF    _tecla_pressionada, W, B
+0000D2 0A03           00175         XORLW   0x03
+0000D4 E0??           00176         BZ      _00139_DS_
+                      00177 ;       .line   44; keypad.c    tecla_pressionada = 3;           
+0000D6 0E03           00178         MOVLW   0x03
+0000D8 010?           00179         BANKSEL _tecla_pressionada
+0000DA 6F??           00180         MOVWF   _tecla_pressionada, B
+0000DC D???           00181         BRA     _00139_DS_
+0000DE                00182 _00130_DS_:
+                      00183 ;       .line   49; keypad.c    else if((Vteclado>650)&&(Vteclado<=690)) 
+0000DE 0E02           00184         MOVLW   0x02
+0000E0 5C??           00185         SUBWF   r0x01, W
+0000E2 E1??           00186         BNZ     _00206_DS_
+0000E4 0E8B           00187         MOVLW   0x8b
+0000E6 5C??           00188         SUBWF   r0x00, W
+0000E8                00189 _00206_DS_:
+0000E8 E3??           00190         BNC     _00126_DS_
+0000EA 0E02           00191         MOVLW   0x02
+0000EC 5C??           00192         SUBWF   r0x01, W
+0000EE E1??           00193         BNZ     _00207_DS_
+0000F0 0EB3           00194         MOVLW   0xb3
+0000F2 5C??           00195         SUBWF   r0x00, W
+0000F4                00196 _00207_DS_:
+0000F4 E2??           00197         BC      _00126_DS_
+0000F6 010?           00198         BANKSEL _tecla_pressionada
+                      00199 ;       .line   51; keypad.c    if(tecla_pressionada!=4) {
+0000F8 51??           00200         MOVF    _tecla_pressionada, W, B
+0000FA 0A04           00201         XORLW   0x04
+0000FC E0??           00202         BZ      _00139_DS_
+                      00203 ;       .line   52; keypad.c    tecla_pressionada = 4;           
+0000FE 0E04           00204         MOVLW   0x04
+000100 010?           00205         BANKSEL _tecla_pressionada
+000102 6F??           00206         MOVWF   _tecla_pressionada, B
+000104 D???           00207         BRA     _00139_DS_
+000106                00208 _00126_DS_:
+                      00209 ;       .line   56; keypad.c    else if((Vteclado>720)&&(Vteclado<=780))
+000106 0E02           00210         MOVLW   0x02
+000108 5C??           00211         SUBWF   r0x01, W
+00010A E1??           00212         BNZ     _00210_DS_
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:11:54        PAGE  5
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00010C 0ED1           00213         MOVLW   0xd1
+00010E 5C??           00214         SUBWF   r0x00, W
+000110                00215 _00210_DS_:
+000110 E3??           00216         BNC     _00122_DS_
+000112 0E03           00217         MOVLW   0x03
+000114 5C??           00218         SUBWF   r0x01, W
+000116 E1??           00219         BNZ     _00211_DS_
+000118 0E0D           00220         MOVLW   0x0d
+00011A 5C??           00221         SUBWF   r0x00, W
+00011C                00222 _00211_DS_:
+00011C E2??           00223         BC      _00122_DS_
+00011E 010?           00224         BANKSEL _tecla_pressionada
+                      00225 ;       .line   58; keypad.c    if(tecla_pressionada!=5) {
+000120 51??           00226         MOVF    _tecla_pressionada, W, B
+000122 0A05           00227         XORLW   0x05
+000124 E0??           00228         BZ      _00139_DS_
+                      00229 ;       .line   59; keypad.c    tecla_pressionada = 5;            
+000126 0E05           00230         MOVLW   0x05
+000128 010?           00231         BANKSEL _tecla_pressionada
+00012A 6F??           00232         MOVWF   _tecla_pressionada, B
+00012C D???           00233         BRA     _00139_DS_
+00012E                00234 _00122_DS_:
+00012E 010?           00235         BANKSEL _tecla_pressionada
+                      00236 ;       .line   63; keypad.c    tecla_pressionada = 0;
+000130 6B??           00237         CLRF    _tecla_pressionada, B
+000132                00238 _00139_DS_:
+000132 010?           00239         BANKSEL _tecla_pressionada
+                      00240 ;       .line   65; keypad.c    return tecla_pressionada;    
+000134 51??           00241         MOVF    _tecla_pressionada, W, B
+000136 CFE4 F000      00242         MOVFF   PREINC1, r0x05
+00013A CFE4 F000      00243         MOVFF   PREINC1, r0x04
+00013E CFE4 F000      00244         MOVFF   PREINC1, r0x03
+000142 CFE4 F000      00245         MOVFF   PREINC1, r0x02
+000146 CFE4 F000      00246         MOVFF   PREINC1, r0x01
+00014A CFE4 F000      00247         MOVFF   PREINC1, r0x00
+00014E CFE4 FFD9      00248         MOVFF   PREINC1, FSR2L
+000152 0012           00249         RETURN  
+                      00250 
+                      00251 ; ; Starting pCode block
+                      00252 S_keypad__kpInit        code
+000000                00253 _kpInit:
+                      00254 ;       .line   5; keypad.c     void kpInit(void)   //Inicia o teclado a partir dos registros necessario
+                            s 
+000000 CFD9 FFE5      00255         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00256         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00257         MOVFF   r0x00, POSTDEC1
+                      00258 ;       .line   7; keypad.c     bitClr(INTCON2, 7); //liga pull up   
+00000C EE0F F0F1      00259         LFSR    0x00, 0xff1
+000010 CFEF F000      00260         MOVFF   INDF0, r0x00
+000014 9E??           00261         BCF     r0x00, 7
+000016 EE0F F0F1      00262         LFSR    0x00, 0xff1
+00001A C??? F???      00263         MOVFF   r0x00, INDF0
+                      00264 ;       .line   8; keypad.c     bitSet(TRISE, 0);
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:11:54        PAGE  6
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00001E EE0F F096      00265         LFSR    0x00, 0xf96
+000022 CFEF F000      00266         MOVFF   INDF0, r0x00
+000026 80??           00267         BSF     r0x00, 0
+000028 EE0F F096      00268         LFSR    0x00, 0xf96
+00002C C??? F???      00269         MOVFF   r0x00, INDF0
+                      00270 ;       .line   10; keypad.c    SPPCFG = 0x00;          // SFR nao presente no PIC18F4520
+000030 EE0F F063      00271         LFSR    0x00, 0xf63
+000034 0E00           00272         MOVLW   0x00
+000036 6EEF           00273         MOVWF   INDF0
+000038 CFE4 F000      00274         MOVFF   PREINC1, r0x00
+00003C CFE4 FFD9      00275         MOVFF   PREINC1, FSR2L
+000040 0012           00276         RETURN  
+                      00277 
+                      00278 
+                      00279 
+                      00280 ; Statistics:
+                      00281 ; code size:      406 (0x0196) bytes ( 0.31%)
+                      00282 ;                 203 (0x00cb) words
+                      00283 ; udata size:       1 (0x0001) bytes ( 0.06%)
+                      00284 ; access size:      6 (0x0006) bytes
+                      00285 
+                      00286 
+                      00287         end
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:11:54        PAGE  7
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+FSR1L                             CONSTANT      00000FE1           4065
+FSR2L                             CONSTANT      00000FD9           4057
+INDF0                             CONSTANT      00000FEF           4079
+POSTDEC1                          CONSTANT      00000FE5           4069
+POSTINC1                          CONSTANT      00000FE6           4070
+PREINC1                           CONSTANT      00000FE4           4068
+PRODL                             CONSTANT      00000FF3           4083
+STATUS                            CONSTANT      00000FD8           4056
+WREG                              CONSTANT      00000FE8           4072
+_00122_DS_                        ADDRESS       0000012E            302
+_00126_DS_                        ADDRESS       00000106            262
+_00130_DS_                        ADDRESS       000000DE            222
+_00134_DS_                        ADDRESS       000000B6            182
+_00138_DS_                        ADDRESS       0000008C            140
+_00139_DS_                        ADDRESS       00000132            306
+_00141_DS_                        ADDRESS       00000028             40
+_00194_DS_                        ADDRESS       0000004E             78
+_00195_DS_                        ADDRESS       00000078            120
+_00197_DS_                        ADDRESS       00000084            132
+_00198_DS_                        ADDRESS       00000096            150
+_00199_DS_                        ADDRESS       000000A2            162
+_00201_DS_                        ADDRESS       000000AE            174
+_00202_DS_                        ADDRESS       000000C0            192
+_00203_DS_                        ADDRESS       000000CC            204
+_00206_DS_                        ADDRESS       000000E8            232
+_00207_DS_                        ADDRESS       000000F4            244
+_00210_DS_                        ADDRESS       00000110            272
+_00211_DS_                        ADDRESS       0000011C            284
+__16_BIT                          CONSTANT      00000001              1
+__18F4550                         CONSTANT      00000001              1
+__ACC_RAM_LOW_END                 CONSTANT      0000005F             95
+__ACC_RAM_LOW_START               CONSTANT      00000000              0
+__ACTIVE_BANK_ADDR                VARIABLE      FFFFFFFF             -1
+__ASSUMED_BANK_ADDR               VARIABLE      FFFFFFFF             -1
+__BANK_0                          CONSTANT      00000000              0
+__BANK_1                          CONSTANT      00000100            256
+__BANK_2                          CONSTANT      00000200            512
+__BANK_3                          CONSTANT      00000300            768
+__BANK_4                          CONSTANT      00000400           1024
+__BANK_5                          CONSTANT      00000500           1280
+__BANK_6                          CONSTANT      00000600           1536
+__BANK_7                          CONSTANT      00000700           1792
+__BANK_8                          CONSTANT      00000800           2048
+__BANK_9                          CONSTANT      00000900           2304
+__BANK_10                         CONSTANT      00000A00           2560
+__BANK_11                         CONSTANT      00000B00           2816
+__BANK_12                         CONSTANT      00000C00           3072
+__BANK_13                         CONSTANT      00000D00           3328
+__BANK_14                         CONSTANT      00000E00           3584
+__BANK_15                         CONSTANT      00000F00           3840
+__BANK_BITS                       CONSTANT      00000F00           3840
+__BANK_FIRST                      CONSTANT      00000000              0
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  10:11:54        PAGE  8
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+__BANK_INV                        CONSTANT      FFFFFFFF             -1
+__BANK_LAST                       CONSTANT      00000F00           3840
+__BANK_MASK                       CONSTANT      000000FF            255
+__BANK_SHIFT                      CONSTANT      00000008              8
+__BANK_SIZE                       CONSTANT      00000100            256
+__CODE_END                        CONSTANT      00007FFF          32767
+__CODE_START                      CONSTANT      00000000              0
+__COMMON_RAM_END                  CONSTANT      0000005F             95
+__COMMON_RAM_START                CONSTANT      00000000              0
+__CONFIG_END                      CONSTANT      0030000D        3145741
+__CONFIG_START                    CONSTANT      00300000        3145728
+__EEPROM_END                      CONSTANT      00F000FF       15728895
+__EEPROM_START                    CONSTANT      00F00000       15728640
+__EXTENDED                        CONSTANT      00000001              1
+__GPUTILS_SVN_VERSION             CONSTANT      00000505           1285
+__GPUTILS_VERSION_MAJOR           CONSTANT      00000001              1
+__GPUTILS_VERSION_MICRO           CONSTANT      00000000              0
+__GPUTILS_VERSION_MINOR           CONSTANT      00000005              5
+__IDLOCS_END                      CONSTANT      00200007        2097159
+__IDLOCS_START                    CONSTANT      00200000        2097152
+__NUM_BANKS                       CONSTANT      00000010             16
+__VECTOR_INT_HIGH                 CONSTANT      00000008              8
+__VECTOR_INT_LOW                  CONSTANT      00000018             24
+__VECTOR_RESET                    CONSTANT      00000000              0
+__WHILE_LOOP_COUNT_MAX            CONSTANT      000000FF            255
+__divuint                         EXTERNAL      00000000              0
+_adcRead                          EXTERNAL      00000000              0
+_kpInit                           GLOBAL        00000000              0
+_kpRead                           GLOBAL        00000000              0
+_tecla_pressionada                GLOBAL        00000000              0
+r0x00                             STATIC        00000000              0
+r0x01                             STATIC        00000001              1
+r0x02                             STATIC        00000002              2
+r0x03                             STATIC        00000003              3
+r0x04                             STATIC        00000004              4
+r0x05                             STATIC        00000005              5
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     0 reported,     0 suppressed
+
+

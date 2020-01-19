@@ -1,0 +1,1098 @@
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  11:01:18        PAGE  1
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00001 ;--------------------------------------------------------
+                      00002 ; File Created by SDCC : free open source ANSI-C Compiler
+                      00003 ; Version 3.6.0 #9615 (MINGW64)
+                      00004 ;--------------------------------------------------------
+                      00005 ; PIC16 port for the Microchip 16-bit core micros
+                      00006 ;--------------------------------------------------------
+                      00007         list    p=18f4550
+                      00008         radix   dec
+                      00009 
+                      00010 
+                      00011 ;--------------------------------------------------------
+                      00012 ; public variables in this module
+                      00013 ;--------------------------------------------------------
+  0000                00014         global  _varInit
+  0000                00015         global  _varTest
+  0000                00016         global  _getState
+  0000                00017         global  _setState
+  0000                00018         global  _getStateRst
+  0000                00019         global  _setStateRst
+  0000                00020         global  _getTime
+  0000                00021         global  _setTime
+  0000                00022         global  _getAlarmLow
+  0000                00023         global  _setAlarmLow
+  0000                00024         global  _getAlarmHigh
+  0000                00025         global  _setAlarmHigh
+  0000                00026         global  _getIdiom
+  0000                00027         global  _setIdiom
+                      00028 
+                      00029 ;--------------------------------------------------------
+                      00030 ; extern variables in this module
+                      00031 ;--------------------------------------------------------
+  0000                00032         extern  _rtcStore
+  0000                00033         extern  _rtcStoreInt
+  0000                00034         extern  _rtcRead
+  0000                00035         extern  _rtcReadInt
+                      00036 
+                      00037 ;--------------------------------------------------------
+                      00038 ;       Equates to used internal registers
+                      00039 ;--------------------------------------------------------
+  00000FD8            00040 STATUS  equ     0xfd8
+  00000FE8            00041 WREG    equ     0xfe8
+  00000FE1            00042 FSR1L   equ     0xfe1
+  00000FD9            00043 FSR2L   equ     0xfd9
+  00000FE6            00044 POSTINC1        equ     0xfe6
+  00000FE5            00045 POSTDEC1        equ     0xfe5
+  00000FE4            00046 PREINC1 equ     0xfe4
+  00000FDB            00047 PLUSW2  equ     0xfdb
+  00000FF3            00048 PRODL   equ     0xff3
+                      00049 
+                      00050 
+                      00051 ; Internal registers
+                      00052 .registers      udata_ovr       0x0000
+000000                00053 r0x00   res     1
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  11:01:18        PAGE  2
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000001                00054 r0x01   res     1
+000002                00055 r0x02   res     1
+000003                00056 r0x03   res     1
+000004                00057 r0x04   res     1
+                      00058 
+                      00059 udata_var_0     udata
+000000                00060 _state  res     1
+                      00061 
+                      00062 udata_var_1     udata
+000000                00063 _stateRst       res     1
+                      00064 
+                      00065 udata_var_2     udata
+000000                00066 _idiom  res     1
+                      00067 
+                      00068 udata_var_3     udata
+000000                00069 _time   res     2
+                      00070 
+                      00071 udata_var_4     udata
+000000                00072 _alarmLow       res     2
+                      00073 
+                      00074 udata_var_5     udata
+000000                00075 _alarmHigh      res     2
+                      00076 
+                      00077 ;--------------------------------------------------------
+                      00078 ; global & static initialisations
+                      00079 ;--------------------------------------------------------
+                      00080 ; I code from now on!
+                      00081 ; ; Starting pCode block
+                      00082 S_var__setIdiom code
+000000                00083 _setIdiom:
+                      00084 ;       .line   114; var.c      void setIdiom(char newIdiom){
+000000 CFD9 FFE5      00085         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00086         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00087         MOVFF   r0x00, POSTDEC1
+00000C 0E02           00088         MOVLW   0x02
+00000E CFDB F000      00089         MOVFF   PLUSW2, r0x00
+                      00090 ;       .line   117; var.c      idiom = newIdiom%2; 
+000012 0E01           00091         MOVLW   0x01
+000014 14??           00092         ANDWF   r0x00, W
+000016 010?           00093         BANKSEL _idiom
+000018 6F??           00094         MOVWF   _idiom, B
+00001A 010?           00095         BANKSEL _idiom
+                      00096 ;       .line   118; var.c      rtcStore(ADDRESS_IDIOM, idiom);
+00001C 51??           00097         MOVF    _idiom, W, B
+00001E 6EE5           00098         MOVWF   POSTDEC1
+000020 0E8A           00099         MOVLW   0x8a
+000022 6EE5           00100         MOVWF   POSTDEC1
+000024 EC?? F0??      00101         CALL    _rtcStore
+000028 52E6           00102         MOVF    POSTINC1, F
+00002A 52E6           00103         MOVF    POSTINC1, F
+00002C CFE4 F000      00104         MOVFF   PREINC1, r0x00
+000030 CFE4 FFD9      00105         MOVFF   PREINC1, FSR2L
+000034 0012           00106         RETURN  
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  11:01:18        PAGE  3
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00107 
+                      00108 ; ; Starting pCode block
+                      00109 S_var__getIdiom code
+000000                00110 _getIdiom:
+                      00111 ;       .line   110; var.c      char getIdiom(void){
+000000 CFD9 FFE5      00112         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00113         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00114         MOVFF   r0x00, POSTDEC1
+                      00115 ;       .line   111; var.c      idiom = rtcRead(ADDRESS_IDIOM)%2;
+00000C 0E8A           00116         MOVLW   0x8a
+00000E 6EE5           00117         MOVWF   POSTDEC1
+000010 EC?? F0??      00118         CALL    _rtcRead
+000014 6E??           00119         MOVWF   r0x00
+000016 52E6           00120         MOVF    POSTINC1, F
+000018 0E01           00121         MOVLW   0x01
+00001A 14??           00122         ANDWF   r0x00, W
+00001C 010?           00123         BANKSEL _idiom
+00001E 6F??           00124         MOVWF   _idiom, B
+000020 010?           00125         BANKSEL _idiom
+                      00126 ;       .line   112; var.c      return idiom;
+000022 51??           00127         MOVF    _idiom, W, B
+000024 CFE4 F000      00128         MOVFF   PREINC1, r0x00
+000028 CFE4 FFD9      00129         MOVFF   PREINC1, FSR2L
+00002C 0012           00130         RETURN  
+                      00131 
+                      00132 ; ; Starting pCode block
+                      00133 S_var__setAlarmHigh     code
+000000                00134 _setAlarmHigh:
+                      00135 ;       .line   101; var.c      void setAlarmHigh(char alarm, int newAlarmHigh) {
+000000 CFD9 FFE5      00136         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00137         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00138         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      00139         MOVFF   r0x01, POSTDEC1
+000010 C??? F???      00140         MOVFF   r0x02, POSTDEC1
+000014 C??? F???      00141         MOVFF   r0x03, POSTDEC1
+000018 C??? F???      00142         MOVFF   r0x04, POSTDEC1
+00001C 0E02           00143         MOVLW   0x02
+00001E CFDB F000      00144         MOVFF   PLUSW2, r0x00
+000022 0E03           00145         MOVLW   0x03
+000024 CFDB F000      00146         MOVFF   PLUSW2, r0x01
+000028 0E04           00147         MOVLW   0x04
+00002A CFDB F000      00148         MOVFF   PLUSW2, r0x02
+                      00149 ;       .line   102; var.c      if(newAlarmHigh > getAlarmLow(alarm) & newAlarmHigh > 0 & newAlarmHigh <
+                            = 9999){
+00002E 50??           00150         MOVF    r0x00, W
+000030 6EE5           00151         MOVWF   POSTDEC1
+000032 EC?? F0??      00152         CALL    _getAlarmLow
+000036 6E??           00153         MOVWF   r0x03
+000038 CFF3 F000      00154         MOVFF   PRODL, r0x04
+00003C 52E6           00155         MOVF    POSTINC1, F
+00003E 50??           00156         MOVF    r0x04, W
+000040 0F80           00157         ADDLW   0x80
+000042 6EF3           00158         MOVWF   PRODL
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  11:01:18        PAGE  4
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000044 50??           00159         MOVF    r0x02, W
+000046 0F80           00160         ADDLW   0x80
+000048 5CF3           00161         SUBWF   PRODL, W
+00004A E1??           00162         BNZ     _00257_DS_
+00004C 50??           00163         MOVF    r0x01, W
+00004E 5C??           00164         SUBWF   r0x03, W
+000050                00165 _00257_DS_:
+000050 70D8           00166         BTG     STATUS, 0
+000052 6A??           00167         CLRF    r0x03
+000054 36??           00168         RLCF    r0x03, F
+000056 50??           00169         MOVF    r0x02, W
+000058 0F80           00170         ADDLW   0x80
+00005A 0F80           00171         ADDLW   0x80
+00005C E1??           00172         BNZ     _00259_DS_
+00005E 0E01           00173         MOVLW   0x01
+000060 5C??           00174         SUBWF   r0x01, W
+000062                00175 _00259_DS_:
+000062 6A??           00176         CLRF    r0x04
+000064 36??           00177         RLCF    r0x04, F
+000066 50??           00178         MOVF    r0x04, W
+000068 16??           00179         ANDWF   r0x03, F
+00006A 50??           00180         MOVF    r0x02, W
+00006C 0F80           00181         ADDLW   0x80
+00006E 0F59           00182         ADDLW   0x59
+000070 E1??           00183         BNZ     _00262_DS_
+000072 0E10           00184         MOVLW   0x10
+000074 5C??           00185         SUBWF   r0x01, W
+000076                00186 _00262_DS_:
+000076 6A??           00187         CLRF    r0x04
+000078 36??           00188         RLCF    r0x04, F
+00007A 50??           00189         MOVF    r0x04, W
+00007C 80D8           00190         BSF     STATUS, 0
+00007E 66E8           00191         TSTFSZ  WREG
+000080 90D8           00192         BCF     STATUS, 0
+000082 6A??           00193         CLRF    r0x04
+000084 36??           00194         RLCF    r0x04, F
+000086 50??           00195         MOVF    r0x04, W
+000088 16??           00196         ANDWF   r0x03, F
+00008A 50??           00197         MOVF    r0x03, W
+00008C E0??           00198         BZ      _00248_DS_
+                      00199 ;       .line   103; var.c      if(alarm%2 == 0)
+00008E B0??           00200         BTFSC   r0x00, 0
+000090 D???           00201         BRA     _00244_DS_
+                      00202 ;       .line   104; var.c      rtcStoreInt(ADDRESS_AH0, newAlarmHigh); 
+000092 50??           00203         MOVF    r0x02, W
+000094 6EE5           00204         MOVWF   POSTDEC1
+000096 50??           00205         MOVF    r0x01, W
+000098 6EE5           00206         MOVWF   POSTDEC1
+00009A 0EBC           00207         MOVLW   0xbc
+00009C 6EE5           00208         MOVWF   POSTDEC1
+00009E EC?? F0??      00209         CALL    _rtcStoreInt
+0000A2 0E03           00210         MOVLW   0x03
+0000A4 26E1           00211         ADDWF   FSR1L, F
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  11:01:18        PAGE  5
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0000A6 D???           00212         BRA     _00248_DS_
+0000A8                00213 _00244_DS_:
+                      00214 ;       .line   106; var.c      rtcStoreInt(ADDRESS_AH1, newAlarmHigh);
+0000A8 50??           00215         MOVF    r0x02, W
+0000AA 6EE5           00216         MOVWF   POSTDEC1
+0000AC 50??           00217         MOVF    r0x01, W
+0000AE 6EE5           00218         MOVWF   POSTDEC1
+0000B0 0EAE           00219         MOVLW   0xae
+0000B2 6EE5           00220         MOVWF   POSTDEC1
+0000B4 EC?? F0??      00221         CALL    _rtcStoreInt
+0000B8 0E03           00222         MOVLW   0x03
+0000BA 26E1           00223         ADDWF   FSR1L, F
+0000BC                00224 _00248_DS_:
+0000BC CFE4 F000      00225         MOVFF   PREINC1, r0x04
+0000C0 CFE4 F000      00226         MOVFF   PREINC1, r0x03
+0000C4 CFE4 F000      00227         MOVFF   PREINC1, r0x02
+0000C8 CFE4 F000      00228         MOVFF   PREINC1, r0x01
+0000CC CFE4 F000      00229         MOVFF   PREINC1, r0x00
+0000D0 CFE4 FFD9      00230         MOVFF   PREINC1, FSR2L
+0000D4 0012           00231         RETURN  
+                      00232 
+                      00233 ; ; Starting pCode block
+                      00234 S_var__getAlarmHigh     code
+000000                00235 _getAlarmHigh:
+                      00236 ;       .line   94; var.c       int getAlarmHigh(char alarm) {    
+000000 CFD9 FFE5      00237         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00238         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00239         MOVFF   r0x00, POSTDEC1
+00000C 0E02           00240         MOVLW   0x02
+00000E CFDB F000      00241         MOVFF   PLUSW2, r0x00
+                      00242 ;       .line   95; var.c       if(alarm%2 == 0)
+000012 B0??           00243         BTFSC   r0x00, 0
+000014 D???           00244         BRA     _00231_DS_
+                      00245 ;       .line   96; var.c       alarmHigh = rtcReadInt(ADDRESS_AH0);    
+000016 0EBC           00246         MOVLW   0xbc
+000018 6EE5           00247         MOVWF   POSTDEC1
+00001A EC?? F0??      00248         CALL    _rtcReadInt
+00001E 010?           00249         BANKSEL _alarmHigh
+000020 6F??           00250         MOVWF   _alarmHigh, B
+000022 CFF3 F000      00251         MOVFF   PRODL, (_alarmHigh + 1)
+000026 52E6           00252         MOVF    POSTINC1, F
+000028 D???           00253         BRA     _00232_DS_
+00002A                00254 _00231_DS_:
+                      00255 ;       .line   98; var.c       alarmHigh = rtcReadInt(ADDRESS_AH1);        
+00002A 0EAE           00256         MOVLW   0xae
+00002C 6EE5           00257         MOVWF   POSTDEC1
+00002E EC?? F0??      00258         CALL    _rtcReadInt
+000032 010?           00259         BANKSEL _alarmHigh
+000034 6F??           00260         MOVWF   _alarmHigh, B
+000036 CFF3 F000      00261         MOVFF   PRODL, (_alarmHigh + 1)
+00003A 52E6           00262         MOVF    POSTINC1, F
+00003C                00263 _00232_DS_:
+                      00264 ;       .line   99; var.c       return alarmHigh;
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  11:01:18        PAGE  6
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00003C C??? F???      00265         MOVFF   (_alarmHigh + 1), PRODL
+000040 010?           00266         BANKSEL _alarmHigh
+000042 51??           00267         MOVF    _alarmHigh, W, B
+000044 CFE4 F000      00268         MOVFF   PREINC1, r0x00
+000048 CFE4 FFD9      00269         MOVFF   PREINC1, FSR2L
+00004C 0012           00270         RETURN  
+                      00271 
+                      00272 ; ; Starting pCode block
+                      00273 S_var__setAlarmLow      code
+000000                00274 _setAlarmLow:
+                      00275 ;       .line   86; var.c       void setAlarmLow(char alarm,int newAlarmLow) {    
+000000 CFD9 FFE5      00276         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00277         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00278         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      00279         MOVFF   r0x01, POSTDEC1
+000010 C??? F???      00280         MOVFF   r0x02, POSTDEC1
+000014 C??? F???      00281         MOVFF   r0x03, POSTDEC1
+000018 C??? F???      00282         MOVFF   r0x04, POSTDEC1
+00001C 0E02           00283         MOVLW   0x02
+00001E CFDB F000      00284         MOVFF   PLUSW2, r0x00
+000022 0E03           00285         MOVLW   0x03
+000024 CFDB F000      00286         MOVFF   PLUSW2, r0x01
+000028 0E04           00287         MOVLW   0x04
+00002A CFDB F000      00288         MOVFF   PLUSW2, r0x02
+                      00289 ;       .line   87; var.c       if(newAlarmLow < getAlarmHigh(alarm) & newAlarmLow > 0 & newAlarmLow <= 
+                            9999){
+00002E 50??           00290         MOVF    r0x00, W
+000030 6EE5           00291         MOVWF   POSTDEC1
+000032 EC?? F0??      00292         CALL    _getAlarmHigh
+000036 6E??           00293         MOVWF   r0x03
+000038 CFF3 F000      00294         MOVFF   PRODL, r0x04
+00003C 52E6           00295         MOVF    POSTINC1, F
+00003E 50??           00296         MOVF    r0x02, W
+000040 0F80           00297         ADDLW   0x80
+000042 6EF3           00298         MOVWF   PRODL
+000044 50??           00299         MOVF    r0x04, W
+000046 0F80           00300         ADDLW   0x80
+000048 5CF3           00301         SUBWF   PRODL, W
+00004A E1??           00302         BNZ     _00219_DS_
+00004C 50??           00303         MOVF    r0x03, W
+00004E 5C??           00304         SUBWF   r0x01, W
+000050                00305 _00219_DS_:
+000050 70D8           00306         BTG     STATUS, 0
+000052 6A??           00307         CLRF    r0x03
+000054 36??           00308         RLCF    r0x03, F
+000056 50??           00309         MOVF    r0x02, W
+000058 0F80           00310         ADDLW   0x80
+00005A 0F80           00311         ADDLW   0x80
+00005C E1??           00312         BNZ     _00221_DS_
+00005E 0E01           00313         MOVLW   0x01
+000060 5C??           00314         SUBWF   r0x01, W
+000062                00315 _00221_DS_:
+000062 6A??           00316         CLRF    r0x04
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  11:01:18        PAGE  7
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000064 36??           00317         RLCF    r0x04, F
+000066 50??           00318         MOVF    r0x04, W
+000068 16??           00319         ANDWF   r0x03, F
+00006A 50??           00320         MOVF    r0x02, W
+00006C 0F80           00321         ADDLW   0x80
+00006E 0F59           00322         ADDLW   0x59
+000070 E1??           00323         BNZ     _00224_DS_
+000072 0E10           00324         MOVLW   0x10
+000074 5C??           00325         SUBWF   r0x01, W
+000076                00326 _00224_DS_:
+000076 6A??           00327         CLRF    r0x04
+000078 36??           00328         RLCF    r0x04, F
+00007A 50??           00329         MOVF    r0x04, W
+00007C 80D8           00330         BSF     STATUS, 0
+00007E 66E8           00331         TSTFSZ  WREG
+000080 90D8           00332         BCF     STATUS, 0
+000082 6A??           00333         CLRF    r0x04
+000084 36??           00334         RLCF    r0x04, F
+000086 50??           00335         MOVF    r0x04, W
+000088 16??           00336         ANDWF   r0x03, F
+00008A 50??           00337         MOVF    r0x03, W
+00008C E0??           00338         BZ      _00210_DS_
+                      00339 ;       .line   88; var.c       if(alarm%2 == 0)
+00008E B0??           00340         BTFSC   r0x00, 0
+000090 D???           00341         BRA     _00206_DS_
+                      00342 ;       .line   89; var.c       rtcStoreInt(ADDRESS_AL0, newAlarmLow);  
+000092 50??           00343         MOVF    r0x02, W
+000094 6EE5           00344         MOVWF   POSTDEC1
+000096 50??           00345         MOVF    r0x01, W
+000098 6EE5           00346         MOVWF   POSTDEC1
+00009A 0E58           00347         MOVLW   0x58
+00009C 6EE5           00348         MOVWF   POSTDEC1
+00009E EC?? F0??      00349         CALL    _rtcStoreInt
+0000A2 0E03           00350         MOVLW   0x03
+0000A4 26E1           00351         ADDWF   FSR1L, F
+0000A6 D???           00352         BRA     _00210_DS_
+0000A8                00353 _00206_DS_:
+                      00354 ;       .line   91; var.c       rtcStoreInt(ADDRESS_AL1, newAlarmLow);     
+0000A8 50??           00355         MOVF    r0x02, W
+0000AA 6EE5           00356         MOVWF   POSTDEC1
+0000AC 50??           00357         MOVF    r0x01, W
+0000AE 6EE5           00358         MOVWF   POSTDEC1
+0000B0 0E76           00359         MOVLW   0x76
+0000B2 6EE5           00360         MOVWF   POSTDEC1
+0000B4 EC?? F0??      00361         CALL    _rtcStoreInt
+0000B8 0E03           00362         MOVLW   0x03
+0000BA 26E1           00363         ADDWF   FSR1L, F
+0000BC                00364 _00210_DS_:
+0000BC CFE4 F000      00365         MOVFF   PREINC1, r0x04
+0000C0 CFE4 F000      00366         MOVFF   PREINC1, r0x03
+0000C4 CFE4 F000      00367         MOVFF   PREINC1, r0x02
+0000C8 CFE4 F000      00368         MOVFF   PREINC1, r0x01
+0000CC CFE4 F000      00369         MOVFF   PREINC1, r0x00
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  11:01:18        PAGE  8
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0000D0 CFE4 FFD9      00370         MOVFF   PREINC1, FSR2L
+0000D4 0012           00371         RETURN  
+                      00372 
+                      00373 ; ; Starting pCode block
+                      00374 S_var__getAlarmLow      code
+000000                00375 _getAlarmLow:
+                      00376 ;       .line   79; var.c       int getAlarmLow(char alarm) {
+000000 CFD9 FFE5      00377         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00378         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00379         MOVFF   r0x00, POSTDEC1
+00000C 0E02           00380         MOVLW   0x02
+00000E CFDB F000      00381         MOVFF   PLUSW2, r0x00
+                      00382 ;       .line   80; var.c       if(alarm%2 == 0)
+000012 B0??           00383         BTFSC   r0x00, 0
+000014 D???           00384         BRA     _00193_DS_
+                      00385 ;       .line   81; var.c       alarmLow = rtcReadInt(ADDRESS_AL0);     
+000016 0E58           00386         MOVLW   0x58
+000018 6EE5           00387         MOVWF   POSTDEC1
+00001A EC?? F0??      00388         CALL    _rtcReadInt
+00001E 010?           00389         BANKSEL _alarmLow
+000020 6F??           00390         MOVWF   _alarmLow, B
+000022 CFF3 F000      00391         MOVFF   PRODL, (_alarmLow + 1)
+000026 52E6           00392         MOVF    POSTINC1, F
+000028 D???           00393         BRA     _00194_DS_
+00002A                00394 _00193_DS_:
+                      00395 ;       .line   83; var.c       alarmLow = rtcReadInt(ADDRESS_AL1);     
+00002A 0E76           00396         MOVLW   0x76
+00002C 6EE5           00397         MOVWF   POSTDEC1
+00002E EC?? F0??      00398         CALL    _rtcReadInt
+000032 010?           00399         BANKSEL _alarmLow
+000034 6F??           00400         MOVWF   _alarmLow, B
+000036 CFF3 F000      00401         MOVFF   PRODL, (_alarmLow + 1)
+00003A 52E6           00402         MOVF    POSTINC1, F
+00003C                00403 _00194_DS_:
+                      00404 ;       .line   84; var.c       return alarmLow;
+00003C C??? F???      00405         MOVFF   (_alarmLow + 1), PRODL
+000040 010?           00406         BANKSEL _alarmLow
+000042 51??           00407         MOVF    _alarmLow, W, B
+000044 CFE4 F000      00408         MOVFF   PREINC1, r0x00
+000048 CFE4 FFD9      00409         MOVFF   PREINC1, FSR2L
+00004C 0012           00410         RETURN  
+                      00411 
+                      00412 ; ; Starting pCode block
+                      00413 S_var__setTime  code
+000000                00414 _setTime:
+                      00415 ;       .line   72; var.c       void setTime(int newTime) {
+000000 CFD9 FFE5      00416         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00417         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00418         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      00419         MOVFF   r0x01, POSTDEC1
+000010 C??? F???      00420         MOVFF   r0x02, POSTDEC1
+000014 C??? F???      00421         MOVFF   r0x03, POSTDEC1
+000018 0E02           00422         MOVLW   0x02
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  11:01:18        PAGE  9
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00001A CFDB F000      00423         MOVFF   PLUSW2, r0x00
+00001E 0E03           00424         MOVLW   0x03
+000020 CFDB F000      00425         MOVFF   PLUSW2, r0x01
+                      00426 ;       .line   73; var.c       if((newTime)>=0 & newTime <= 9999){
+000024 80D8           00427         BSF     STATUS, 0
+000026 AE??           00428         BTFSS   r0x01, 7
+000028 90D8           00429         BCF     STATUS, 0
+00002A 6A??           00430         CLRF    r0x02
+00002C 36??           00431         RLCF    r0x02, F
+00002E 50??           00432         MOVF    r0x02, W
+000030 80D8           00433         BSF     STATUS, 0
+000032 66E8           00434         TSTFSZ  WREG
+000034 90D8           00435         BCF     STATUS, 0
+000036 6A??           00436         CLRF    r0x02
+000038 36??           00437         RLCF    r0x02, F
+00003A 50??           00438         MOVF    r0x01, W
+00003C 0F80           00439         ADDLW   0x80
+00003E 0F59           00440         ADDLW   0x59
+000040 E1??           00441         BNZ     _00187_DS_
+000042 0E10           00442         MOVLW   0x10
+000044 5C??           00443         SUBWF   r0x00, W
+000046                00444 _00187_DS_:
+000046 6A??           00445         CLRF    r0x03
+000048 36??           00446         RLCF    r0x03, F
+00004A 50??           00447         MOVF    r0x03, W
+00004C 80D8           00448         BSF     STATUS, 0
+00004E 66E8           00449         TSTFSZ  WREG
+000050 90D8           00450         BCF     STATUS, 0
+000052 6A??           00451         CLRF    r0x03
+000054 36??           00452         RLCF    r0x03, F
+000056 50??           00453         MOVF    r0x03, W
+000058 16??           00454         ANDWF   r0x02, F
+00005A 50??           00455         MOVF    r0x02, W
+00005C E0??           00456         BZ      _00180_DS_
+                      00457 ;       .line   74; var.c       time = newTime; 
+00005E C??? F???      00458         MOVFF   r0x00, _time
+000062 C??? F???      00459         MOVFF   r0x01, (_time + 1)
+000066 010?           00460         BANKSEL (_time + 1)
+                      00461 ;       .line   75; var.c       rtcStoreInt(ADDRESS_TIME, time);        
+000068 51??           00462         MOVF    (_time + 1), W, B
+00006A 6EE5           00463         MOVWF   POSTDEC1
+00006C 010?           00464         BANKSEL _time
+00006E 51??           00465         MOVF    _time, W, B
+000070 6EE5           00466         MOVWF   POSTDEC1
+000072 0EF4           00467         MOVLW   0xf4
+000074 6EE5           00468         MOVWF   POSTDEC1
+000076 EC?? F0??      00469         CALL    _rtcStoreInt
+00007A 0E03           00470         MOVLW   0x03
+00007C 26E1           00471         ADDWF   FSR1L, F
+00007E                00472 _00180_DS_:
+00007E CFE4 F000      00473         MOVFF   PREINC1, r0x03
+000082 CFE4 F000      00474         MOVFF   PREINC1, r0x02
+000086 CFE4 F000      00475         MOVFF   PREINC1, r0x01
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  11:01:18        PAGE 10
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00008A CFE4 F000      00476         MOVFF   PREINC1, r0x00
+00008E CFE4 FFD9      00477         MOVFF   PREINC1, FSR2L
+000092 0012           00478         RETURN  
+                      00479 
+                      00480 ; ; Starting pCode block
+                      00481 S_var__getTime  code
+000000                00482 _getTime:
+                      00483 ;       .line   68; var.c       int getTime(void) {      
+000000 CFD9 FFE5      00484         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00485         MOVFF   FSR1L, FSR2L
+                      00486 ;       .line   69; var.c       time = rtcReadInt(ADDRESS_TIME);        
+000008 0EF4           00487         MOVLW   0xf4
+00000A 6EE5           00488         MOVWF   POSTDEC1
+00000C EC?? F0??      00489         CALL    _rtcReadInt
+000010 010?           00490         BANKSEL _time
+000012 6F??           00491         MOVWF   _time, B
+000014 CFF3 F000      00492         MOVFF   PRODL, (_time + 1)
+000018 52E6           00493         MOVF    POSTINC1, F
+                      00494 ;       .line   70; var.c       return time;
+00001A C??? F???      00495         MOVFF   (_time + 1), PRODL
+00001E 010?           00496         BANKSEL _time
+000020 51??           00497         MOVF    _time, W, B
+000022 CFE4 FFD9      00498         MOVFF   PREINC1, FSR2L
+000026 0012           00499         RETURN  
+                      00500 
+                      00501 ; ; Starting pCode block
+                      00502 S_var__setStateRst      code
+000000                00503 _setStateRst:
+                      00504 ;       .line   64; var.c       void setStateRst(char newStateRst) {
+000000 CFD9 FFE5      00505         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00506         MOVFF   FSR1L, FSR2L
+000008 0E02           00507         MOVLW   0x02
+00000A CFDB F000      00508         MOVFF   PLUSW2, _stateRst
+                      00509 ;       .line   65; var.c       stateRst = newStateRst;
+00000E CFE4 FFD9      00510         MOVFF   PREINC1, FSR2L
+000012 0012           00511         RETURN  
+                      00512 
+                      00513 ; ; Starting pCode block
+                      00514 S_var__getStateRst      code
+000000                00515 _getStateRst:
+                      00516 ;       .line   61; var.c       char getStateRst(void) {
+000000 CFD9 FFE5      00517         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00518         MOVFF   FSR1L, FSR2L
+000008 010?           00519         BANKSEL _stateRst
+                      00520 ;       .line   62; var.c       return stateRst;
+00000A 51??           00521         MOVF    _stateRst, W, B
+00000C CFE4 FFD9      00522         MOVFF   PREINC1, FSR2L
+000010 0012           00523         RETURN  
+                      00524 
+                      00525 ; ; Starting pCode block
+                      00526 S_var__setState code
+000000                00527 _setState:
+                      00528 ;       .line   57; var.c       void setState(char newState) {   
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  11:01:18        PAGE 11
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000000 CFD9 FFE5      00529         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00530         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00531         MOVFF   r0x00, POSTDEC1
+00000C 0E02           00532         MOVLW   0x02
+00000E CFDB F000      00533         MOVFF   PLUSW2, r0x00
+                      00534 ;       .line   58; var.c       rtcStore(ADDRESS_STATE, newState);
+000012 50??           00535         MOVF    r0x00, W
+000014 6EE5           00536         MOVWF   POSTDEC1
+000016 0E90           00537         MOVLW   0x90
+000018 6EE5           00538         MOVWF   POSTDEC1
+00001A EC?? F0??      00539         CALL    _rtcStore
+00001E 52E6           00540         MOVF    POSTINC1, F
+000020 52E6           00541         MOVF    POSTINC1, F
+                      00542 ;       .line   59; var.c       state = newState;       
+000022 C??? F???      00543         MOVFF   r0x00, _state
+000026 CFE4 F000      00544         MOVFF   PREINC1, r0x00
+00002A CFE4 FFD9      00545         MOVFF   PREINC1, FSR2L
+00002E 0012           00546         RETURN  
+                      00547 
+                      00548 ; ; Starting pCode block
+                      00549 S_var__getState code
+000000                00550 _getState:
+                      00551 ;       .line   53; var.c       char getState(void) {    
+000000 CFD9 FFE5      00552         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00553         MOVFF   FSR1L, FSR2L
+                      00554 ;       .line   54; var.c       state = rtcRead(ADDRESS_STATE); 
+000008 0E90           00555         MOVLW   0x90
+00000A 6EE5           00556         MOVWF   POSTDEC1
+00000C EC?? F0??      00557         CALL    _rtcRead
+000010 010?           00558         BANKSEL _state
+000012 6F??           00559         MOVWF   _state, B
+000014 52E6           00560         MOVF    POSTINC1, F
+000016 010?           00561         BANKSEL _state
+                      00562 ;       .line   55; var.c       return state;
+000018 51??           00563         MOVF    _state, W, B
+00001A CFE4 FFD9      00564         MOVFF   PREINC1, FSR2L
+00001E 0012           00565         RETURN  
+                      00566 
+                      00567 ; ; Starting pCode block
+                      00568 S_var__varTest  code
+000000                00569 _varTest:
+                      00570 ;       .line   31; var.c       void varTest(void) {   
+000000 CFD9 FFE5      00571         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00572         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00573         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      00574         MOVFF   r0x01, POSTDEC1
+000010 C??? F???      00575         MOVFF   r0x02, POSTDEC1
+000014 C??? F???      00576         MOVFF   r0x03, POSTDEC1
+                      00577 ;       .line   32; var.c       if(getAlarmHigh(0)<= getAlarmLow(0)){            
+000018 0E00           00578         MOVLW   0x00
+00001A 6EE5           00579         MOVWF   POSTDEC1
+00001C EC?? F0??      00580         CALL    _getAlarmHigh
+000020 6E??           00581         MOVWF   r0x00
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  11:01:18        PAGE 12
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000022 CFF3 F000      00582         MOVFF   PRODL, r0x01
+000026 52E6           00583         MOVF    POSTINC1, F
+000028 0E00           00584         MOVLW   0x00
+00002A 6EE5           00585         MOVWF   POSTDEC1
+00002C EC?? F0??      00586         CALL    _getAlarmLow
+000030 6E??           00587         MOVWF   r0x02
+000032 CFF3 F000      00588         MOVFF   PRODL, r0x03
+000036 52E6           00589         MOVF    POSTINC1, F
+000038 50??           00590         MOVF    r0x03, W
+00003A 0F80           00591         ADDLW   0x80
+00003C 6EF3           00592         MOVWF   PRODL
+00003E 50??           00593         MOVF    r0x01, W
+000040 0F80           00594         ADDLW   0x80
+000042 5CF3           00595         SUBWF   PRODL, W
+000044 E1??           00596         BNZ     _00147_DS_
+000046 50??           00597         MOVF    r0x00, W
+000048 5C??           00598         SUBWF   r0x02, W
+00004A                00599 _00147_DS_:
+00004A E3??           00600         BNC     _00111_DS_
+                      00601 ;       .line   33; var.c       rtcStoreInt(ADDRESS_AH0, 7000);
+00004C 0E1B           00602         MOVLW   0x1b
+00004E 6EE5           00603         MOVWF   POSTDEC1
+000050 0E58           00604         MOVLW   0x58
+000052 6EE5           00605         MOVWF   POSTDEC1
+000054 0EBC           00606         MOVLW   0xbc
+000056 6EE5           00607         MOVWF   POSTDEC1
+000058 EC?? F0??      00608         CALL    _rtcStoreInt
+00005C 0E03           00609         MOVLW   0x03
+00005E 26E1           00610         ADDWF   FSR1L, F
+                      00611 ;       .line   34; var.c       rtcStoreInt(ADDRESS_AL0, 1000);
+000060 0E03           00612         MOVLW   0x03
+000062 6EE5           00613         MOVWF   POSTDEC1
+000064 0EE8           00614         MOVLW   0xe8
+000066 6EE5           00615         MOVWF   POSTDEC1
+000068 0E58           00616         MOVLW   0x58
+00006A 6EE5           00617         MOVWF   POSTDEC1
+00006C EC?? F0??      00618         CALL    _rtcStoreInt
+000070 0E03           00619         MOVLW   0x03
+000072 26E1           00620         ADDWF   FSR1L, F
+000074                00621 _00111_DS_:
+                      00622 ;       .line   36; var.c       if(getAlarmHigh(1)<= getAlarmLow(1)){
+000074 0E01           00623         MOVLW   0x01
+000076 6EE5           00624         MOVWF   POSTDEC1
+000078 EC?? F0??      00625         CALL    _getAlarmHigh
+00007C 6E??           00626         MOVWF   r0x00
+00007E CFF3 F000      00627         MOVFF   PRODL, r0x01
+000082 52E6           00628         MOVF    POSTINC1, F
+000084 0E01           00629         MOVLW   0x01
+000086 6EE5           00630         MOVWF   POSTDEC1
+000088 EC?? F0??      00631         CALL    _getAlarmLow
+00008C 6E??           00632         MOVWF   r0x02
+00008E CFF3 F000      00633         MOVFF   PRODL, r0x03
+000092 52E6           00634         MOVF    POSTINC1, F
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  11:01:18        PAGE 13
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000094 50??           00635         MOVF    r0x03, W
+000096 0F80           00636         ADDLW   0x80
+000098 6EF3           00637         MOVWF   PRODL
+00009A 50??           00638         MOVF    r0x01, W
+00009C 0F80           00639         ADDLW   0x80
+00009E 5CF3           00640         SUBWF   PRODL, W
+0000A0 E1??           00641         BNZ     _00148_DS_
+0000A2 50??           00642         MOVF    r0x00, W
+0000A4 5C??           00643         SUBWF   r0x02, W
+0000A6                00644 _00148_DS_:
+0000A6 E3??           00645         BNC     _00113_DS_
+                      00646 ;       .line   37; var.c       rtcStoreInt(ADDRESS_AH1, 9000);
+0000A8 0E23           00647         MOVLW   0x23
+0000AA 6EE5           00648         MOVWF   POSTDEC1
+0000AC 0E28           00649         MOVLW   0x28
+0000AE 6EE5           00650         MOVWF   POSTDEC1
+0000B0 0EAE           00651         MOVLW   0xae
+0000B2 6EE5           00652         MOVWF   POSTDEC1
+0000B4 EC?? F0??      00653         CALL    _rtcStoreInt
+0000B8 0E03           00654         MOVLW   0x03
+0000BA 26E1           00655         ADDWF   FSR1L, F
+                      00656 ;       .line   38; var.c       rtcStoreInt(ADDRESS_AL1, 3000);
+0000BC 0E0B           00657         MOVLW   0x0b
+0000BE 6EE5           00658         MOVWF   POSTDEC1
+0000C0 0EB8           00659         MOVLW   0xb8
+0000C2 6EE5           00660         MOVWF   POSTDEC1
+0000C4 0E76           00661         MOVLW   0x76
+0000C6 6EE5           00662         MOVWF   POSTDEC1
+0000C8 EC?? F0??      00663         CALL    _rtcStoreInt
+0000CC 0E03           00664         MOVLW   0x03
+0000CE 26E1           00665         ADDWF   FSR1L, F
+0000D0                00666 _00113_DS_:
+                      00667 ;       .line   40; var.c       if(getTime()<0)
+0000D0 EC?? F0??      00668         CALL    _getTime
+0000D4 6E??           00669         MOVWF   r0x00
+0000D6 CFF3 F000      00670         MOVFF   PRODL, r0x01
+0000DA 80D8           00671         BSF     STATUS, 0
+0000DC AE??           00672         BTFSS   r0x01, 7
+0000DE 90D8           00673         BCF     STATUS, 0
+0000E0 E3??           00674         BNC     _00115_DS_
+                      00675 ;       .line   41; var.c       setTime(1000);
+0000E2 0E03           00676         MOVLW   0x03
+0000E4 6EE5           00677         MOVWF   POSTDEC1
+0000E6 0EE8           00678         MOVLW   0xe8
+0000E8 6EE5           00679         MOVWF   POSTDEC1
+0000EA EC?? F0??      00680         CALL    _setTime
+0000EE 52E6           00681         MOVF    POSTINC1, F
+0000F0 52E6           00682         MOVF    POSTINC1, F
+0000F2                00683 _00115_DS_:
+                      00684 ;       .line   42; var.c       if(getAlarmHigh(0)<0)
+0000F2 0E00           00685         MOVLW   0x00
+0000F4 6EE5           00686         MOVWF   POSTDEC1
+0000F6 EC?? F0??      00687         CALL    _getAlarmHigh
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  11:01:18        PAGE 14
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0000FA 6E??           00688         MOVWF   r0x00
+0000FC CFF3 F000      00689         MOVFF   PRODL, r0x01
+000100 52E6           00690         MOVF    POSTINC1, F
+000102 80D8           00691         BSF     STATUS, 0
+000104 AE??           00692         BTFSS   r0x01, 7
+000106 90D8           00693         BCF     STATUS, 0
+000108 E3??           00694         BNC     _00117_DS_
+                      00695 ;       .line   43; var.c       rtcStoreInt(ADDRESS_AH0, 7000);
+00010A 0E1B           00696         MOVLW   0x1b
+00010C 6EE5           00697         MOVWF   POSTDEC1
+00010E 0E58           00698         MOVLW   0x58
+000110 6EE5           00699         MOVWF   POSTDEC1
+000112 0EBC           00700         MOVLW   0xbc
+000114 6EE5           00701         MOVWF   POSTDEC1
+000116 EC?? F0??      00702         CALL    _rtcStoreInt
+00011A 0E03           00703         MOVLW   0x03
+00011C 26E1           00704         ADDWF   FSR1L, F
+00011E                00705 _00117_DS_:
+                      00706 ;       .line   44; var.c       if(getAlarmHigh(1)<0)
+00011E 0E01           00707         MOVLW   0x01
+000120 6EE5           00708         MOVWF   POSTDEC1
+000122 EC?? F0??      00709         CALL    _getAlarmHigh
+000126 6E??           00710         MOVWF   r0x00
+000128 CFF3 F000      00711         MOVFF   PRODL, r0x01
+00012C 52E6           00712         MOVF    POSTINC1, F
+00012E 80D8           00713         BSF     STATUS, 0
+000130 AE??           00714         BTFSS   r0x01, 7
+000132 90D8           00715         BCF     STATUS, 0
+000134 E3??           00716         BNC     _00119_DS_
+                      00717 ;       .line   45; var.c       rtcStoreInt(ADDRESS_AH1, 9000);
+000136 0E23           00718         MOVLW   0x23
+000138 6EE5           00719         MOVWF   POSTDEC1
+00013A 0E28           00720         MOVLW   0x28
+00013C 6EE5           00721         MOVWF   POSTDEC1
+00013E 0EAE           00722         MOVLW   0xae
+000140 6EE5           00723         MOVWF   POSTDEC1
+000142 EC?? F0??      00724         CALL    _rtcStoreInt
+000146 0E03           00725         MOVLW   0x03
+000148 26E1           00726         ADDWF   FSR1L, F
+00014A                00727 _00119_DS_:
+                      00728 ;       .line   46; var.c       if(getAlarmLow(0)<0)
+00014A 0E00           00729         MOVLW   0x00
+00014C 6EE5           00730         MOVWF   POSTDEC1
+00014E EC?? F0??      00731         CALL    _getAlarmLow
+000152 6E??           00732         MOVWF   r0x00
+000154 CFF3 F000      00733         MOVFF   PRODL, r0x01
+000158 52E6           00734         MOVF    POSTINC1, F
+00015A 80D8           00735         BSF     STATUS, 0
+00015C AE??           00736         BTFSS   r0x01, 7
+00015E 90D8           00737         BCF     STATUS, 0
+000160 E3??           00738         BNC     _00121_DS_
+                      00739 ;       .line   47; var.c       rtcStoreInt(ADDRESS_AL0, 1000);
+000162 0E03           00740         MOVLW   0x03
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  11:01:18        PAGE 15
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000164 6EE5           00741         MOVWF   POSTDEC1
+000166 0EE8           00742         MOVLW   0xe8
+000168 6EE5           00743         MOVWF   POSTDEC1
+00016A 0E58           00744         MOVLW   0x58
+00016C 6EE5           00745         MOVWF   POSTDEC1
+00016E EC?? F0??      00746         CALL    _rtcStoreInt
+000172 0E03           00747         MOVLW   0x03
+000174 26E1           00748         ADDWF   FSR1L, F
+000176                00749 _00121_DS_:
+                      00750 ;       .line   48; var.c       if(getAlarmLow(1)<0)
+000176 0E01           00751         MOVLW   0x01
+000178 6EE5           00752         MOVWF   POSTDEC1
+00017A EC?? F0??      00753         CALL    _getAlarmLow
+00017E 6E??           00754         MOVWF   r0x00
+000180 CFF3 F000      00755         MOVFF   PRODL, r0x01
+000184 52E6           00756         MOVF    POSTINC1, F
+000186 80D8           00757         BSF     STATUS, 0
+000188 AE??           00758         BTFSS   r0x01, 7
+00018A 90D8           00759         BCF     STATUS, 0
+00018C E3??           00760         BNC     _00124_DS_
+                      00761 ;       .line   49; var.c       rtcStoreInt(ADDRESS_AL1, 300);   
+00018E 0E01           00762         MOVLW   0x01
+000190 6EE5           00763         MOVWF   POSTDEC1
+000192 0E2C           00764         MOVLW   0x2c
+000194 6EE5           00765         MOVWF   POSTDEC1
+000196 0E76           00766         MOVLW   0x76
+000198 6EE5           00767         MOVWF   POSTDEC1
+00019A EC?? F0??      00768         CALL    _rtcStoreInt
+00019E 0E03           00769         MOVLW   0x03
+0001A0 26E1           00770         ADDWF   FSR1L, F
+0001A2                00771 _00124_DS_:
+0001A2 CFE4 F000      00772         MOVFF   PREINC1, r0x03
+0001A6 CFE4 F000      00773         MOVFF   PREINC1, r0x02
+0001AA CFE4 F000      00774         MOVFF   PREINC1, r0x01
+0001AE CFE4 F000      00775         MOVFF   PREINC1, r0x00
+0001B2 CFE4 FFD9      00776         MOVFF   PREINC1, FSR2L
+0001B6 0012           00777         RETURN  
+                      00778 
+                      00779 ; ; Starting pCode block
+                      00780 S_var__varInit  code
+000000                00781 _varInit:
+                      00782 ;       .line   20; var.c       void varInit(void) {   
+000000 CFD9 FFE5      00783         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00784         MOVFF   FSR1L, FSR2L
+                      00785 ;       .line   21; var.c       setState(0);    
+000008 0E00           00786         MOVLW   0x00
+00000A 6EE5           00787         MOVWF   POSTDEC1
+00000C EC?? F0??      00788         CALL    _setState
+000010 52E6           00789         MOVF    POSTINC1, F
+                      00790 ;       .line   22; var.c       setIdiom(0);
+000012 0E00           00791         MOVLW   0x00
+000014 6EE5           00792         MOVWF   POSTDEC1
+000016 EC?? F0??      00793         CALL    _setIdiom
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  11:01:18        PAGE 16
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00001A 52E6           00794         MOVF    POSTINC1, F
+                      00795 ;       .line   23; var.c       setTime(1000);
+00001C 0E03           00796         MOVLW   0x03
+00001E 6EE5           00797         MOVWF   POSTDEC1
+000020 0EE8           00798         MOVLW   0xe8
+000022 6EE5           00799         MOVWF   POSTDEC1
+000024 EC?? F0??      00800         CALL    _setTime
+000028 52E6           00801         MOVF    POSTINC1, F
+00002A 52E6           00802         MOVF    POSTINC1, F
+                      00803 ;       .line   24; var.c       rtcStoreInt(ADDRESS_AL0, 1000);
+00002C 0E03           00804         MOVLW   0x03
+00002E 6EE5           00805         MOVWF   POSTDEC1
+000030 0EE8           00806         MOVLW   0xe8
+000032 6EE5           00807         MOVWF   POSTDEC1
+000034 0E58           00808         MOVLW   0x58
+000036 6EE5           00809         MOVWF   POSTDEC1
+000038 EC?? F0??      00810         CALL    _rtcStoreInt
+00003C 0E03           00811         MOVLW   0x03
+00003E 26E1           00812         ADDWF   FSR1L, F
+                      00813 ;       .line   25; var.c       rtcStoreInt(ADDRESS_AL1, 3000);     
+000040 0E0B           00814         MOVLW   0x0b
+000042 6EE5           00815         MOVWF   POSTDEC1
+000044 0EB8           00816         MOVLW   0xb8
+000046 6EE5           00817         MOVWF   POSTDEC1
+000048 0E76           00818         MOVLW   0x76
+00004A 6EE5           00819         MOVWF   POSTDEC1
+00004C EC?? F0??      00820         CALL    _rtcStoreInt
+000050 0E03           00821         MOVLW   0x03
+000052 26E1           00822         ADDWF   FSR1L, F
+                      00823 ;       .line   26; var.c       rtcStoreInt(ADDRESS_AH0, 7000);
+000054 0E1B           00824         MOVLW   0x1b
+000056 6EE5           00825         MOVWF   POSTDEC1
+000058 0E58           00826         MOVLW   0x58
+00005A 6EE5           00827         MOVWF   POSTDEC1
+00005C 0EBC           00828         MOVLW   0xbc
+00005E 6EE5           00829         MOVWF   POSTDEC1
+000060 EC?? F0??      00830         CALL    _rtcStoreInt
+000064 0E03           00831         MOVLW   0x03
+000066 26E1           00832         ADDWF   FSR1L, F
+                      00833 ;       .line   27; var.c       rtcStoreInt(ADDRESS_AH1, 9000);
+000068 0E23           00834         MOVLW   0x23
+00006A 6EE5           00835         MOVWF   POSTDEC1
+00006C 0E28           00836         MOVLW   0x28
+00006E 6EE5           00837         MOVWF   POSTDEC1
+000070 0EAE           00838         MOVLW   0xae
+000072 6EE5           00839         MOVWF   POSTDEC1
+000074 EC?? F0??      00840         CALL    _rtcStoreInt
+000078 0E03           00841         MOVLW   0x03
+00007A 26E1           00842         ADDWF   FSR1L, F
+00007C CFE4 FFD9      00843         MOVFF   PREINC1, FSR2L
+000080 0012           00844         RETURN  
+                      00845 
+                      00846 
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  11:01:18        PAGE 17
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00847 
+                      00848 ; Statistics:
+                      00849 ; code size:     1560 (0x0618) bytes ( 1.19%)
+                      00850 ;                 780 (0x030c) words
+                      00851 ; udata size:       9 (0x0009) bytes ( 0.50%)
+                      00852 ; access size:      5 (0x0005) bytes
+                      00853 
+                      00854 
+                      00855         end
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  11:01:18        PAGE 18
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+FSR1L                             CONSTANT      00000FE1           4065
+FSR2L                             CONSTANT      00000FD9           4057
+PLUSW2                            CONSTANT      00000FDB           4059
+POSTDEC1                          CONSTANT      00000FE5           4069
+POSTINC1                          CONSTANT      00000FE6           4070
+PREINC1                           CONSTANT      00000FE4           4068
+PRODL                             CONSTANT      00000FF3           4083
+STATUS                            CONSTANT      00000FD8           4056
+WREG                              CONSTANT      00000FE8           4072
+_00111_DS_                        ADDRESS       00000074            116
+_00113_DS_                        ADDRESS       000000D0            208
+_00115_DS_                        ADDRESS       000000F2            242
+_00117_DS_                        ADDRESS       0000011E            286
+_00119_DS_                        ADDRESS       0000014A            330
+_00121_DS_                        ADDRESS       00000176            374
+_00124_DS_                        ADDRESS       000001A2            418
+_00147_DS_                        ADDRESS       0000004A             74
+_00148_DS_                        ADDRESS       000000A6            166
+_00180_DS_                        ADDRESS       0000007E            126
+_00187_DS_                        ADDRESS       00000046             70
+_00193_DS_                        ADDRESS       0000002A             42
+_00194_DS_                        ADDRESS       0000003C             60
+_00206_DS_                        ADDRESS       000000A8            168
+_00210_DS_                        ADDRESS       000000BC            188
+_00219_DS_                        ADDRESS       00000050             80
+_00221_DS_                        ADDRESS       00000062             98
+_00224_DS_                        ADDRESS       00000076            118
+_00231_DS_                        ADDRESS       0000002A             42
+_00232_DS_                        ADDRESS       0000003C             60
+_00244_DS_                        ADDRESS       000000A8            168
+_00248_DS_                        ADDRESS       000000BC            188
+_00257_DS_                        ADDRESS       00000050             80
+_00259_DS_                        ADDRESS       00000062             98
+_00262_DS_                        ADDRESS       00000076            118
+__16_BIT                          CONSTANT      00000001              1
+__18F4550                         CONSTANT      00000001              1
+__ACC_RAM_LOW_END                 CONSTANT      0000005F             95
+__ACC_RAM_LOW_START               CONSTANT      00000000              0
+__ACTIVE_BANK_ADDR                VARIABLE      FFFFFFFF             -1
+__ASSUMED_BANK_ADDR               VARIABLE      FFFFFFFF             -1
+__BANK_0                          CONSTANT      00000000              0
+__BANK_1                          CONSTANT      00000100            256
+__BANK_2                          CONSTANT      00000200            512
+__BANK_3                          CONSTANT      00000300            768
+__BANK_4                          CONSTANT      00000400           1024
+__BANK_5                          CONSTANT      00000500           1280
+__BANK_6                          CONSTANT      00000600           1536
+__BANK_7                          CONSTANT      00000700           1792
+__BANK_8                          CONSTANT      00000800           2048
+__BANK_9                          CONSTANT      00000900           2304
+__BANK_10                         CONSTANT      00000A00           2560
+__BANK_11                         CONSTANT      00000B00           2816
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  11:01:18        PAGE 19
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+__BANK_12                         CONSTANT      00000C00           3072
+__BANK_13                         CONSTANT      00000D00           3328
+__BANK_14                         CONSTANT      00000E00           3584
+__BANK_15                         CONSTANT      00000F00           3840
+__BANK_BITS                       CONSTANT      00000F00           3840
+__BANK_FIRST                      CONSTANT      00000000              0
+__BANK_INV                        CONSTANT      FFFFFFFF             -1
+__BANK_LAST                       CONSTANT      00000F00           3840
+__BANK_MASK                       CONSTANT      000000FF            255
+__BANK_SHIFT                      CONSTANT      00000008              8
+__BANK_SIZE                       CONSTANT      00000100            256
+__CODE_END                        CONSTANT      00007FFF          32767
+__CODE_START                      CONSTANT      00000000              0
+__COMMON_RAM_END                  CONSTANT      0000005F             95
+__COMMON_RAM_START                CONSTANT      00000000              0
+__CONFIG_END                      CONSTANT      0030000D        3145741
+__CONFIG_START                    CONSTANT      00300000        3145728
+__EEPROM_END                      CONSTANT      00F000FF       15728895
+__EEPROM_START                    CONSTANT      00F00000       15728640
+__EXTENDED                        CONSTANT      00000001              1
+__GPUTILS_SVN_VERSION             CONSTANT      00000505           1285
+__GPUTILS_VERSION_MAJOR           CONSTANT      00000001              1
+__GPUTILS_VERSION_MICRO           CONSTANT      00000000              0
+__GPUTILS_VERSION_MINOR           CONSTANT      00000005              5
+__IDLOCS_END                      CONSTANT      00200007        2097159
+__IDLOCS_START                    CONSTANT      00200000        2097152
+__NUM_BANKS                       CONSTANT      00000010             16
+__VECTOR_INT_HIGH                 CONSTANT      00000008              8
+__VECTOR_INT_LOW                  CONSTANT      00000018             24
+__VECTOR_RESET                    CONSTANT      00000000              0
+__WHILE_LOOP_COUNT_MAX            CONSTANT      000000FF            255
+_alarmHigh                        STATIC        00000000              0
+_alarmLow                         STATIC        00000000              0
+_getAlarmHigh                     GLOBAL        00000000              0
+_getAlarmLow                      GLOBAL        00000000              0
+_getIdiom                         GLOBAL        00000000              0
+_getState                         GLOBAL        00000000              0
+_getStateRst                      GLOBAL        00000000              0
+_getTime                          GLOBAL        00000000              0
+_idiom                            STATIC        00000000              0
+_rtcRead                          EXTERNAL      00000000              0
+_rtcReadInt                       EXTERNAL      00000000              0
+_rtcStore                         EXTERNAL      00000000              0
+_rtcStoreInt                      EXTERNAL      00000000              0
+_setAlarmHigh                     GLOBAL        00000000              0
+_setAlarmLow                      GLOBAL        00000000              0
+_setIdiom                         GLOBAL        00000000              0
+_setState                         GLOBAL        00000000              0
+_setStateRst                      GLOBAL        00000000              0
+_setTime                          GLOBAL        00000000              0
+_state                            STATIC        00000000              0
+_stateRst                         STATIC        00000000              0
+gpasm-1.5.0 #1285 (Sep 12 2016) build/default   11-30-2017  11:01:18        PAGE 20
+
+
+SYMBOL TABLE
+  LABEL                              TYPE        VALUE         VALUE          VALUE
+                                                 (hex)         (dec)          (text)
+
+_time                             STATIC        00000000              0
+_varInit                          GLOBAL        00000000              0
+_varTest                          GLOBAL        00000000              0
+r0x00                             STATIC        00000000              0
+r0x01                             STATIC        00000001              1
+r0x02                             STATIC        00000002              2
+r0x03                             STATIC        00000003              3
+r0x04                             STATIC        00000004              4
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     0 reported,     0 suppressed
+
+
